@@ -52,4 +52,16 @@ class ProductModel
         return $products;
     }
 
+    public function get_all_products()
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM imported_product");
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $products = [];
+        while ($row = $result->fetch_assoc()) {
+            $products[] = $row;
+        }
+        return $products;
+    }
+
 }

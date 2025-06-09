@@ -31,11 +31,14 @@
             <a href="orders" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'orders' ? 'active' : ''; ?>">
                 <i class="ri-shopping-cart-line"></i> <span>Orders</span>
             </a>
-     
+            <a href="store" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'store' ? 'active' : ''; ?>">
+                <i class="ri-shopping-cart-line"></i> <span>Store Profile</span>
+            </a>
+
             <a href="reports" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'reports' ? 'active' : ''; ?>">
                 <i class="ri-bar-chart-line"></i> <span>Reports</span>
             </a>
-       
+
             <a href="support" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'support' ? 'active' : ''; ?>">
                 <i class="ri-customer-service-2-line"></i> <span>Support</span>
             </a>

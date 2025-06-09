@@ -33,6 +33,7 @@ try {
         'support' => ['file' => 'support/index.php', 'title' => 'Customer Support', 'auth_required' => true],
         'feedback' => ['file' => 'feedback/index.php', 'title' => 'Ratings & Feedback', 'auth_required' => true],
         'profile' => ['file' => 'profile/index.php', 'title' => 'Profile', 'auth_required' => true],
+        'store' => ['file' => 'store/index.php', 'title' => 'Store Profile', 'auth_required' => true],
 
         'settings' => ['file' => 'settings/index.php', 'title' => 'Settings', 'auth_required' => true],
     ];

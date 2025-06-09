@@ -1,55 +1,113 @@
 <?php
 require '../../vendor/autoload.php';
+require_once '../../core/config.php';
+require_once '../../models/index.php';
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
-// Your secret key (keep it safe and secret)
-$secret_key = "your_secret_key_here";
+$JWT_SECRET_KEY = "your_jwt_secret_key"; 
+if (!$JWT_SECRET_KEY) {
 
-// Fake user database for demo
-$users = [
-    'user1' => 'password123',
-    'user2' => 'mypassword'
-];
-
-// Simulated login input
-$username = $_POST['username'] ?? '';
-$password = $_POST['password'] ?? '';
-
-if (!$username || !$password) {
-    http_response_code(400);
-    echo json_encode(['error' => 'Username and password required']);
+    echo json_encode(['status' => 'error', 'message' => 'JWT secret key not set', 'http_code' => 500]);
     exit;
 }
 
-// Check if user exists and password matches (use hashing in real apps!)
-if (!isset($users[$username]) || $users[$username] !== $password) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Invalid credentials']);
+ini_set('session.cookie_httponly', 1);
+ini_set('session.cookie_secure', 1); // Force HTTPS cookies
+session_start();
+
+header('Content-Type: application/json; charset=utf-8');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+
+// Handle preflight requests
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+
     exit;
 }
 
-// User is authenticated, create JWT payload
-$issuedAt   = time();
-$expiration = $issuedAt + 3600; // 1 hour token validity
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+
+    echo json_encode(['status' => 'error', 'message' => 'Method Not Allowed', 'http_code' => 405]);
+    exit;
+}
+
+$request_body = file_get_contents('php://input');
+if (empty($request_body)) {
+
+    echo json_encode(['status' => 'error', 'message' => 'Missing request body', 'http_code' => 400]);
+    exit;
+}
+
+$data = json_decode($request_body, true);
+if (json_last_error() !== JSON_ERROR_NONE) {
+   
+    echo json_encode(['status' => 'error', 'message' => 'Invalid JSON', 'http_code' => 400]);
+    exit;
+}
+
+if (!isset($data['email']) || !isset($data['password'])) {
+
+    echo json_encode(['status' => 'error', 'message' => 'Email and password required', 'http_code' => 400]);
+    exit;
+}
+
+$email = trim($data['email']);
+$password = $data['password'];
+
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+ 
+    echo json_encode(['status' => 'error', 'message' => 'Invalid email format', 'http_code' => 400]);
+    exit;
+}
+
+
+$user = $userModel->login($email);
+if (!$user) {
+
+    echo json_encode(['status' => 'error', 'message' => 'Invalid credentials', 'http_code' => 401]);
+    exit;
+}
+
+// Verify password (assuming passwords are stored hashed)
+if ($password !== $user['password']) {
+
+    echo json_encode(['status' => 'error', 'message' => 'Invalid credentials', 'http_code' => 401]);
+    exit;
+}
+
+
+$issuedAt = time();
+$expiration = null; // Token never expires
 
 $payload = [
     'iat' => $issuedAt,
     'exp' => $expiration,
-    'iss' => 'yourdomain.com',
-    'aud' => 'yourdomain.com',
-    'data' => [
-        'username' => $username,
-    ]
+    'iss' => 'localhost',
+    'aud' => 'localhost',
+    'sub' => $user['user_id'], 
+    'role' => $user['role'],
+    'jti' => bin2hex(random_bytes(16)) 
 ];
 
-// Encode the token
-$jwt = JWT::encode($payload, $secret_key, 'HS256');
+try {
+    $jwt = JWT::encode($payload, $JWT_SECRET_KEY, 'HS256');
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode(['status' => 'error', 'message' => 'Token generation failed', 'http_code' => 500]);
+    exit;
+}
 
-// Return the token
-header('Content-Type: application/json');
+http_response_code(200);
 echo json_encode([
+    'status' => 'success',
     'message' => 'Login successful',
-    'token' => $jwt
+    'token' => $jwt,
+    'expires' => $expiration,
+    'user' => [
+        'user_id' => $user['user_id'],
+        'role' => $user['role']
+    ]
 ]);
