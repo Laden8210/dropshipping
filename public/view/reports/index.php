@@ -69,11 +69,11 @@
 
                <!-- Charts Section -->
                <div class="charts-row">
-                   <div class="chart-container">
+                   <div class="chart-container" id="sales-performance">
                        <div class="chart-header">
                            <h3>Sales Performance</h3>
                            <div class="chart-actions">
-                               <button><i class="fas fa-download"></i></button>
+                               <button><i class="fas fa-download" onclick="saveDashboardAsPDF('sales-performance')"></i></button>
                                <button><i class="fas fa-expand"></i></button>
                            </div>
                        </div>
@@ -82,11 +82,11 @@
                        </div>
                    </div>
 
-                   <div class="chart-container">
+                   <div class="chart-container" id="revenue-by-category">
                        <div class="chart-header">
                            <h3>Revenue by Category</h3>
                            <div class="chart-actions">
-                               <button><i class="fas fa-download"></i></button>
+                               <button><i class="fas fa-download" onclick="saveDashboardAsPDF('revenue-by-category')"></i></button>
                            </div>
                        </div>
                        <div class="chart-wrapper">
@@ -97,10 +97,10 @@
 
                <!-- Report Tables -->
                <div class="tables-row">
-                   <div class="table-container">
+                   <div class="table-container" id="top-products">
                        <div class="table-header">
                            <h3>Top Performing Products</h3>
-                           <button class="export-btn" style="padding: 8px 15px; font-size: 14px;">
+                           <button class="export-btn" style="padding: 8px 15px; font-size: 14px;" onclick="saveDashboardAsPDF('top-products')">
                                <i class="fas fa-download"></i> Export
                            </button>
                        </div>
@@ -156,14 +156,14 @@
                        </div>
                    </div>
 
-                   <div class="table-container">
-                       <div class="table-header">
+                   <div class="table-container" id="recent-orders">
+                       <div class="table-header" >
                            <h3>Recent Orders</h3>
-                           <button class="export-btn" style="padding: 8px 15px; font-size: 14px;">
+                           <button class="export-btn" style="padding: 8px 15px; font-size: 14px;" onclick="saveDashboardAsPDF('recent-orders')">
                                <i class="fas fa-download"></i> Export
                            </button>
                        </div>
-                       <div class="table-wrapper">
+                       <div class="table-wrapper" >
                            <table>
                                <thead>
                                    <tr>
@@ -298,10 +298,39 @@
                }
            });
 
-           // Date range filter
+ 
            document.getElementById('date-range').addEventListener('change', function() {
-               // In a real app, this would fetch new data based on the selected range
+
                alert(`Loading data for: ${this.value}`);
            });
        });
    </script>
+
+   
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+    function saveDashboardAsPDF(target) {
+        const card = document.getElementById(target);
+      
+        const button = card.querySelector('button');
+        button.style.display = 'none';
+
+
+        html2canvas(card).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new window.jspdf.jsPDF({
+                orientation: 'landscape',
+                unit: 'pt',
+                format: [canvas.width, canvas.height]
+            });
+            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+            pdf.save(target + '.pdf');
+        });
+     
+
+        button.style.display = 'block';
+    }
+</script>
+
