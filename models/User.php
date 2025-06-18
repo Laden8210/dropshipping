@@ -55,7 +55,7 @@ class User
     public function register($userData)
     {
         $user_id = UIDGenerator::generateUID();
-        $role = 'user';
+        $role = $userData['role'] ?? 'user'; 
         $first_name = isset($userData['first_name']) ? trim($userData['first_name']) : '';
         $last_name = isset($userData['last_name']) ? trim($userData['last_name']) : '';
         $email = $this->sanitizeEmail($userData['email']);

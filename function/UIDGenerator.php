@@ -20,4 +20,18 @@ class UIDGenerator
 
         return $uid;
     }
+
+    public static function generateOrderNumber()
+    {
+        // format ORD-YYYYMMDD-HHMMSS-XXXX
+        $dateTimePart = date('Ymd-His');
+        $randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        $randomPart = substr(str_shuffle($randomChars), 0, 4); 
+        $orderNumber = 'ORD-' . $dateTimePart . '-' . $randomPart;
+        if (!preg_match('/^ORD-\d{8}-\d{6}-[A-Z0-9]{4}$/', $orderNumber)) {
+            return self::generateOrderNumber();
+        }
+        return $orderNumber;
+
+    }
 }

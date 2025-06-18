@@ -105,10 +105,8 @@
         <div class="card-header bg-white d-flex justify-content-between align-items-center">
             <h5 class="mb-0"><i class="fas fa-list me-2"></i>Recent Orders</h5>
             <div>
-                <span class="badge bg-primary rounded-pill me-2">24 new orders</span>
-                <button class="btn btn-sm btn-success">
-                    <i class="fas fa-plus me-1"></i>Create Order
-                </button>
+                <span class="badge bg-primary rounded-pill me-2" id="new-orders-count">24 new orders</span>
+
             </div>
         </div>
         <div class="card-body">
@@ -448,4 +446,94 @@
             });
         });
     });
+
+
+    window.viewProduct = (keyword, sort_by) => {
+        new GetRequest({
+            getUrl: "controller/order?action=get-orders",
+            params: {
+                keyword,
+
+                status,
+
+            },
+            callback: (err, data) => {
+                if (err) return console.error("Error fetching user data:", err);
+                console.log("User data retrieved:", data);
+
+                // table 
+
+                const tableBody = document.querySelector(".order-table tbody");
+
+                tableBody.innerHTML = ""; 
+
+                const newOrdersCount = document.getElementById("new-orders-count");
+                newOrdersCount.textContent = `${data.length} new orders`;
+
+                data.forEach(order => {
+                    const row = document.createElement("tr");
+                    // count the item quantity
+                    order.items_count = order.items
+                        ? order.items.reduce((sum, item) => sum + parseInt(item.quantity, 10), 0)
+                        : 0;
+
+                    const customerName = `${order.user.first_name} ${order.user.last_name}`;
+                    row.innerHTML = `
+                        <td>${order.order_number}</td>
+                        <td>
+                            <div class="customer-info">
+                                <div class="customer-avatar">${customerName.split(' ').map(n => n[0]).join('').toUpperCase()}</div>
+                                <div>${customerName}</div>
+                            </div>
+                        </td>
+                        <td>${order.created_at}</td>
+                        <td>${order.items_count} items</td>
+                        <td>$${order.total_amount}</td>
+                        <td><span class="status-badge status-${order.status.toLowerCase()}">${order.status}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary action-btn" data-bs-toggle="modal" data-bs-target="#orderModal"
+                                onclick="getOrderDetails('${order.order_number}')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-info action-btn">
+                                <i class="fas fa-edit"></i>
+                                Edit
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger action-btn">
+                                <i class="fas fa-times-circle"></i>
+                                Cancel
+                            </button>
+                        </td>
+                    `;
+
+                    tableBody.appendChild(row);
+                });
+            }
+        }).send();
+    };
+
+    // Function to fetch order details and populate the modal
+
+    function getOrderDetails(orderNumber) {
+        new GetRequest({
+            getUrl: "controller/order?action=get-order-details",
+            params: { order_number: orderNumber },
+            callback: (err, data) => {
+                if (err) return console.error("Error fetching order details:", err);
+                console.log("Order details retrieved:", data);
+
+                // Populate the modal with order details
+                document.getElementById("orderModalLabel").textContent = `Order #${data.order_number}`;
+                // Update other fields in the modal as needed
+            }
+        }).send();
+    }
+
+
+    onload = () => {
+       const keyword = document.getElementById("order-id").value;
+       const status = document.getElementById("order-status").value;
+
+        window.viewProduct(keyword, status);
+    };
 </script>

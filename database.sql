@@ -95,8 +95,6 @@ create table orders (
     house_number VARCHAR(50) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
-
     CONSTRAINT fk_orders_user FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 

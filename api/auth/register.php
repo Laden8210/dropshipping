@@ -85,6 +85,8 @@ if ($userModel->isPhoneNumberRegistered($request_body['phone_number'])) {
     exit;
 }
 
+$request_body['role'] = 'client';
+
 
 $user =  $userModel->register($request_body);
 
