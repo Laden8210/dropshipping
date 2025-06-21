@@ -70,8 +70,7 @@ class CreateRequest {
           Swal.fire({
             title: "Error!",
             text:
-              data.message ||
-              "Something went wrong. Please try again later.",
+              data.message || "Something went wrong. Please try again later.",
             icon: "error",
           });
           this.callback(data.message || "Unknown error", null);
@@ -82,13 +81,11 @@ class CreateRequest {
             icon: "success",
           }).then((result) => {
             if (result.isConfirmed) {
-
               if (this.redirectUrl) {
                 window.location.href = this.redirectUrl;
               } else {
                 location.reload();
               }
-        
             }
           });
           this.callback(null, data.data);
@@ -264,27 +261,18 @@ class DeleteRequest {
           .delete(this.deleteUrl, { data: this.data })
           .then((response) => {
             const data = response.data;
-            if (data.status === "error" || data.http_code !== 200) {
-              Swal.fire({
-                title: "Error!",
-                text:
-                  data.message || "Deletion failed. Please try again later.",
-                icon: "error",
-              });
-              this.callback(data.message || "Unknown error", null);
-            } else {
-              // reload the page
+            console.log("Delete Response:", data);
+
               Swal.fire({
                 title: "Deleted!",
                 text: data.message || "Item deleted successfully!",
-                icon: "success",
+                icon: data.status === "error" ? "error" : "success",
               }).then((result) => {
                 if (result.isConfirmed) {
                   location.reload();
                 }
               });
-              this.callback(null, data.data);
-            }
+
           })
           .catch((error) => {
             const errorMsg =
@@ -361,9 +349,7 @@ class GetRequest {
         });
         this.callback(errorMsg, null);
       })
-      .finally(() => {
-
-      });
+      .finally(() => {});
   };
 }
 window.GetRequest = GetRequest;

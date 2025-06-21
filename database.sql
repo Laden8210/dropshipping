@@ -33,6 +33,98 @@ CREATE TABLE store_profile (
     CONSTRAINT fk_store_profile_user FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
+CREATE TABLE products (
+    pid BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id CHAR(14) NOT NULL,
+    product_name VARCHAR(255) NOT NULL,
+    product_sku VARCHAR(100) NOT NULL,
+    product_category BIGINT NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('active', 'inactive', 'archived') DEFAULT 'active',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_products_user FOREIGN KEY (user_id) REFERENCES users(user_id),
+    CONSTRAINT fk_products_category FOREIGN KEY (product_category) REFERENCES product_categories(category_id)
+);
+
+CREATE TABLE product_categories (
+    category_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    category_name VARCHAR(255) NOT NULL UNIQUE,
+    user_id CHAR(14) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_product_categories_user FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+
+
+
+CREATE TABLE product_price_history (
+    history_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    product_id BIGINT NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    currency VARCHAR(10) NOT NULL DEFAULT 'USD',
+    change_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_product_price_history_product FOREIGN KEY (product_id) REFERENCES products(pid)
+);
+
+CREATE TABLE product_images (
+    image_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    product_id BIGINT NOT NULL,
+    image_url TEXT NOT NULL,
+    is_primary BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_product_images_product FOREIGN KEY (product_id) REFERENCES products(pid)
+);
+
+CREATE TABLE product_reviews (
+    review_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    product_id BIGINT NOT NULL,
+    user_id CHAR(14) NOT NULL,
+    rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    comment TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_product_reviews_product FOREIGN KEY (product_id) REFERENCES products(pid),
+    CONSTRAINT fk_product_reviews_user FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+CREATE TABLE inventory (
+    inventory_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    product_id BIGINT NOT NULL,
+    quantity INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_inventory_product FOREIGN KEY (product_id) REFERENCES products(pid)
+);
+
+CREATE TABLE stock_movements (
+    movement_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    product_id BIGINT NOT NULL,
+    quantity INT NOT NULL,
+    movement_type ENUM('in', 'out') NOT NULL,
+    reason VARCHAR(255) DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_stock_movements_product FOREIGN KEY (product_id) REFERENCES products(pid)
+);
+
+CREATE TABLE warehouse (
+    warehouse_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id CHAR(14) NOT NULL,
+    warehouse_name VARCHAR(255) NOT NULL,
+    warehouse_address VARCHAR(255) NOT NULL,
+    warehouse_phone VARCHAR(20),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_warehouse_user FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+
+
 CREATE TABLE imported_product (
     product_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id CHAR(14) NOT NULL,
@@ -45,14 +137,9 @@ CREATE TABLE imported_product (
     status ENUM('active', 'inactive', 'archived') DEFAULT 'active',
     store_id BIGINT NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-
     CONSTRAINT fk_imported_product_user FOREIGN KEY (user_id) REFERENCES users(user_id),
     CONSTRAINT fk_imported_product_store FOREIGN KEY (store_id) REFERENCES store_profile(store_id)
 );
-
-
-
 
 
 create table cart (

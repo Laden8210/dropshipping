@@ -18,24 +18,32 @@ try {
 
 
     $routes = [
-        '' => ['file' => 'auth/login.php', 'title' => 'Login', 'auth_required' => false],
-        'login' => ['file' => 'auth/login.php', 'title' => 'Login', 'auth_required' => false],
-        'register' => ['file' => 'auth/register.php', 'title' => 'Register', 'auth_required' => false],
-        'forgot-password' => ['file' => 'auth/forgot-password.php', 'title' => 'Forgot Password', 'auth_required' => false],
-        'redirect' => ['file' => 'google/redirect.php', 'title' => 'Redirect', 'auth_required' => false],
-        'dashboard' => ['file' => 'dashboard/index.php', 'title' => 'Dashboard', 'auth_required' => true],
-     
-        'product-import' => ['file' => 'product-import/index.php', 'title' => 'Product Import', 'auth_required' => true],
-        'inventory' => ['file' => 'inventory/index.php', 'title' => 'Inventory Management', 'auth_required' => true],
-        'orders' => ['file' => 'orders/index.php', 'title' => 'Order Management', 'auth_required' => true],
-        'reports' => ['file' => 'reports/index.php', 'title' => 'Reports', 'auth_required' => true],
-        'forex-conversion' => ['file' => 'forex-conversion/index.php', 'title' => 'Forex Conversion', 'auth_required' => true],
-        'support' => ['file' => 'support/index.php', 'title' => 'Customer Support', 'auth_required' => true],
-        'feedback' => ['file' => 'feedback/index.php', 'title' => 'Ratings & Feedback', 'auth_required' => true],
-        'profile' => ['file' => 'profile/index.php', 'title' => 'Profile', 'auth_required' => true],
-        'store' => ['file' => 'store/index.php', 'title' => 'Store Profile', 'auth_required' => true],
+        '' => ['file' => 'auth/login.php', 'title' => 'Login', 'auth_required' => false, 'user_type' => ''],
+        'login' => ['file' => 'auth/login.php', 'title' => 'Login', 'auth_required' => false, 'user_type' => 'user'],
+        'register' => ['file' => 'auth/register.php', 'title' => 'Register', 'auth_required' => false, 'user_type' => 'user'],
+        'forgot-password' => ['file' => 'auth/forgot-password.php', 'title' => 'Forgot Password', 'auth_required' => false, 'user_type' => ''],
+        'redirect' => ['file' => 'user/google/redirect.php', 'title' => 'Redirect', 'auth_required' => false, 'user_type' => ''],
+        'dashboard' => ['file' => 'user/dashboard/index.php', 'title' => 'Dashboard', 'auth_required' => true, 'user_type' => 'user'],
+        'product-import' => ['file' => 'user/product-import/index.php', 'title' => 'Product Import', 'auth_required' => true, 'user_type' => 'user'],
+        'inventory' => ['file' => 'user/inventory/index.php', 'title' => 'Inventory Management', 'auth_required' => true, 'user_type' => 'user'],
+        'orders' => ['file' => 'user/orders/index.php', 'title' => 'Order Management', 'auth_required' => true, 'user_type' => 'user'],
+        'reports' => ['file' => 'user/reports/index.php', 'title' => 'Reports', 'auth_required' => true, 'user_type' => 'user'],
+        'forex-conversion' => ['file' => 'user/forex-conversion/index.php', 'title' => 'Forex Conversion', 'auth_required' => true, 'user_type' => 'user'],
+        'support' => ['file' => 'user/support/index.php', 'title' => 'Customer Support', 'auth_required' => true, 'user_type' => 'user'],
+        'feedback' => ['file' => 'user/feedback/index.php', 'title' => 'Ratings & Feedback', 'auth_required' => true, 'user_type' => 'user'],
+        'profile' => ['file' => 'user/profile/index.php', 'title' => 'Profile', 'auth_required' => true, 'user_type' => 'user'],
+        'store' => ['file' => 'user/store/index.php', 'title' => 'Store Profile', 'auth_required' => true, 'user_type' => 'user'],
+        'settings' => ['file' => 'user/settings/index.php', 'title' => 'Settings', 'auth_required' => true, 'user_type' => 'user'],
 
-        'settings' => ['file' => 'settings/index.php', 'title' => 'Settings', 'auth_required' => true],
+        // supplier routes
+        'dashboard' => ['file' => 'supplier/dashboard/index.php', 'title' => 'Supplier Dashboard', 'auth_required' => true, 'user_type' => 'supplier'],
+        
+        'inventory' => ['file' => 'supplier/inventory/index.php', 'title' => 'Supplier Inventory', 'auth_required' => true, 'user_type' => 'supplier'],
+        'orders' => ['file' => 'supplier/orders/index.php', 'title' => 'Supplier Orders', 'auth_required' => true, 'user_type' => 'supplier'],
+        'category' => ['file' => 'supplier/category/index.php', 'title' => 'Categories Management', 'auth_required' => true, 'user_type' => 'supplier'],
+        'reports' => ['file' => 'supplier/reports/index.php', 'title' => 'Supplier Reports', 'auth_required' => true, 'user_type' => 'supplier'],
+
+        
     ];
 
 
