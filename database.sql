@@ -122,7 +122,6 @@ CREATE TABLE warehouse (
     user_id CHAR(14) NOT NULL,
     warehouse_name VARCHAR(255) NOT NULL,
     warehouse_address VARCHAR(255) NOT NULL,
-    warehouse_phone VARCHAR(20),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_warehouse_user FOREIGN KEY (user_id) REFERENCES users(user_id)

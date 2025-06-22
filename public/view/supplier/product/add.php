@@ -11,13 +11,13 @@
                         <input type="text" class="form-control" id="product_name" name="product_name" required>
                     </div>
 
-               
+
 
                     <div class="col-md-6">
                         <label for="category" class="form-label">Category</label>
                         <select class="form-select" id="category" name="category" required>
                             <option value="" disabled selected>Select a category</option>
-      
+
                         </select>
                     </div>
 
@@ -90,6 +90,13 @@
                         </select>
                     </div>
 
+          
+
+                    <div class="col-md-6">
+                        <label for="product_weight" class="form-label">Weight (grams)</label>
+                        <input type="number" class="form-control" id="product_weight" name="product_weight" required>
+                    </div>
+
                     <div class="col-12">
                         <label for="description" class="form-label">Description</label>
                         <textarea class="form-control" id="description" name="description" rows="3"></textarea>
@@ -121,92 +128,105 @@
 </div>
 
 <script>
+    // use axios for AJAX requests
 
-// use axios for AJAX requests
+    document.getElementById('add-product-form').addEventListener('submit', function(event) {
+        event.preventDefault();
 
-document.getElementById('add-product-form').addEventListener('submit', function (event) {
-    event.preventDefault();
+        const formData = new FormData(this);
+        const productImage = document.getElementById('product_image').files[0];
+        if (productImage) {
+            formData.append('product_image', productImage);
+        }
 
-    const formData = new FormData(this);
-    const productImage = document.getElementById('product_image').files[0];
-    if (productImage) {
-        formData.append('product_image', productImage);
+        axios.post('controller/supplier/product/index.php?action=add-product', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+            })
+            .then(response => {
+            if (response.data.status == 'success') {
+                Swal.fire({
+                icon: 'success',
+                title: 'Product added successfully!',
+                showConfirmButton: false,
+                timer: 1500
+                }).then(() => {
+                window.location.reload();
+                });
+            } else {
+                Swal.fire({
+                icon: 'error',
+                title: 'Error adding product',
+                text: response.data.message || 'An error occurred.'
+                });
+            }
+            })
+            .catch(error => {
+            console.error('There was an error!', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'An error occurred',
+                text: 'An error occurred while adding the product.'
+            });
+            });
+    });
+
+    let selectedFiles = [];
+
+    document.getElementById('product_images').addEventListener('change', function(event) {
+        const preview = document.getElementById('image-preview');
+        const files = Array.from(event.target.files);
+
+        selectedFiles = selectedFiles.concat(files);
+        renderPreviews();
+
+        event.target.value = '';
+    });
+
+    function renderPreviews() {
+        const preview = document.getElementById('image-preview');
+        preview.innerHTML = '';
+
+        selectedFiles.forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const wrapper = document.createElement('div');
+                wrapper.classList.add('position-relative');
+
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.classList.add('img-thumbnail', 'me-2');
+                img.style.width = '120px';
+                img.style.height = '120px';
+                img.style.objectFit = 'cover';
+
+                const removeBtn = document.createElement('button');
+                removeBtn.innerHTML = '&times;';
+                removeBtn.type = 'button';
+                removeBtn.className = 'btn btn-sm btn-danger position-absolute top-0 end-0';
+                removeBtn.style.transform = 'translate(50%, -50%)';
+                removeBtn.onclick = function() {
+                    selectedFiles.splice(index, 1);
+                    renderPreviews();
+                };
+
+                wrapper.appendChild(img);
+                wrapper.appendChild(removeBtn);
+                preview.appendChild(wrapper);
+            };
+            reader.readAsDataURL(file);
+        });
+
+        updateInputFiles();
     }
 
-    axios.post('controller/supplier/product/index.php?action=add-product', formData, {
-        headers: {
-            'Content-Type': 'multipart/form-data'
-        }
-    })
-    .then(response => {
-        if (response.data.success) {
-            alert('Product added successfully!');
-            window.location.reload();
-        } else {
-            alert('Error adding product: ' + response.data.message);
-        }
-    })
-    .catch(error => {
-        console.error('There was an error!', error);
-        alert('An error occurred while adding the product.');
-    });
-});
-
-let selectedFiles = [];
-
-document.getElementById('product_images').addEventListener('change', function (event) {
-    const preview = document.getElementById('image-preview');
-    const files = Array.from(event.target.files);
-
-    selectedFiles = selectedFiles.concat(files);
-    renderPreviews();
-
-    event.target.value = '';
-});
-
-function renderPreviews() {
-    const preview = document.getElementById('image-preview');
-    preview.innerHTML = '';
-
-    selectedFiles.forEach((file, index) => {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            const wrapper = document.createElement('div');
-            wrapper.classList.add('position-relative');
-
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            img.classList.add('img-thumbnail', 'me-2');
-            img.style.width = '120px';
-            img.style.height = '120px';
-            img.style.objectFit = 'cover';
-
-            const removeBtn = document.createElement('button');
-            removeBtn.innerHTML = '&times;';
-            removeBtn.type = 'button';
-            removeBtn.className = 'btn btn-sm btn-danger position-absolute top-0 end-0';
-            removeBtn.style.transform = 'translate(50%, -50%)';
-            removeBtn.onclick = function () {
-                selectedFiles.splice(index, 1);
-                renderPreviews();
-            };
-
-            wrapper.appendChild(img);
-            wrapper.appendChild(removeBtn);
-            preview.appendChild(wrapper);
-        };
-        reader.readAsDataURL(file);
-    });
-
-    updateInputFiles();
-}
-
-function updateInputFiles() {
-    const input = document.getElementById('product_images');
-    const dataTransfer = new DataTransfer();
-    selectedFiles.forEach(file => dataTransfer.items.add(file));
-    input.files = dataTransfer.files;
-}
+    function updateInputFiles() {
+        const input = document.getElementById('product_images');
+        const dataTransfer = new DataTransfer();
+        selectedFiles.forEach(file => dataTransfer.items.add(file));
+        input.files = dataTransfer.files;
+    }
 
 
     const getRequest = new GetAllRequest({
@@ -216,8 +236,8 @@ function updateInputFiles() {
             if (error) {
                 console.log('Error:', error);
                 const categorySelect = document.getElementById('category');
-                categorySelect.innerHTML = '<option value="" disabled selected>'+error+'</option>';
-         
+                categorySelect.innerHTML = '<option value="" disabled selected>' + error + '</option>';
+
             } else {
 
                 console.log('Categories fetched successfully:', data);
@@ -229,7 +249,7 @@ function updateInputFiles() {
                     option.textContent = category.category_name;
                     categorySelect.appendChild(option);
                 });
-              
+
 
 
             }
@@ -237,5 +257,4 @@ function updateInputFiles() {
         promptMessage: 'Do you want to fetch the latest data?'
     });
     getRequest.send();
-
 </script>

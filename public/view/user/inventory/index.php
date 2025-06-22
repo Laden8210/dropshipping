@@ -232,22 +232,12 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Simple gallery functionality
-    document.querySelectorAll('.gallery-thumb').forEach(thumb => {
-        thumb.addEventListener('click', function() {
-            document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
 
-            // In a real app, this would change the main image
-            const newSrc = this.querySelector('img').src.replace('100', '400');
-            document.getElementById('primaryImage').src = newSrc;
-        });
-    });
 
     document.addEventListener('DOMContentLoaded', function() {
         const searchForm = document.getElementById('search-form');
         searchForm.addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent form submission
+            event.preventDefault();
 
             const keyword = document.getElementById('inv-keyword').value;
 

@@ -9,30 +9,34 @@ class ProductModel
         $this->conn = $db;
     }
 
-
-    public function import_product($user_id, $pid, $productName, $supplierId, $productSku, $category)
+    public function import_product($user_id, $product_id, $store_id)
     {
-        $stmt = $this->conn->prepare("INSERT INTO imported_product (user_id, pid, product_name, supplier_id, product_sku, category) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt = $this->conn->prepare("
+        INSERT INTO imported_product (user_id, product_id, store_id)
+        VALUES (?, ?, ?)
+    ");
 
-        $stmt->bind_param("ssssss", $user_id, $pid, $productName, $supplierId, $productSku, $category);
+        $stmt->bind_param("sii", $user_id, $product_id, $store_id);
 
         if ($stmt->execute()) {
             return [
-                'product_id' => $this->conn->insert_id,
+                'imported_product_id' => $this->conn->insert_id,
                 'user_id' => $user_id,
-                'product_name' => $productName,
-                'supplier_id' => $supplierId,
-                'product_sku' => $productSku,
-
+                'product_id' => $product_id,
+                'store_id' => $store_id
             ];
         } else {
-            return false;
+            return [
+                'status' => 'error',
+                'message' => $stmt->error
+            ];
         }
     }
 
+
     public function is_product_imported($user_id, $pid)
     {
-        $stmt = $this->conn->prepare("SELECT COUNT(*) FROM imported_product WHERE user_id = ? AND pid = ?");
+        $stmt = $this->conn->prepare("SELECT COUNT(*) FROM imported_product WHERE user_id = ? AND product_id = ?");
         $stmt->bind_param("ss", $user_id, $pid);
         $stmt->execute();
         $count = 0;
@@ -40,7 +44,8 @@ class ProductModel
         $stmt->fetch();
         return $count > 0;
     }
-    public function get_all_product($user_id){
+    public function get_all_product($user_id)
+    {
         $stmt = $this->conn->prepare("SELECT * FROM imported_product WHERE user_id = ?");
         $stmt->bind_param("s", $user_id);
         $stmt->execute();
@@ -63,5 +68,4 @@ class ProductModel
         }
         return $products;
     }
-
 }

@@ -169,7 +169,7 @@
 <script>
     function cardBuildProduct(data) {
         const container = document.getElementById('product-results');
-        container.innerHTML = ''; // Clear previous results
+        container.innerHTML = ''; 
 
         if (!data || data.length === 0) {
             container.innerHTML = `
@@ -197,34 +197,38 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-5">
-                            <img src="${product.productImage}" 
+                            <img src="public/images/products/${product.primary_image}" 
                                  class="product-image w-100" 
-                                 alt="${product.productNameEn}">
+                                 alt="${product.product_sku}">
                         </div>
                         <div class="col-7">
-                            <h6 class="text-primary mb-1">${product.productSku}</h6>
-                            <h5 class="card-title">${productNames[0]}</h5>
-                            <p class="text-muted small">${product.productNameEn}</p>
+
+                            <h5 class="card-title">${product.product_name}</h5>
+                            <p class="text-muted small">${product.product_sku}</p>
 
                             <div class="d-flex justify-content-between align-items-center mt-3">
-                                <span class="price-tag">$${product.sellPrice}</span>
-                                <span class="badge badge-custom">${product.categoryName || 'Uncategorized'}</span>
+                                <span class="price-tag">${product.currency} ${product.price}</span>
+                                <span class="badge badge-custom">${product.category_name || 'Uncategorized'}</span>
                             </div>
 
                             <div class="mt-3">
                                 <span class="badge bg-light text-dark me-1">
-                                    <i class="fas fa-weight me-1"></i> ${product.productWeight}g
+                                    <i class="fas fa-weight me-1"></i> ${product.product_weight}g
                                 </span>
                                 <span class="badge bg-light text-dark">
-                                    <i class="fas fa-warehouse me-1"></i> Listed ${product.listingCount}x
+                                    <i class="fas fa-warehouse me-1"></i> ${product.warehouse_name}
+                                </span>
+                            
+                                <span class="badge bg-light text-dark">
+                                    <i class="fas fa-map-marker-alt me-1"></i> ${product.warehouse_address}
                                 </span>
                             </div>
 
                             <div class="mt-3 d-flex gap-2">
-                                <button class="btn btn-sm btn-outline-primary flex-fill" onclick="retrieveProduct('${product.pid}')">
+                                <button class="btn btn-sm btn-outline-primary flex-fill" onclick="retrieveProduct('${product.product_id}')">
                                     <i class="fas fa-info-circle me-1"></i> Details
                                 </button>
-                                <button class="btn btn-sm btn-success flex-fill" onclick="importProduct('${product.pid}')">
+                                <button class="btn btn-sm btn-success flex-fill" onclick="importProduct('${product.product_id}')">
                                     <i class="fas fa-cart-plus me-1"></i> Import
                                 </button>
                             </div>
@@ -332,8 +336,7 @@
     }
 
     function importProduct(pid) {
-        // display sweetalert 
-
+ 
         Swal.fire({
             title: 'Import Product',
             text: "Are you sure you want to import this product?",
@@ -353,7 +356,7 @@
                 });
 
                 axios.post(
-                        "controller/product-import/index.php?action=import-product",
+                        "controller/user/product-import/index.php?action=import-product",
                         JSON.stringify({
                             pid: pid
                         }), {
@@ -433,8 +436,6 @@
             },
             callback: (err, data) => {
                 if (err) {
-
-
 
                     console.error("Error fetching user data:", err);
                     const submitBtn = document.querySelector('button[type="submit"]');

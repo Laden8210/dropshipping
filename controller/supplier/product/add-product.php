@@ -40,6 +40,14 @@ if (empty($status)) {
     echo json_encode(['status' => 'error', 'message' => 'Status is required', 'http_code' => 400]);
     exit;
 }
+
+$product_weight = isset($_POST['product_weight']) ? trim($_POST['product_weight']) : '';
+if (empty($product_weight) || !is_numeric($product_weight)) {
+    http_response_code(400);
+    echo json_encode(['status' => 'error', 'message' => 'Valid product weight is required', 'http_code' => 400]);
+    exit;
+}
+
 $description = isset($_POST['description']) ? trim($_POST['description']) : '';
 if (empty($description)) {
     http_response_code(400);
@@ -84,7 +92,8 @@ $data = $supplierProductModel->create_product(
     $productSKU,
     $category,
     $description,
-    $status
+    $status,
+    $product_weight
 );
 
 if (!$data) {
@@ -156,3 +165,13 @@ if (!$supplierProductModel->add_price_history($data['pid'], $price, $currency)) 
     echo json_encode(['status' => 'error', 'message' => 'Failed to add price history', 'http_code' => 500]);
     exit;
 }
+
+
+
+http_response_code(200);
+echo json_encode([
+    'status' => 'success',
+    'message' => 'Product added successfully',
+    'data' => $data,
+    'http_code' => 200
+]);

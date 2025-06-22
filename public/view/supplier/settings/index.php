@@ -12,7 +12,7 @@
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="warehouse-tab" data-bs-toggle="tab" data-bs-target="#warehouse" type="button" role="tab">
-                Store Profile
+                Warehouse
             </button>
         </li>
 
@@ -86,84 +86,19 @@
 
 
         <div class="tab-pane fade" id="warehouse" role="tabpanel">
-
-            <!-- 🏬 Store List with Toggle -->
-            <div class="card mb-4">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="ri-store-2-line me-2"></i>Your Stores</h5>
+            <form id="create-warehouse" action="controller/supplier/setting/index.php?action=create-warehouse" method="POST">
+                <div class="mb-3">
+                    <label for="warehouse_name" class="form-label">Warehouse Name</label>
+                    <input type="text" class="form-control" id="warehouse_name" name="warehouse_name" required>
                 </div>
-                <div class="card-body p-0">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Store Name</th>
-                                <th>Address</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-   
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <form id="create-store-profile" action="controller/store/create_profile.php" method="POST" enctype="multipart/form-data" class="card shadow-sm mb-4">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="ri-store-2-line me-2"></i>Create Store Profile</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <!-- Store Name -->
-                        <div class="col-md-6">
-                            <label for="store_name" class="form-label">Store Name</label>
-                            <input type="text" class="form-control" id="store_name" name="store_name" placeholder="e.g., John's Electronics" required>
-                        </div>
-
-                        <!-- Store Email -->
-                        <div class="col-md-6">
-                            <label for="store_email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="store_email" name="store_email" placeholder="store@example.com">
-                        </div>
-
-                        <!-- Store Phone -->
-                        <div class="col-md-6">
-                            <label for="store_phone" class="form-label">Phone Number</label>
-                            <input type="text" class="form-control" id="store_phone" name="store_phone" placeholder="+63 912 345 6789">
-                        </div>
-
-                        <!-- Store Logo Upload -->
-                        <div class="col-md-6">
-                            <label for="store_logo_url" class="form-label">Store Logo</label>
-                            <input type="file" class="form-control" id="store_logo_url" name="store_logo_url" accept="image/*">
-                        </div>
-
-                        <!-- Store Address -->
-                        <div class="col-md-12">
-                            <label for="store_address" class="form-label">Store Address</label>
-                            <input type="text" class="form-control" id="store_address" name="store_address" placeholder="e.g., 123 Main St, City, Province">
-                        </div>
-
-                        <!-- Store Description -->
-                        <div class="col-md-12">
-                            <label for="store_description" class="form-label">Store Description</label>
-                            <textarea class="form-control" id="store_description" name="store_description" rows="3" placeholder="Brief description about your store..."></textarea>
-                        </div>
-                    </div>
+                <div class="mb-3">
+                    <label for="warehouse_address" class="form-label">Warehouse Address</label>
+                    <textarea class="form-control" id="warehouse_address" name="warehouse_address" rows="3" required></textarea>
                 </div>
 
-                <div class="card-footer bg-white text-end">
-                    <button type="submit" class="btn btn-success px-4">
-                        <i class="ri-save-line me-2"></i>Save Store Profile
-                    </button>
-                </div>
+                <button type="submit" class="btn btn-success" id="create-warehouse-btn">Save Warehouse</button>
             </form>
-
-
         </div>
-
 
         <!-- Notifications Tab -->
         <div class="tab-pane fade" id="notifications" role="tabpanel">
@@ -236,7 +171,7 @@
 
     const createExamRequest = new CreateRequest({
         formSelector: '#create-warehouse',
-        submitButtonSelector: '#create-warehouse-btn',
+        submitButtonSelector: '#create-warehouse-btn',  
         callback: (err, res) => err ? console.error("Form submission error:", err) : console.log("Form submitted successfully:", res),
         redirectUrl: 'category',
     });

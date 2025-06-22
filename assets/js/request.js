@@ -263,16 +263,15 @@ class DeleteRequest {
             const data = response.data;
             console.log("Delete Response:", data);
 
-              Swal.fire({
-                title: "Deleted!",
-                text: data.message || "Item deleted successfully!",
-                icon: data.status === "error" ? "error" : "success",
-              }).then((result) => {
-                if (result.isConfirmed) {
-                  location.reload();
-                }
-              });
-
+            Swal.fire({
+              title: "Deleted!",
+              text: data.message || "Item deleted successfully!",
+              icon: data.status === "error" ? "error" : "success",
+            }).then((result) => {
+              if (result.isConfirmed) {
+                location.reload();
+              }
+            });
           })
           .catch((error) => {
             const errorMsg =
@@ -294,25 +293,30 @@ class DeleteRequest {
 window.DeleteRequest = DeleteRequest;
 
 class GetRequest {
-  constructor({ getUrl, params = {}, callback, promptMessage = null }) {
+  constructor({ getUrl, params = {}, callback, promptMessage = null, showLoading = true, showSuccess = true }) {
     this.getUrl = getUrl;
     this.params = params;
     this.callback = typeof callback === "function" ? callback : () => {};
     this.promptMessage = promptMessage;
+    this.showLoading = showLoading;
+    this.showSuccess = showSuccess;
   }
   send = () => {
     this._executeGet();
   };
   _executeGet = () => {
-    Swal.fire({
-      title: "Loading...",
-      html: "Please wait while the data is being retrieved.",
-      allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
-      },
-      showConfirmButton: false,
-    });
+
+    if (this.showLoading === true) {
+      Swal.fire({
+        title: "Loading...",
+        html: "Please wait while the data is being retrieved.",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+        showConfirmButton: false,
+      });
+    }
     axios
       .get(this.getUrl, { params: this.params })
       .then((response) => {
@@ -327,11 +331,13 @@ class GetRequest {
           });
           this.callback(data.message || "Unknown error", null);
         } else {
-          Swal.fire({
-            title: "Success!",
-            text: data.message || "Data retrieved successfully!",
-            icon: "success",
-          });
+          if (this.showSuccess === true) {
+            Swal.fire({
+              title: "Success!",
+              text: data.message || "Data retrieved successfully!",
+              icon: "success",
+            });
+          }
           this.callback(null, data.data);
         }
       })
