@@ -14,10 +14,10 @@ class SupplierProduct
     public function create_product($user_id, $product_name, $product_sku, $category, $description = '', $status = 'active')
     {
         $stmt = $this->conn->prepare("
-            INSERT INTO products (user_id, product_name, product_sku, category, description, status)
+            INSERT INTO products (user_id, product_name, product_sku, product_category, description, status)
             VALUES (?, ?, ?, ?, ?, ?)
         ");
-        $stmt->bind_param("ssssss", $user_id, $product_name, $product_sku, $category, $description, $status);
+        $stmt->bind_param("sssiss", $user_id, $product_name, $product_sku, $category, $description, $status);
 
         if ($stmt->execute()) {
             return [
@@ -34,7 +34,33 @@ class SupplierProduct
 
     public function get_all_products()
     {
-        $stmt = $this->conn->prepare("SELECT * FROM products");
+        $sql = "
+            SELECT 
+                products.product_id,
+                products.product_name,
+                products.product_sku,    
+                pc.category_name,
+                ph.price, 
+                ph.currency,
+                ph.change_date,
+                pi.image_url AS primary_image
+            FROM products
+            JOIN product_categories pc ON products.product_category = pc.category_id
+            LEFT JOIN (
+                SELECT product_id, price, currency, change_date
+                FROM product_price_history
+                WHERE (product_id, change_date) IN (
+                    SELECT product_id, MAX(change_date)
+                    FROM product_price_history
+                    GROUP BY product_id
+                )
+            ) ph ON products.product_id = ph.product_id
+            LEFT JOIN product_images pi ON products.product_id = pi.product_id AND pi.is_primary = 1
+            WHERE products.status = 'active'
+            ORDER BY products.created_at DESC
+        ";
+
+        $stmt = $this->conn->prepare($sql);
         $stmt->execute();
         $result = $stmt->get_result();
         $products = [];
@@ -43,6 +69,7 @@ class SupplierProduct
         }
         return $products;
     }
+
 
     public function get_user_products($user_id)
     {
@@ -66,7 +93,7 @@ class SupplierProduct
         return $result->fetch_assoc();
     }
 
-    // ===================== PRICE HISTORY =====================
+
 
     public function add_price_history($product_id, $price, $currency = 'USD')
     {
@@ -95,7 +122,7 @@ class SupplierProduct
         return $history;
     }
 
-    // ===================== PRODUCT IMAGES =====================
+
 
     public function add_product_image($product_id, $image_url, $is_primary = false)
     {
@@ -127,5 +154,52 @@ class SupplierProduct
         $stmt->execute();
         $result = $stmt->get_result();
         return $result->fetch_assoc();
+    }
+
+    public function get_inventory($user_id)
+    {
+        $query = "
+        SELECT 
+            p.product_id,
+            p.product_name AS product,
+            p.product_sku AS sku,
+            pc.category_name AS category,
+            IFNULL(i.quantity, 0) AS stock,
+            ph.price,
+            ph.currency,
+            p.status,
+            (
+                SELECT pi.image_url 
+                FROM product_images pi 
+                WHERE pi.product_id = p.product_id AND pi.is_primary = TRUE 
+                ORDER BY pi.created_at DESC 
+                LIMIT 1
+            ) AS primary_image
+        FROM products p
+        LEFT JOIN product_categories pc ON p.product_category = pc.category_id
+        LEFT JOIN inventory i ON p.product_id = i.product_id
+        LEFT JOIN (
+            SELECT ph1.product_id, ph1.price, ph1.currency
+            FROM product_price_history ph1
+            INNER JOIN (
+                SELECT product_id, MAX(change_date) AS max_date
+                FROM product_price_history
+                GROUP BY product_id
+            ) latest ON ph1.product_id = latest.product_id AND ph1.change_date = latest.max_date
+        ) ph ON p.product_id = ph.product_id
+        WHERE p.user_id = ?
+    ";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param("s", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $products = [];
+        while ($row = $result->fetch_assoc()) {
+            $products[] = $row;
+        }
+
+        return $products;
     }
 }

@@ -426,7 +426,7 @@
 `);
     window.viewProduct = (keyword, totalProduct) => {
         new GetRequest({
-            getUrl: "controller/product-import?action=search-product",
+            getUrl: "controller/user/product-import?action=search-product",
             params: {
                 keyword,
                 totalProduct

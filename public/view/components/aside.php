@@ -67,7 +67,9 @@
                 <a href="inventory" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'inventory' ? 'active' : ''; ?>">
                     <i class="ri-archive-line"></i> <span>Inventory</span>
                 </a>
-
+                <a href="product" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'product' ? 'active' : ''; ?>">
+                    <i class="ri-archive-line"></i> <span>Product</span>
+                </a>
 
                 <a href="category" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'category' ? 'active' : ''; ?>">
                     <i class="ri-list-check-2-line"></i> <span>Categories</span>

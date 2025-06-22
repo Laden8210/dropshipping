@@ -43,10 +43,12 @@ switch ($request) {
             case 'add-product':
                 require_once 'add-product.php';
                 break;
-               
+            case 'add-stock-movement':
+                require_once 'add-stock-movement.php';
+                break;
         }
         break;
-    
+
     case 'GET':
         switch ($action) {
             case 'get-products':
@@ -58,8 +60,16 @@ switch ($request) {
             case 'get-inventory':
                 require_once 'get-inventory.php';
                 break;
+            case 'get-stock-movement':
+                require_once 'get-stock-movement.php';
+                break;
+            default:
+                http_response_code(404);
+                echo json_encode(['error' => 'Invalid action']);
+                break;
         }
         break;
+    
     default:
         http_response_code(404);
         echo json_encode(['error' => 'Invalid request']);

@@ -49,10 +49,10 @@
     <div class="tab-content" id="inventoryTabContent">
         <!-- My Inventory Tab -->
         <div class="tab-pane fade show active" id="inventory" role="tabpanel" aria-labelledby="inventory-tab">
-            <!-- Inventory Search Form -->
+
             <div class="card mb-4">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filter Inventory</h5>
+                    <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filter Product</h5>
                     <button class="btn btn-sm btn-outline-secondary">
                         <i class="fas fa-sync-alt me-1"></i>Reset Filters
                     </button>
@@ -90,13 +90,13 @@
                 </div>
             </div>
 
-            <!-- Inventory Table -->
+
             <div class="card">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-box me-2"></i>Inventory Items</h5>
+                    <h5 class="mb-0"><i class="fas fa-box me-2"></i>Product</h5>
                     <div>
                         <span class="badge bg-primary rounded-pill me-2" id="stat">1,042 active items</span>
-                        <a href="inventory?action=add" class="btn btn-sm btn-success">
+                        <a href="product?action=add" class="btn btn-sm btn-success">
                             <i class="fas fa-plus me-1"></i>Add Product
                         </a>
                     </div>
@@ -132,6 +132,7 @@
 
 </div>
 
+
 <div class="modal fade" id="stockMovementModal" tabindex="-1" aria-labelledby="stockMovementLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
@@ -144,7 +145,9 @@
 
                 <div class="d-flex align-items-center mb-3">
                     <p class="text-muted">View the history of stock movements for this product, including restocks, sales, and adjustments.</p>
-                   
+                    <button type="button" class="btn btn-sm btn-primary ms-auto" data-bs-toggle="modal" data-bs-target="#addStockModal">
+                        + Add Stock
+                    </button>
                 </div>
                 <div class="row mb-3 text-center">
                     <div class="col-md-4">
@@ -207,13 +210,11 @@
 <div class="modal fade" id="addStockModal" tabindex="-1" aria-labelledby="addStockModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-md">
         <div class="modal-content">
-            <form id="add-stock-form" action="controller/supplier/inventory/index.php?action=add-stock-movement" method="POST">
+            <form id="add-stock-form">
                 <div class="modal-header">
                     <h5 class="modal-title">Add Stock Movement</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-
-                <input type="hidden" name="product_id" id="product_id" value="">
 
                 <div class="modal-body">
                     <div class="mb-3">
@@ -227,7 +228,10 @@
                         <label for="quantity" class="form-label">Quantity</label>
                         <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
                     </div>
-
+                    <div class="mb-3">
+                        <label for="price" class="form-label">Total Price</label>
+                        <input type="number" class="form-control" id="price" name="price" min="0" step="0.01" required>
+                    </div>
                     <div class="mb-3">
                         <label for="reason" class="form-label">Reason</label>
                         <textarea class="form-control" id="reason" name="reason" rows="2"></textarea>
@@ -235,7 +239,7 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-success" id="add-stock-btn">Save Movement</button>
+                    <button type="submit" class="btn btn-success">Save Movement</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </form>
@@ -248,13 +252,13 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Simple gallery functionality
+ 
     document.querySelectorAll('.gallery-thumb').forEach(thumb => {
         thumb.addEventListener('click', function() {
             document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
             this.classList.add('active');
 
-            // In a real app, this would change the main image
+    
             const newSrc = this.querySelector('img').src.replace('100', '400');
             document.getElementById('primaryImage').src = newSrc;
         });
@@ -263,7 +267,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         const searchForm = document.getElementById('search-form');
         searchForm.addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent form submission
+            event.preventDefault(); 
 
             const keyword = document.getElementById('inv-keyword').value;
 
@@ -276,7 +280,7 @@
 
     window.viewProduct = (keyword, sort_by) => {
         new GetRequest({
-            getUrl: "controller/supplier/inventory/?action=get-inventory",
+            getUrl: "controller/supplier/product/?action=get-products",
             params: {
                 keyword,
 
@@ -300,18 +304,16 @@
                 const totalLowStock = data.filter(product => product.totalInventory < 10).length;
 
                 const stats = document.querySelectorAll('.stat-card h3');
-                stats[0].textContent = totalProducts; // Total Products
-                stats[1].textContent = totalActive; // Active Products
+                stats[0].textContent = totalProducts; 
+                stats[1].textContent = totalActive;
 
 
-                stats[2].textContent = totalInactive; // Inactive Products
-                stats[3].textContent = totalLowStock; // Low Stock Items
+                stats[2].textContent = totalInactive; 
+                stats[3].textContent = totalLowStock; 
 
 
-
-                // table 
                 const tableBody = document.querySelector('.inventory-table tbody');
-                tableBody.innerHTML = ''; // Clear existing rows
+                tableBody.innerHTML = ''; 
 
                 data.forEach(product => {
                     const row = document.createElement('tr');
@@ -345,16 +347,23 @@
                                 <i class="fas fa-eye"></i> View
                             </button>
                             
-                            <button class="btn btn-sm btn-primary" 
-                            onclick="retrieveStockMovement(${product.product_id})">
-                                <i class="fas fa-exchange-alt me-1"></i> Stock Movement
+                            <button href="inventory?action=edit&id=${product.product_id}" class="btn btn-sm btn-secondary">
+                                <i class="fas fa-edit"></i> Edit
                             </button>
 
-                            <button class="btn btn-sm btn-secondary" 
-                            onclick="showAddStockModal(${product.product_id})">
-                                <i class="fas fa-plus me-1"></i> Adjust Stock 
+                            <button class="btn btn-sm btn-info" onclick="retrieveStockMovement(${product.product_id})">
+                                <i class="fas fa-history"></i> View Price History
                             </button>
-                         
+
+                            <button class="btn btn-sm btn-warning" onclick="updateProductStatus(${product.product_id})">
+                                <i class="fas fa-sync-alt"></i> Update Status 
+                            </button>
+
+                            
+
+                            <button href="inventory?action=delete&id=${product.product_id}" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i> Delete 
+                            </button>
                         </td>   
                         `;
                     tableBody.appendChild(row);
@@ -459,33 +468,18 @@
         }).send();
     }
 
-    function showAddStockModal(productId) {
-        document.getElementById('add-stock-form').reset();
-        document.getElementById('product_id').value = productId;
-        const addStockModal = new bootstrap.Modal(document.getElementById('addStockModal'));
-        addStockModal.show();
-    }
-
-    const createExamRequest = new CreateRequest({
-        formSelector: '#add-stock-form',
-        submitButtonSelector: '#add-stock-btn',
-        callback: (err, res) => err ? console.error("Form submission error:", err) : console.log("Form submitted successfully:", res),
-        redirectUrl: 'inventory',
-    });
-
-    function retrieveStockMovement(product_id) {
+    function retrieveStockMovement(productId) {
         new GetRequest({
             getUrl: "controller/supplier/inventory?action=get-stock-movement",
             params: {
-                product_id
+                productId
             },
-            showSuccess: false,
             callback: (err, data) => {
                 if (err) return console.error("Error fetching stock movement data:", err);
                 console.log("Stock movement data retrieved:", data);
 
                 const stockMovementBody = document.getElementById('stock-movement-body');
-                stockMovementBody.innerHTML = '';
+                stockMovementBody.innerHTML = ''; 
 
                 let currentStock = 0;
                 let totalIngoing = 0;
@@ -494,17 +488,17 @@
                 data.forEach(movement => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td>${movement.movement_number}</td>
-                        <td>${movement.created_at}</td>
-                        <td><span class="badge bg-${movement.movement_type === 'in' ? 'success' : 'danger'}">${movement.movement_type === 'in' ? 'Restock' : 'Stock Out'}</span></td>
+                        <td>${movement.movement_id}</td>
+                        <td>${new Date(movement.date).toLocaleDateString()}</td>
+                        <td><span class="badge bg-${movement.type === 'in' ? 'success' : 'danger'}">${movement.type === 'in' ? 'Restock' : 'Stock Out'}</span></td>
                         <td>${movement.quantity}</td>
-                        <td>${movement.price}</td>
+                        <td>$${movement.price.toFixed(2)}</td>
                         <td>${movement.reason || '-'}</td>
                     `;
                     stockMovementBody.appendChild(row);
 
                     // Update totals
-                    if (movement.movement_type === 'in') {
+                    if (movement.type === 'in') {
                         currentStock += movement.quantity;
                         totalIngoing += movement.quantity;
                     } else {

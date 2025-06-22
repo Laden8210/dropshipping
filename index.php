@@ -39,6 +39,7 @@ try {
         'dashboard' => ['file' => 'supplier/dashboard/index.php', 'title' => 'Supplier Dashboard', 'auth_required' => true, 'user_type' => 'supplier'],
         
         'inventory' => ['file' => 'supplier/inventory/index.php', 'title' => 'Supplier Inventory', 'auth_required' => true, 'user_type' => 'supplier'],
+        'product' => ['file' => 'supplier/product/index.php', 'title' => 'Supplier Products', 'auth_required' => true, 'user_type' => 'supplier'],
         'orders' => ['file' => 'supplier/orders/index.php', 'title' => 'Supplier Orders', 'auth_required' => true, 'user_type' => 'supplier'],
         'category' => ['file' => 'supplier/category/index.php', 'title' => 'Categories Management', 'auth_required' => true, 'user_type' => 'supplier'],
         'reports' => ['file' => 'supplier/reports/index.php', 'title' => 'Supplier Reports', 'auth_required' => true, 'user_type' => 'supplier'],
