@@ -104,13 +104,13 @@
                             </tr>
                         </thead>
                         <tbody>
-   
+
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <form id="create-store-profile" action="controller/store/create_profile.php" method="POST" enctype="multipart/form-data" class="card shadow-sm mb-4">
+            <form id="create-store-profile" action="controller/user/store-profile?action=create-store" method="POST" enctype="multipart/form-data" class="card shadow-sm mb-4">
                 <div class="card-header bg-white">
                     <h5 class="mb-0"><i class="ri-store-2-line me-2"></i>Create Store Profile</h5>
                 </div>
@@ -155,7 +155,7 @@
                 </div>
 
                 <div class="card-footer bg-white text-end">
-                    <button type="submit" class="btn btn-success px-4">
+                    <button type="submit" class="btn btn-success px-4" id="create-store-btn">
                         <i class="ri-save-line me-2"></i>Save Store Profile
                     </button>
                 </div>
@@ -210,34 +210,77 @@
 </div>
 
 <script>
-    new GetRequest({
-        getUrl: "controller/supplier/setting?action=warehouse-details",
-        params: {
-
-        },
+    const request = new GetRequest({
+        getUrl: "controller/user/store-profile/index.php?action=get-stores",
+        params: {},
         showLoading: false,
         showSuccess: false,
-        callback: (err, data) => {
+    
+        callback: (err, res) => {
             if (err) {
-                console.error("Error fetching warehouse details:", err);
+                console.error("Error fetching store details:", err);
                 return;
             }
-            if (Array.isArray(data) && data.length > 0) {
-                const warehouseDetails = data[0];
-                document.getElementById('warehouse_name').value = warehouseDetails.warehouse_name;
-                document.getElementById('warehouse_address').value = warehouseDetails.warehouse_address;
-            } else {
-                console.warn("No warehouse details found for the user.");
-            }
+
+            const stores = res || [];
 
 
+  
+            const tbody = document.querySelector('#warehouse .table tbody');
+            tbody.innerHTML = '';
+
+            stores.forEach(store => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                <td>
+                    ${store.store_logo_url ? `<img src="public/images/store/${store.store_logo_url}" alt="Logo" style="width:40px;height:40px;object-fit:cover;border-radius:4px;margin-right:8px;">` : ''}
+                    ${store.store_name || ''}
+                </td>
+                <td>${store.store_address || ''}</td>
+                <td>${store.store_email || ''}</td>
+                <td>${store.store_phone || ''}</td>
+                <td>
+                    <span class="badge ${store.status === 'active' ? 'bg-success' : 'bg-secondary'}">
+                        ${store.status === 'active' ? 'Active' : 'Inactive'}
+                    </span>
+                </td>
+            `;
+                tbody.appendChild(row);
+            });
         }
-    }).send();
+    });
 
-    const createExamRequest = new CreateRequest({
-        formSelector: '#create-warehouse',
-        submitButtonSelector: '#create-warehouse-btn',
-        callback: (err, res) => err ? console.error("Form submission error:", err) : console.log("Form submitted successfully:", res),
-        redirectUrl: 'category',
+    request.send();
+
+
+    document.getElementById('create-store-profile').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        axios.post('controller/user/store-profile/index.php?action=create-store', formData)
+            .then(response => {
+                if (response.data.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Store Created',
+                        text: response.data.message,
+                    });
+                    this.reset();
+                    request.send();
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.data.message,
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error creating store:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred while creating the store.',
+                });
+            });
     });
 </script>

@@ -28,6 +28,7 @@ CREATE TABLE store_profile (
     store_address VARCHAR(255),
     store_phone VARCHAR(20),
     store_email VARCHAR(150),
+    status ENUM('active', 'inactive', 'archived') DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_store_profile_user FOREIGN KEY (user_id) REFERENCES users(user_id)

@@ -63,4 +63,15 @@ class StoreProfile
         $stmt->bind_param("i", $store_id);
         return $stmt->execute();
     }
+
+    public function exists($user_id ,$store_id)
+    {
+        $stmt = $this->conn->prepare("SELECT COUNT(*) FROM store_profile WHERE user_id = ? AND store_id = ?");
+        $stmt->bind_param("si", $user_id, $store_id);
+        $stmt->execute();
+        $count = 0;
+        $stmt->bind_result($count);
+        $stmt->fetch();
+        return $count > 0;
+    }
 }

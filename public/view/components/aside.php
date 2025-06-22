@@ -1,11 +1,11 @@
 <!-- Sidebar -->
 <aside class="sidebar" id="sidebar">
-    <!-- Logo -->
+
     <div class="logo-container text-center py-3">
         <img src="assets/img/logo.png" alt="LuzViMinDrop Logo" class="logo img-fluid" style="max-height: 40px;">
     </div>
 
-    <!-- Store Profile Section -->
+
     <div class="store-profile-card bg-white rounded shadow-sm mx-1 p-3 mb-4 d-flex align-items-center">
         <div class="avatar-circle me-3">
             <span class="initial"><?php echo strtoupper(substr($name, 0, 1)); ?></span>
@@ -49,7 +49,6 @@
             'product' => ['Products', 'ri-product-hunt-line'],
             'category' => ['Categories', 'ri-list-check-2-line'],
             'orders' => ['Orders', 'ri-shopping-cart-line'],
-            'store' => ['Store Profile', 'ri-store-line'],
             'reports' => ['Reports', 'ri-bar-chart-line'],
             'support' => ['Support', 'ri-customer-service-2-line'],
             'feedback' => ['Feedback', 'ri-star-line'],
@@ -57,7 +56,7 @@
         ];
 
         $allowedPages = [
-            'user' => ['dashboard', 'product-import', 'inventory', 'orders', 'store', 'reports', 'support', 'feedback', 'settings'],
+            'user' => ['dashboard', 'product-import', 'inventory', 'orders', 'reports', 'support', 'feedback', 'settings'],
             'supplier' => ['dashboard', 'inventory', 'product', 'category', 'orders', 'settings'],
             'admin' => ['dashboard', 'users', 'products', 'orders', 'reports', 'support', 'settings']
         ];
@@ -83,7 +82,8 @@
 
 <div class="modal fade" id="storeNameModal" tabindex="-1" aria-labelledby="storeNameModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <form id="storeNameForm" method="POST">
+        <form id="set-store" method="POST"
+            action="controller/user/store-profile/index.php?action=set-current-store">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Update Store Name</h5>
@@ -91,17 +91,13 @@
                 </div>
                 <div class="modal-body">
                     <label for="storeName" class="form-label">Store Name</label>
-                    <select class="form-select" id="storeName" name="storeName" required>
+                    <select class="form-select" id="storeName" name="store_id" required>
                         <option value="" disabled selected>Select your store</option>
-                        <?php foreach ($stores as $store): ?>
-                            <option value="<?php echo htmlspecialchars($store['name']); ?>">
-                                <?php echo htmlspecialchars($store['name']); ?>
-                            </option>
-                        <?php endforeach; ?>
+
                     </select>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Update</button>
+                    <button type="submit" class="btn btn-primary" id="submit-btn">Update</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -109,9 +105,59 @@
     </div>
 </div>
 
-<script>
-    function updateStore() {
-        const modal = new bootstrap.Modal(document.getElementById('storeNameModal'));
-        modal.show();
-    }
-</script>
+<?php if ($role == 'user'): ?>
+
+    <script>
+        function updateStore() {
+            const modal = new bootstrap.Modal(document.getElementById('storeNameModal'));
+            modal.show();
+        }
+
+        function retrieveCurrentStore() {
+            axios.get("controller/user/store-profile/index.php?action=get-current-store")
+                .then(function(response) {
+                    const res = response.data;
+                    const storeName = document.getElementById('store-name');
+                    storeName.textContent = res.store_name || 'Unnamed Store';
+                    console.log("Current store fetched successfully:", res.store_name || 'Unnamed Store');
+                })
+                .catch(function(error) {
+                    console.error("Error fetching current store:", error);
+                });
+        }
+
+
+        const createExamRequest = new CreateRequest({
+            formSelector: '#set-store',
+            submitButtonSelector: '#submit-btn',
+            callback: (err, res) => err ? console.error("Form submission error:", err) : retrieveCurrentStore(),
+
+        });
+
+
+        new GetRequest({
+            getUrl: "controller/user/store-profile/index.php?action=get-stores",
+            params: {},
+            showLoading: false,
+            showSuccess: false,
+            callback: (err, res) => {
+                if (err) {
+                    console.error("Error fetching store details:", err);
+                    return;
+                }
+
+                const stores = res || [];
+                const storeSelect = document.getElementById('storeName');
+                storeSelect.innerHTML = '';
+                stores.forEach(store => {
+                    const option = document.createElement('option');
+                    option.value = store.store_id;
+                    option.textContent = store.store_name || 'Unnamed Store';
+                    storeSelect.appendChild(option);
+                });
+                retrieveCurrentStore(); 
+
+            }
+        }).send();
+    </script>
+<?php endif; ?>

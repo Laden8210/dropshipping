@@ -1,6 +1,25 @@
 <?php
 
 
+ini_set('session.cookie_httponly', 1);
+ini_set('session.cookie_secure', $_SERVER['HTTP_HOST'] !== 'localhost');
+ini_set('session.use_strict_mode', 1);
+
+
+header('Content-Type: application/json; charset=utf-8');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST, GET, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, Origin, Accept');
+
+session_start();
+
+if (!isset($_SESSION['auth']['user_id']) || $_SESSION['auth']['role'] !== 'user') {
+    http_response_code(403);
+    echo json_encode(['status' => 'error', 'message' => 'Forbidden: You do not have permission to access this resource.']);
+    exit;
+}
+
+
 require_once '../../core/config.php';
 require_once '../../models/index.php';
 require_once '../../function/UIDGenerator.php';

@@ -1,7 +1,6 @@
 <?php
 
 
-
 ini_set('session.cookie_httponly', 1);
 ini_set('session.cookie_secure', $_SERVER['HTTP_HOST'] !== 'localhost');
 ini_set('session.use_strict_mode', 1);
@@ -37,37 +36,45 @@ $action = isset($_GET['action']) ? $_GET['action'] : '';
 switch ($request) {
     case 'POST':
         switch ($action) {
-            case 'import-product':
-                
-                require_once 'import-product.php';
-      
+            case 'create-store':
+                require_once 'create-store.php';
+                break;
+
+            case 'update-store':
+                require_once 'update-store.php';
+                break;
+
+            case 'delete-store':
+                require_once 'delete-store.php';
+                break;
+
+            case 'set-current-store':
+                require_once 'set-current-store.php';
                 break;
 
             default:
                 http_response_code(404);
-                echo json_encode(['error' => 'Invalid action']);
+                echo json_encode(['error' => 'Invalid post action']);
         }
-
         break;
-
-
     case 'GET':
-
-
-
         switch ($action) {
-            case 'search-product':
-                require_once 'retrieve-product.php';
+            case 'get-stores':
+                require_once 'get-stores.php';
                 break;
-            case 'single-product':
-                require_once 'single-product.php';
+            case 'get-store':
+                require_once 'get-store.php';
+                break;
+            case 'get-current-store':
+                require_once 'get-current-store.php';
                 break;
             default:
-                
+                http_response_code(404);
+                echo json_encode(['error' => 'Invalid get action']);
         }
         break;
     default:
         http_response_code(404);
-        echo json_encode(['error' => 'Invalid request']);
+        echo json_encode(['error' => 'Invalid request method']);
         break;
 }

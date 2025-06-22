@@ -139,13 +139,7 @@ try {
                 'title' => 'Profile'
             ]
         ],
-        'store' => [
-            'auth_required' => true,
-            'user' => [
-                'file' => 'user/store/index.php',
-                'title' => 'Store Profile'
-            ]
-        ],
+ 
 
         // Supplier-only routes
         'product' => [

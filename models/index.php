@@ -7,6 +7,7 @@ require_once 'SupplierProduct.php';
 require_once 'Category.php';
 require_once 'Inventory.php';
 require_once 'Warehouse.php';
+require_once 'StoreProfile.php';
 
 $userModel = new User($conn);
 $productModel = new ProductModel($conn);
@@ -15,3 +16,4 @@ $supplierProductModel = new SupplierProduct($conn);
 $categoryModel = new Category($conn);
 $inventoryModel = new Inventory($conn);
 $warehouseModel = new Warehouse($conn);
+$storeProfileModel = new StoreProfile($conn);
