@@ -112,6 +112,8 @@
                                     <th>Stock</th>
                                     <th>Price</th>
                                     <th>Forex Conversion(PHP)</th>
+                                    <th>Profit Margin</th>
+                                    <th>Selling Price</th>
                                     <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
@@ -122,7 +124,7 @@
                         </table>
                     </div>
 
-             
+
                 </div>
             </div>
         </div>
@@ -230,8 +232,59 @@
     </div>
 </div>
 
+<div class="modal fade" id="updateProfitMargin" tabindex="-1" aria-labelledby="updateProfitMarginLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateProfitMarginLabel">Update Profit Margin</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="update-profit-margin-form" method="POST" action="controller/user/inventory/index.php?action=update-profit-margin">
+
+                    <input type="hidden" id="product-id-for-margin" name="product_id">
+
+                    <div class="mb-3">
+                        <label for="new-profit-margin" class="form-label">New Profit Margin (%)</label>
+                        <input type="number" class="form-control" id="new-profit-margin" name="profit_margin" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="converted-currency" class="form-label">Converted Currency</label>
+                        <input type="text" class="form-control" id="converted-currency" name="converted_currency" readonly>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="profit-margin-amount" class="form-label">Profit Margin Amount</label>
+                        <input type="number" class="form-control" id="profit-margin-amount" name="profit_margin_amount" readonly>
+                    </div>
+
+
+                    <div class="mb-3">
+                        <label for="selling-price" class="form-label">Selling Price</label>
+                        <input type="number" class="form-control" id="selling-price" name="selling_price" readonly>
+                    </div>
+
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" id="update-profit-margin-btn" class="btn btn-primary">Update Margin</button>
+
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    new CreateRequest({
+        formSelector: '#update-profit-margin-form',
+        submitButtonSelector: '#update-profit-margin-btn',
+        callback: (err, res) => err ? console.error("Form submission error:", err) : console.log("Form submitted successfully:", res),
+        redirectUrl: 'inventory',
+    });
 
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -250,7 +303,7 @@
 
     window.viewProduct = (keyword, sort_by) => {
         new GetRequest({
-            getUrl: "controller/inventory?action=search-product",
+            getUrl: "controller/user/inventory?action=search-product",
             params: {
                 keyword,
 
@@ -289,43 +342,64 @@
 
                 data.forEach(product => {
                     const row = document.createElement('tr');
-                    let images = [];
-
-                    try {
-                        images = JSON.parse(product.productImage);
-                    } catch (e) {
-                        console.error("Failed to parse productImage:", e);
-                    }
 
 
 
-                    const firstImage = Array.isArray(images) && images.length > 0 ?
-                        images[0] :
-                        'https://via.placeholder.com/40/000000/ffffff?text=No+Image';
 
                     row.innerHTML = `
                         <td>
                             <div class="d-flex align-items-center">
-                                <img src="${firstImage}" class="rounded me-3" alt="Product" width="40">
-                                <div>${product.productNameEn}</div>
+                                <img src="public/images/products/${product.primary_image}" class="img-thumbnail me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                <span>${product.product}</span>
                             </div>
                         </td>
-                        <td>${product.productSku}</td>
-                        <td>${product.categoryName}</td>
+                        <td>${product.product_sku}</td>
+                        <td><span class="badge bg-info text-dark">${product.category_name}</span></td>
+                        <td>${product.current_stock !== null && product.current_stock !== undefined ? product.current_stock : 'No available stock'}</td>
+                        <td>${product.currency} ${product.price}</td>
+                        <td>${product.converted_currency} ${product.converted_price}</td>
                         <td>
-                            <div class="d-flex align-items-center">
-                         
-                                <span>${product.totalInventory}</span>
-                            </div>
+                            ${product.profit_margin ? product.profit_margin + '%' : 'N/A'}
+                            <br>
+                            <small class="text-muted">
+                                Total: 
+                                ${
+                                    (product.converted_price && product.profit_margin)
+                                        ? (parseFloat(product.converted_price) * parseFloat(product.profit_margin) / 100).toFixed(2)
+                                        : 'N/A'
+                                }
+                                ${product.converted_currency || ''}
+                            </small>
                         </td>
-                        <td>$${product.suggestSellPrice}</td>
-                        <td>₱${product.exchangeRate}</td>
-                        <td><span class="status-badge status-${product.status_db.toLowerCase()}">${product.status_db}</span></td>
-                        <td>
+                       <td>
+                            ${
+                                product.converted_currency && product.converted_price && product.profit_margin
+                                    ? `${product.converted_currency} ${(parseFloat(product.converted_price) + (parseFloat(product.converted_price) * parseFloat(product.profit_margin) / 100)).toFixed(2)}`
+                                    : 'N/A'
+                            }
+                        </td>
 
-                            <button class="btn btn-sm btn-outline-info action-btn"  onclick="retrieveProduct('${product.pid}')"><i class="fas fa-eye"></i></button>
-                            <button class="btn btn-sm btn-outline-danger action-btn"><i class="fas fa-trash-alt"></i></button>
-                        </td>`;
+                        <td>
+                            ${product.status === 'active' 
+                                ? '<span class="badge bg-success">Active</span>' 
+                                : product.status === 'inactive'
+                                    ? '<span class="badge bg-warning text-dark">Inactive</span>'
+                                    : product.status === 'archived'
+                                        ? '<span class="badge bg-secondary">Archived</span>'
+                                        : `<span class="badge bg-light text-dark">${product.status}</span>`
+                            }
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" onclick="retrieveProduct(${product.product_id})">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                        
+                            <button class="btn btn-sm btn-secondary" onclick="updateProfitMargin(${product.product_id}, '${product.converted_price}')">
+                                <i class="fas fa-edit"></i> Edit Margin
+                            </button>
+                         
+                        </td>   
+                        `;
                     tableBody.appendChild(row);
                 });
 
@@ -333,6 +407,46 @@
             }
         }).send();
     };
+
+    function updateProfitMargin(productId, amount) {
+        const modal = new bootstrap.Modal(document.getElementById('updateProfitMargin'));
+
+        // Set product ID and amount
+        document.getElementById('product-id-for-margin').value = productId;
+        document.getElementById('converted-currency').value = amount;
+        document.getElementById('new-profit-margin').value = '';
+        document.getElementById('profit-margin-amount').value = '';
+        document.getElementById('selling-price').value = '';
+
+        // Store base amount in a hidden attribute or global var if needed
+        document.getElementById('new-profit-margin').setAttribute('data-amount', amount);
+
+        modal.show();
+    }
+
+    // Listen to profit margin input
+    document.addEventListener('DOMContentLoaded', () => {
+        const marginInput = document.getElementById('new-profit-margin');
+
+        marginInput.addEventListener('input', function() {
+            const amount = parseFloat(this.getAttribute('data-amount'));
+            const margin = parseFloat(this.value);
+
+            if (!isNaN(amount) && !isNaN(margin)) {
+                const profitAmount = amount * (margin / 100);
+                const sellingPrice = amount + profitAmount;
+
+                document.getElementById('profit-margin-amount').value = profitAmount.toFixed(2);
+                document.getElementById('selling-price').value = sellingPrice.toFixed(2);
+            } else {
+                document.getElementById('profit-margin-amount').value = '';
+                document.getElementById('selling-price').value = '';
+            }
+        });
+    });
+
+    // event listener for auto computation of profit margin
+
 
     function retrieveProduct(pid) {
         new GetRequest({

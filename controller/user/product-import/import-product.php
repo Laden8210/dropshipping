@@ -40,3 +40,12 @@ if($productModel->is_product_imported($_SESSION['auth']['user_id'], $pid)) {
     echo json_encode(['status' => 'error', 'message' => 'Product already imported.', 'http_code' => 400]);
     exit;
 }
+
+
+if($productModel->import_product($_SESSION['auth']['user_id'], $pid, $_SESSION['auth']['store_id'])) {
+    http_response_code(200);
+    echo json_encode(['status' => 'success', 'message' => 'Product imported successfully.', 'http_code' => 200]);
+} else {
+    http_response_code(500);
+    echo json_encode(['status' => 'error', 'message' => 'Failed to import product.', 'http_code' => 500]);
+}

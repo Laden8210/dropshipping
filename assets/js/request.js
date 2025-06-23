@@ -321,6 +321,7 @@ class GetRequest {
       .get(this.getUrl, { params: this.params })
       .then((response) => {
         const data = response.data;
+        Swal.close();
         if (data.status === "error" || data.http_code !== 200) {
           Swal.fire({
             title: "Error!",

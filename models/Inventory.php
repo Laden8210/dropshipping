@@ -34,6 +34,31 @@ class Inventory
         return $result->fetch_assoc();
     }
 
+    public function updateQuantity($product_id, $quantityChange)
+    {
+  
+        $stmt = $this->db->prepare("SELECT quantity FROM inventory WHERE product_id = ?");
+        $stmt->bind_param("i", $product_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $inventory = $result->fetch_assoc();
+
+        if (!$inventory) {
+            return false; 
+        }
+
+        $current_quantity = (int)$inventory['quantity'];
+        $new_quantity = $current_quantity + $quantityChange;
+
+        if ($new_quantity < 0) {
+            return false; 
+        }
+
+        $updateStmt = $this->db->prepare("UPDATE inventory SET quantity = ?, updated_at = NOW() WHERE product_id = ?");
+        $updateStmt->bind_param("ii", $new_quantity, $product_id);
+        return $updateStmt->execute();
+    }
+
     public function addStockMovement($product_id, $quantity, $movement_type, $reason = null)
     {
         $this->db->begin_transaction();

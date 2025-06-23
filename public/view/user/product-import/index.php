@@ -169,7 +169,7 @@
 <script>
     function cardBuildProduct(data) {
         const container = document.getElementById('product-results');
-        container.innerHTML = ''; 
+        container.innerHTML = '';
 
         if (!data || data.length === 0) {
             container.innerHTML = `
@@ -336,7 +336,7 @@
     }
 
     function importProduct(pid) {
- 
+
         Swal.fire({
             title: 'Import Product',
             text: "Are you sure you want to import this product?",
@@ -481,7 +481,7 @@
     });
 
     onload = () => {
-        // Initialize the product search with default values
+
         const keyword = document.getElementById('keyword').value || '';
         const totalProduct = document.getElementById('totalProduct').value || 10;
         window.viewProduct(keyword, totalProduct);

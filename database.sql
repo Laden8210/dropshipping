@@ -144,37 +144,44 @@ create table cart (
 );
 
 
-create table orders (
+
+
+CREATE TABLE orders (
     order_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id CHAR(14) NOT NULL,
+    subtotal DECIMAL(10, 2) NOT NULL,
+    shipping_fee DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    tax DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     total_amount DECIMAL(10, 2) NOT NULL,
     status ENUM('pending', 'completed', 'cancelled') DEFAULT 'pending',
     order_number VARCHAR(50) NOT NULL UNIQUE,
-    shipping_zip VARCHAR(20) NOT NULL,
-    shipping_country VARCHAR(100) NOT NULL,
-    shipping_country_code VARCHAR(10) NOT NULL,
-    shipping_province VARCHAR(100) NOT NULL,
-    shipping_city VARCHAR(100) NOT NULL,
-    shipping_county VARCHAR(100) DEFAULT NULL,
-    shipping_phone VARCHAR(20) NOT NULL,
-    shipping_customer_name VARCHAR(255) NOT NULL,
-    shipping_address VARCHAR(255) NOT NULL,
-    shipping_address2 VARCHAR(255) DEFAULT NULL,
-    tax_id VARCHAR(50) DEFAULT NULL,
-    remark TEXT DEFAULT NULL,
-    email VARCHAR(150) DEFAULT NULL,
-    consignee_id VARCHAR(50) DEFAULT NULL,
-    pay_type VARCHAR(50) DEFAULT NULL,
-    shop_amount DECIMAL(10, 2) DEFAULT NULL,
-    logistic_name VARCHAR(100) DEFAULT NULL,
-    from_country_code VARCHAR(10) NOT NULL,
-    house_number VARCHAR(50) DEFAULT NULL,
+    payment_method ENUM('credit_card', 'paypal', 'bank_transfer', 'cod') NOT NULL,
+    tracking_number VARCHAR(100) DEFAULT NULL,
+    shipping_address_id BIGINT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT fk_orders_user FOREIGN KEY (user_id) REFERENCES users(user_id)
+    
+    CONSTRAINT fk_orders_user FOREIGN KEY (user_id) REFERENCES users(user_id),
+    CONSTRAINT fk_orders_shipping_address FOREIGN KEY (shipping_address_id) REFERENCES user_shipping_address(address_id)
 );
 
-create table order_items (
+
+CREATE TABLE user_shipping_address (
+    address_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    full_name VARCHAR(255) NOT NULL,
+    address_line VARCHAR(255) NOT NULL,
+    region VARCHAR(100) NOT NULL,
+    city VARCHAR(100) NOT NULL,
+    brgy VARCHAR(100) NOT NULL,
+    postal_code VARCHAR(20) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_order_shipping_address_user FOREIGN KEY (user_id) REFERENCES users(user_id)
+
+);
+
+CREATE TABLE order_items (
     order_item_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     order_id BIGINT NOT NULL,
     product_id BIGINT NOT NULL,
@@ -183,7 +190,7 @@ create table order_items (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_order_items_order FOREIGN KEY (order_id) REFERENCES orders(order_id),
+    CONSTRAINT fk_order_items_order FOREIGN KEY (order_id) REFERENCES orders(order_id), 
     CONSTRAINT fk_order_items_product FOREIGN KEY (product_id) REFERENCES imported_product(product_id)
 );
 

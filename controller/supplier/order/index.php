@@ -13,7 +13,7 @@ header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-W
 
 session_start();
 
-if (!isset($_SESSION['auth']['user_id']) || $_SESSION['auth']['role'] !== 'user') {
+if (!isset($_SESSION['auth']['user_id']) || $_SESSION['auth']['role'] !== 'supplier') {
     http_response_code(403);
     echo json_encode(['status' => 'error', 'message' => 'Forbidden: You do not have permission to access this resource.']);
     exit;
@@ -34,38 +34,36 @@ $request = $request ?: '';
 $action = isset($_GET['action']) ? $_GET['action'] : '';
 
 switch ($request) {
+
     case 'POST':
         switch ($action) {
-            case 'import-product':
-
-                require_once 'import-product.php';
-
+            case 'create-order':
+                require_once 'create-order.php';
                 break;
-
-            case 'update-profit-margin':
-                require_once 'update-profit-margin.php';
+            case 'update-order-status':
+                require_once 'update-order-status.php';
                 break;
-
             default:
                 http_response_code(404);
-                echo json_encode(['error' => 'Invalid action']);
+                echo json_encode(['error' => 'Invalid request']);
+                break;
         }
-
         break;
 
 
     case 'GET':
         switch ($action) {
-            case 'search-product':
-                require_once 'retrieve-product.php';
+            case 'get-orders':
+                require_once 'get-orders.php';
                 break;
-            case 'single-product':
-                require_once 'single-product.php';
+            case 'get-order-details':
+                require_once 'get-order-details.php';
                 break;
-        
+    
             default:
         }
         break;
+    
     default:
         http_response_code(404);
         echo json_encode(['error' => 'Invalid request']);

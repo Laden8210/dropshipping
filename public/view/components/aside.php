@@ -31,7 +31,7 @@
                 <div class="small mt-1 text-dark">
                     Store:
                     <span class="fw-bold text-dark" id="store-name" onclick="updateStore()" style="cursor: pointer;">
-                        <?php echo isset($store_name) ? htmlspecialchars($store_name) : 'Default Store Name'; ?>
+
                     </span>
                 </div>
             <?php endif; ?>
@@ -86,7 +86,7 @@
             action="controller/user/store-profile/index.php?action=set-current-store">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Update Store Name</h5>
+                    <h5 class="modal-title">Update Store</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -97,7 +97,7 @@
                     </select>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary" id="submit-btn">Update</button>
+                    <button type="submit" class="btn btn-primary" id="update-store-btn">Update</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -127,9 +127,9 @@
         }
 
 
-        const createExamRequest = new CreateRequest({
+        new CreateRequest({
             formSelector: '#set-store',
-            submitButtonSelector: '#submit-btn',
+            submitButtonSelector: '#update-store-btn',
             callback: (err, res) => err ? console.error("Form submission error:", err) : retrieveCurrentStore(),
 
         });
@@ -155,7 +155,7 @@
                     option.textContent = store.store_name || 'Unnamed Store';
                     storeSelect.appendChild(option);
                 });
-                retrieveCurrentStore(); 
+                retrieveCurrentStore();
 
             }
         }).send();

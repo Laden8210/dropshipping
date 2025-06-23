@@ -20,11 +20,11 @@ if (!isset($_SESSION['auth']['user_id']) || $_SESSION['auth']['role'] !== 'user'
 }
 
 
-require_once '../../core/config.php';
-require_once '../../models/index.php';
-require_once '../../function/UIDGenerator.php';
+require_once '../../../core/config.php';
+require_once '../../../models/index.php';
+require_once '../../../function/UIDGenerator.php';
 
-require_once '../../vendor/autoload.php';
+require_once '../../../vendor/autoload.php';
 
 $request = $_SERVER['REQUEST_METHOD'];
 $request = trim($request, '/');

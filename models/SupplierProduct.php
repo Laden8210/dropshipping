@@ -73,6 +73,53 @@ class SupplierProduct
         return $products;
     }
 
+    public function get_available_products($user_id, $store_id)
+    {
+        $sql = "
+            SELECT 
+                products.product_id,
+                products.product_name,
+                products.product_sku,    
+                products.product_weight,
+                pc.category_name,
+                ph.price, 
+                ph.currency,
+                ph.change_date,
+                pi.image_url AS primary_image,
+                w.warehouse_name,
+                w.warehouse_address
+            FROM products
+            JOIN product_categories pc ON products.product_category = pc.category_id
+            LEFT JOIN (
+                SELECT p1.*
+                FROM product_price_history p1
+                INNER JOIN (
+                    SELECT product_id, MAX(change_date) AS max_date
+                    FROM product_price_history
+                    GROUP BY product_id
+                ) p2 ON p1.product_id = p2.product_id AND p1.change_date = p2.max_date
+            ) ph ON products.product_id = ph.product_id
+            LEFT JOIN product_images pi ON products.product_id = pi.product_id AND pi.is_primary = 1
+            LEFT JOIN warehouse w ON products.user_id = w.user_id
+            WHERE products.status = 'active'
+            AND NOT EXISTS (
+                SELECT 1 FROM imported_product ip
+                WHERE ip.product_id = products.product_id AND ip.user_id = ? AND ip.store_id = ?
+            )
+            ORDER BY products.created_at DESC
+        ";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("si", $user_id, $store_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $products = [];
+        while ($row = $result->fetch_assoc()) {
+            $products[] = $row;
+        }
+        return $products;
+    }
+
 
 
     public function get_user_products($user_id)

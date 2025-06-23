@@ -8,8 +8,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
+if (!isset($_SESSION['auth']['store_id'])) {
+    echo json_encode(['status' => 'error', 'message' => 'Please set the store first', 'http_code' => 400]);
+    exit;
+}
 
-$data = $supplierProductModel->get_all_products();
+$data = $supplierProductModel->get_available_products(
+    $_SESSION['auth']['user_id'],
+    $_SESSION['auth']['store_id']
+);
 if ($data) {
     echo json_encode(['status' => 'success', 'data' => $data, 'http_code' => 200]);
 } else {

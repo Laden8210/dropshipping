@@ -450,7 +450,7 @@
 
     window.viewProduct = (keyword, sort_by) => {
         new GetRequest({
-            getUrl: "controller/order?action=get-orders",
+            getUrl: "controller/user/order?action=get-orders",
             params: {
                 keyword,
 
@@ -488,7 +488,7 @@
                         </td>
                         <td>${order.created_at}</td>
                         <td>${order.items_count} items</td>
-                        <td>$${order.total_amount}</td>
+                        <td>${order.total_amount}</td>
                         <td><span class="status-badge status-${order.status.toLowerCase()}">${order.status}</span></td>
                         <td>
                             <button class="btn btn-sm btn-outline-primary action-btn" data-bs-toggle="modal" data-bs-target="#orderModal"
@@ -516,7 +516,7 @@
 
     function getOrderDetails(orderNumber) {
         new GetRequest({
-            getUrl: "controller/order?action=get-order-details",
+            getUrl: "controller/user/order?action=get-order-details",
             params: { order_number: orderNumber },
             callback: (err, data) => {
                 if (err) return console.error("Error fetching order details:", err);

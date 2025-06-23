@@ -9,8 +9,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $store_id = $_SESSION['auth']['store_id'] ?? null;
 
 if (empty($store_id)) {
-    http_response_code(400);
-    echo json_encode(['status' => 'error', 'message' => 'Store ID is not set in session.', 'http_code' => 400]);
+  
+    echo json_encode(['status' => 'error', 'message' => 'Store ID is not set in session.', 'http_code' => 200, 'store_name' => 'No Store']);
     exit;
 }
 
