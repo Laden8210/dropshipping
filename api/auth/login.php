@@ -82,8 +82,7 @@ if ($password !== $user['password']) {
 }
 
 if ($user['role'] !== 'client') {
-
-    echo json_encode(['status' => 'error', 'message' => 'Account is inactive', 'http_code' => 403]);
+    echo json_encode(['status' => 'error', 'message' => 'Unauthorized access', 'http_code' => 403]);
     exit;
 }
 
