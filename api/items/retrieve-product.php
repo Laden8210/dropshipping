@@ -90,6 +90,7 @@ foreach ($data as &$product) {
 
 
 
+$data = array_values($data);
 
 echo json_encode([
     'status' => 'success',

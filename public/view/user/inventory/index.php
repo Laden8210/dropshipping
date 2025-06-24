@@ -350,7 +350,7 @@
                         <td>
                             <div class="d-flex align-items-center">
                                 <img src="public/images/products/${product.primary_image}" class="img-thumbnail me-2" style="width: 40px; height: 40px; object-fit: cover;">
-                                <span>${product.product}</span>
+                                <span>${product.product_name}</span>
                             </div>
                         </td>
                         <td>${product.product_sku}</td>

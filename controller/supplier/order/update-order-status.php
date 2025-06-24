@@ -45,7 +45,6 @@ if ($status === 'processing') {
         $product_id = $item['product_id'];
         $quantity = $item['quantity'];
 
-
         $inventoryModel->addStockMovement($product_id, $quantity, 'out', 'Order ID: ' . $order_number);
     }
 }
