@@ -216,4 +216,33 @@
                 });
             }
         });
+
+        const getRequest = new GetAllRequest({
+        getUrl: 'controller/supplier/category/index.php?action=get-categories',
+        params: {},
+        callback: (error, data) => {
+            if (error) {
+                console.log('Error:', error);
+                const categorySelect = document.getElementById('category');
+                categorySelect.innerHTML = '<option value="" disabled selected>' + error + '</option>';
+
+            } else {
+
+                console.log('Categories fetched successfully:', data);
+                const categorySelect = document.getElementById('category');
+                categorySelect.innerHTML = '<option value="" disabled selected>Select a category</option>';
+                data.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category.category_id;
+                    option.textContent = category.category_name;
+                    categorySelect.appendChild(option);
+                });
+
+
+
+            }
+        },
+        promptMessage: 'Do you want to fetch the latest data?'
+    });
+    getRequest.send();
     </script>
