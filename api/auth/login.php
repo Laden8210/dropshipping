@@ -64,6 +64,7 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 }
 
 
+
 $user = $userModel->login($email);
 if (!$user) {
 
@@ -71,10 +72,18 @@ if (!$user) {
     exit;
 }
 
+
+
 // Verify password (assuming passwords are stored hashed)
 if ($password !== $user['password']) {
 
     echo json_encode(['status' => 'error', 'message' => 'Invalid credentials', 'http_code' => 401]);
+    exit;
+}
+
+if ($user['role'] !== 'client') {
+
+    echo json_encode(['status' => 'error', 'message' => 'Account is inactive', 'http_code' => 403]);
     exit;
 }
 
