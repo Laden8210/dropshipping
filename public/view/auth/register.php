@@ -59,6 +59,16 @@
                 <input type="text" name="phone_number" id="phoneNumber" placeholder="Phone Number" required />
               </div>
 
+              <!-- User type -->
+
+              <div class="input-group mb-3">
+
+                <select name="role" id="role" required class="form-select">
+                  <option value="" disabled selected>Select User Type</option>
+                  <option value="user">User</option>
+                  <option value="supplier">Supplier</option>
+                </select>
+              </div>
               <!-- Password Field -->
               <div class="input-group mb-3">
                 <i class="fas fa-lock"></i>

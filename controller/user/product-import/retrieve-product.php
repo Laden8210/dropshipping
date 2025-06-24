@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if (!isset($_SESSION['auth']['store_id'])) {
-    echo json_encode(['status' => 'error', 'message' => 'Please set the store first', 'http_code' => 400]);
+    echo json_encode(['status' => 'error', 'message' => 'Please select a store before importing products.', 'http_code' => 400]);
     exit;
 }
 

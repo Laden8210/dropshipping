@@ -81,6 +81,12 @@ if ($userModel->isPhoneNumberRegistered($request_body['phone_number'])) {
     exit;
 }
 
+if (!isset($request_body['role']) || !in_array($request_body['role'], ['user', 'supplier'])) {
+    http_response_code(400);
+    echo json_encode(['status' => 'error', 'message' => 'Invalid user type. Must be "user" or "supplier".', 'http_code' => 400]);
+    exit;
+}
+
 
 $user =  $userModel->register($request_body);
 

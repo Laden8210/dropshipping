@@ -139,6 +139,15 @@ try {
                 'title' => 'Profile'
             ]
         ],
+
+        'create-store'
+        => [
+            'auth_required' => true,
+            'user' => [
+                'file' => 'user/store/create.php',
+                'title' => 'Create Store'
+            ]
+        ],
  
 
         // Supplier-only routes
