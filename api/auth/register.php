@@ -30,12 +30,12 @@ if (json_last_error() !== JSON_ERROR_NONE) {
 
 
 
-if (!isset($request_body['firstName']) || empty(trim($request_body['firstName']))) {
+if (!isset($request_body['first_name']) || empty(trim($request_body['first_name']))) {
  
     echo json_encode(['status' => 'error', 'message' => 'First name is required', 'http_code' => 400]);
     exit;
 }
-if (!isset($request_body['lastName']) || empty(trim($request_body['lastName']))) {
+if (!isset($request_body['last_name']) || empty(trim($request_body['last_name']))) {
 
     echo json_encode(['status' => 'error', 'message' => 'Last name is required', 'http_code' => 400]);
     exit;
