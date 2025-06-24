@@ -279,9 +279,7 @@
             getUrl: "controller/supplier/inventory/?action=get-inventory",
             params: {
                 keyword,
-
                 status,
-
             },
             callback: (err, data) => {
                 if (err) return console.error("Error fetching user data:", err);
@@ -293,13 +291,11 @@
                 cardHeader.innerHTML = `<i class="fas fa-box me-2"></i>Inventory Items (${totalProducts})`;
 
                 const statBadge = document.getElementById('stat');
-                statBadge.textContent = data && Array.isArray(data)
-                    ? `${data.filter(product => product.status_db === 'active').length} active items`
-                    : '0 active items';
+                statBadge.textContent = `${data.filter(product => product.status_db === 'active').length} active items`;
                 // update inventory stats
-                const totalActive = data.filter(product => product.status_db === 'active').length;
-                const totalInactive = data.filter(product => product.status_db === 'inactive').length;
-                const totalLowStock = data.filter(product => product.totalInventory < 10).length;
+                const totalActive = data ? data.filter(product => product.status_db === 'active').length : 0;
+                const totalInactive = data ? data.filter(product => product.status_db === 'inactive').length : 0;
+                const totalLowStock = data ? data.filter(product => product.totalInventory < 10).length : 0;
 
                 const stats = document.querySelectorAll('.stat-card h3');
                 stats[0].textContent = totalProducts; // Total Products
