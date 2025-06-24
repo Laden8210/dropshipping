@@ -12,7 +12,7 @@
                 <i class="fas fa-box-open"></i>
             </div>
             <div class="stat-content">
-                <h3>1,248</h3>
+                <h3>0</h3>
                 <p>Total Products</p>
             </div>
         </div>
@@ -21,7 +21,7 @@
                 <i class="fas fa-check-circle"></i>
             </div>
             <div class="stat-content">
-                <h3>1,042</h3>
+                <h3>0</h3>
                 <p>Active Products</p>
             </div>
         </div>
@@ -30,7 +30,7 @@
                 <i class="fas fa-pause-circle"></i>
             </div>
             <div class="stat-content">
-                <h3>206</h3>
+                <h3>0</h3>
                 <p>Inactive Products</p>
             </div>
         </div>
@@ -39,7 +39,7 @@
                 <i class="fas fa-truck-loading"></i>
             </div>
             <div class="stat-content">
-                <h3>42</h3>
+                <h3>0</h3>
                 <p>Low Stock Items</p>
             </div>
         </div>
@@ -293,7 +293,9 @@
                 cardHeader.innerHTML = `<i class="fas fa-box me-2"></i>Inventory Items (${totalProducts})`;
 
                 const statBadge = document.getElementById('stat');
-                statBadge.textContent = `${data.filter(product => product.status_db === 'active').length} active items`;
+                statBadge.textContent = data && Array.isArray(data)
+                    ? `${data.filter(product => product.status_db === 'active').length} active items`
+                    : '0 active items';
                 // update inventory stats
                 const totalActive = data.filter(product => product.status_db === 'active').length;
                 const totalInactive = data.filter(product => product.status_db === 'inactive').length;

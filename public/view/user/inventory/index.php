@@ -12,7 +12,7 @@
                 <i class="fas fa-box-open"></i>
             </div>
             <div class="stat-content">
-                <h3>1,248</h3>
+                <h3>0</h3>
                 <p>Total Products</p>
             </div>
         </div>
@@ -21,7 +21,7 @@
                 <i class="fas fa-check-circle"></i>
             </div>
             <div class="stat-content">
-                <h3>1,042</h3>
+                <h3>0</h3>
                 <p>Active Products</p>
             </div>
         </div>
@@ -30,7 +30,7 @@
                 <i class="fas fa-pause-circle"></i>
             </div>
             <div class="stat-content">
-                <h3>206</h3>
+                <h3>0</h3>
                 <p>Inactive Products</p>
             </div>
         </div>
@@ -39,7 +39,7 @@
                 <i class="fas fa-truck-loading"></i>
             </div>
             <div class="stat-content">
-                <h3>42</h3>
+                <h3>0</h3>
                 <p>Low Stock Items</p>
             </div>
         </div>
