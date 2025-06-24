@@ -57,13 +57,13 @@ if ($updatedOrder['status'] === 'error') {
     echo json_encode(['status' => 'error', 'message' => $updatedOrder['message'], 'http_code' => 500]);
     exit;
 }
-// echo json_encode([
-//     'status' => 'success',
-//     'message' => 'Order status updated successfully.',
-//     'data' => [
-//         'order_number' => $order_number,
-//         'status' => $status,
-//         'products' => $items
-//     ],
-//     'http_code' => 200
-// ]);
+echo json_encode([
+    'status' => 'success',
+    'message' => 'Order status updated successfully.',
+    'data' => [
+        'order_number' => $order_number,
+        'status' => $status,
+        'products' => $items
+    ],
+    'http_code' => 200
+]);
