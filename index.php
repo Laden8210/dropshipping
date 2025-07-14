@@ -56,6 +56,10 @@ try {
             'supplier' => [
                 'file' => 'supplier/dashboard/index.php',
                 'title' => 'Supplier Dashboard'
+            ],
+            'courier' => [
+                'file' => 'courier/dashboard/index.php',
+                'title' => 'Courier Dashboard'
             ]
         ],
         'inventory' => [
@@ -100,7 +104,12 @@ try {
             'supplier' => [
                 'file' => 'supplier/settings/index.php',
                 'title' => 'Supplier Settings'
+            ],
+            'courier' => [
+                'file' => 'courier/settings/index.php',
+                'title' => 'Courier Settings'
             ]
+
         ],
 
         // User-only routes
@@ -148,7 +157,6 @@ try {
                 'title' => 'Create Store'
             ]
         ],
- 
 
         // Supplier-only routes
         'product' => [
@@ -164,10 +172,20 @@ try {
                 'file' => 'supplier/category/index.php',
                 'title' => 'Categories Management'
             ]
+        ],
+
+        // Courier-only routes
+
+        'deliveries' => [
+            'auth_required' => true,
+            'courier' => [
+                'file' => 'courier/deliveries/index.php',
+                'title' => 'Deliveries Management'
+            ]
         ]
     ];
 
-    
+
     if ($request === 'logout') {
         session_unset();
         session_destroy();
@@ -190,15 +208,17 @@ try {
             exit;
         }
 
-        if ($_SESSION['auth']['ip_address'] !== $_SERVER['REMOTE_ADDR'] || 
-            $_SESSION['auth']['user_agent'] !== $_SERVER['HTTP_USER_AGENT']) {
+        if (
+            $_SESSION['auth']['ip_address'] !== $_SERVER['REMOTE_ADDR'] ||
+            $_SESSION['auth']['user_agent'] !== $_SERVER['HTTP_USER_AGENT']
+        ) {
             session_unset();
             session_destroy();
             header('Location: login?error=session_tampered');
             exit;
         }
 
-      
+
         $user = $userModel->getCurrentUser();
         $role = $user['role'];
         $name = $user['first_name'] . ' ' . $user['last_name'];
@@ -214,14 +234,14 @@ try {
         $title = $viewConfig['title'];
         $content = __DIR__ . '/public/view/' . $viewConfig['file'];
     } else {
-        // Public route
+
         if (isset($_SESSION['auth'])) {
-            // Redirect to appropriate dashboard
+
             $role = $_SESSION['auth']['role'];
             header('Location: dashboard');
             exit;
         }
-        
+
         $title = $route['title'];
         $content = __DIR__ . '/public/view/' . $route['file'];
     }
@@ -229,7 +249,6 @@ try {
     // Render the view
     $layout = 'app.php';
     require_once __DIR__ . '/public/view/layouts/' . $layout;
-    
 } catch (Exception $e) {
     error_log($e->getMessage());
     http_response_code(500);

@@ -67,6 +67,8 @@
                   <option value="" disabled selected>Select User Type</option>
                   <option value="user">User</option>
                   <option value="supplier">Supplier</option>
+
+                  <option value="courier">Courier</option>
                 </select>
               </div>
               <!-- Password Field -->

@@ -11,7 +11,7 @@ class OrderProduct
         $this->conn = $db;
     }
 
-    // Create a new order with optional items
+
     public function create($data, $items = [])
     {
         $this->conn->begin_transaction();
@@ -58,7 +58,6 @@ class OrderProduct
         }
     }
 
-    // Read one order with user and items
     public function get($orderId)
     {
         $sql = "SELECT o.*, 
@@ -88,7 +87,37 @@ class OrderProduct
         return $order;
     }
 
-        // Read order items
+    // get order by order number
+    public function getByOrderNumber($orderNumber){
+
+        $sql = "SELECT o.*, 
+                       u.first_name, u.last_name, u.email AS user_email
+                FROM {$this->orderTable} o
+                LEFT JOIN {$this->userTable} u ON o.user_id = u.user_id
+                WHERE o.order_number = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("s", $orderNumber);
+        $stmt->execute();
+        $order = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        // Get order items
+        $sqlItems = "SELECT * FROM {$this->orderItemTable} WHERE order_id = ?";
+        $stmt = $this->conn->prepare($sqlItems);
+        $stmt->bind_param("i", $order['order_id']);
+        $stmt->execute();
+        $itemsResult = $stmt->get_result();
+        $items = [];
+
+        while ($item = $itemsResult->fetch_assoc()) {
+            $items[] = $item;
+        }
+
+        $order['items'] = $items;
+        return $order;
+    }
+
+
     public function getItems($order_id)
     {
         $sql = "SELECT * FROM {$this->orderItemTable} WHERE order_id = ?";

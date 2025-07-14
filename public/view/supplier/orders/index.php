@@ -447,7 +447,7 @@
                             <option value="cancelled">Cancelled</option>
                         </select>
                     </div>
-               
+
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <button type="submit" form="updateStatusForm" class="btn btn-primary" id="update-status-btn">Update Status</button>
                 </form>
@@ -529,7 +529,7 @@
                         <td>${order.total_amount}</td>
                         <td><span class="status-badge status-${order.status.toLowerCase()}">${order.status}</span></td>
                         <td>
-                            <button class="btn btn-sm btn-outline-primary action-btn" data-bs-toggle="modal" data-bs-target="#orderModal"
+                            <button class="btn btn-sm btn-outline-primary action-btn"
                                 onclick="getOrderDetails('${order.order_number}')">
                                 <i class="fas fa-eye"></i>
                             </button>
@@ -564,16 +564,53 @@
             params: {
                 order_number: orderNumber
             },
-            callback: (err, data) => {
+            callback: (err, res) => {
                 if (err) return console.error("Error fetching order details:", err);
-                console.log("Order details retrieved:", data);
+                console.log("Order details retrieved:", res);
 
-                // Populate the modal with order details
+                const data = res;
+
                 document.getElementById("orderModalLabel").textContent = `Order #${data.order_number}`;
-                // Update other fields in the modal as needed
+                const modalBody = document.querySelector("#orderModals .modal-body");
+                modalBody.innerHTML = `
+                <div class="row">
+                    <div class="col-md-8">
+                        <h5>Order Information</h5>
+                        <p><strong>Order Date:</strong> ${data.created_at}</p>
+                        <p><strong>Customer:</strong> ${data.first_name} ${data.last_name}</p>
+                        <p><strong>Email:</strong> ${data.user_email}</p>
+                        <p><strong>Phone:</strong> N/A</p>
+                        <p><strong>Status:</strong> 
+                            <span class="status-badge status-${data.status.toLowerCase()}">${data.status}</span>
+                        </p>
+                    </div>
+                    <div class="col-md-4">
+                        <h5>Order Summary</h5>
+                        <p><strong>Subtotal:</strong> ₱${data.subtotal}</p>
+                        <p><strong>Shipping Fee:</strong> ₱${data.shipping_fee}</p>
+                        <p><strong>Tax:</strong> ₱${data.tax}</p>
+                        <p><strong>Total Amount:</strong> <strong>₱${data.total_amount}</strong></p>
+                    </div>
+                </div>
+                <h5 class="mt-4">Items</h5>
+                <ul class="list-group">
+                    ${data.items.map(item => `
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Product ID:</strong> ${item.product_id}<br>
+                                Qty: ${item.quantity} × ₱${item.price}
+                            </div>
+                            <span class="badge bg-primary rounded-pill">₱${(item.quantity * parseFloat(item.price)).toFixed(2)}</span>
+                        </li>
+                    `).join("")}
+                </ul>
+            `;
+                const orderModal = new bootstrap.Modal(document.getElementById('orderModals'));
+                orderModal.show();
             }
         }).send();
     }
+
 
 
     onload = () => {

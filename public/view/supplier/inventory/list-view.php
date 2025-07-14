@@ -285,31 +285,30 @@
                 if (err) return console.error("Error fetching user data:", err);
                 console.log("User data retrieved:", data);
 
-                // update card header with total products
+        
                 const totalProducts = data.length;
                 const cardHeader = document.querySelector('.card-header h5');
                 cardHeader.innerHTML = `<i class="fas fa-box me-2"></i>Inventory Items (${totalProducts})`;
 
                 const statBadge = document.getElementById('stat');
                 statBadge.textContent = `${data.filter(product => product.status_db === 'active').length} active items`;
-                // update inventory stats
+     
                 const totalActive = data ? data.filter(product => product.status_db === 'active').length : 0;
                 const totalInactive = data ? data.filter(product => product.status_db === 'inactive').length : 0;
                 const totalLowStock = data ? data.filter(product => product.totalInventory < 10).length : 0;
 
                 const stats = document.querySelectorAll('.stat-card h3');
-                stats[0].textContent = totalProducts; // Total Products
-                stats[1].textContent = totalActive; // Active Products
+                stats[0].textContent = totalProducts; 
+                stats[1].textContent = totalActive;
 
 
-                stats[2].textContent = totalInactive; // Inactive Products
-                stats[3].textContent = totalLowStock; // Low Stock Items
+                stats[2].textContent = totalInactive;
+                stats[3].textContent = totalLowStock; 
 
 
 
-                // table 
                 const tableBody = document.querySelector('.inventory-table tbody');
-                tableBody.innerHTML = ''; // Clear existing rows
+                tableBody.innerHTML = '';
 
                 data.forEach(product => {
                     const row = document.createElement('tr');
@@ -319,7 +318,7 @@
                         <td>
                             <div class="d-flex align-items-center">
                                 <img src="public/images/products/${product.primary_image}" class="img-thumbnail me-2" style="width: 40px; height: 40px; object-fit: cover;">
-                                <span>${product.product_name}</span>
+                                <span>${product.product}</span>
                             </div>
                         </td>
                         <td>${product.sku}</td>

@@ -24,6 +24,12 @@
             } elseif ($role == 'admin') {
                 $badgeText = 'Administrator';
                 $badgeClass .= 'bg-danger';
+            }elseif ($role == 'courier') {
+                $badgeText = 'Courier';
+                $badgeClass .= 'bg-warning';
+            } else {
+                $badgeText = 'Unknown Role';
+                $badgeClass .= 'bg-secondary';
             }
             ?>
             <span class="<?php echo $badgeClass; ?>"><?php echo $badgeText; ?></span>
@@ -45,6 +51,7 @@
         $navItems = [
             'dashboard' => ['Dashboard', 'ri-dashboard-line'],
             'product-import' => ['Product Import', 'ri-download-line'],
+            'deliveries' => ['Deliveries', 'ri-truck-line'],
             'inventory' => ['Inventory', 'ri-archive-line'],
             'product' => ['Products', 'ri-product-hunt-line'],
             'category' => ['Categories', 'ri-list-check-2-line'],
@@ -58,7 +65,8 @@
         $allowedPages = [
             'user' => ['dashboard', 'product-import', 'inventory', 'orders', 'reports', 'support', 'feedback', 'settings'],
             'supplier' => ['dashboard', 'inventory', 'product', 'category', 'orders', 'settings'],
-            'admin' => ['dashboard', 'users', 'products', 'orders', 'reports', 'support', 'settings']
+            'admin' => ['dashboard', 'users', 'products', 'orders', 'reports', 'support', 'settings'],
+            'courier' => ['dashboard', 'deliveries', 'settings']
         ];
 
         foreach ($navItems as $key => [$label, $icon]) {

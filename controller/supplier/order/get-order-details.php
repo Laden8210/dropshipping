@@ -11,7 +11,19 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit;
 }
 
-$orders = $orderProductModel->getAll();
+$order_number = isset($_GET['order_number']) ? $_GET['order_number'] : null;
+if (empty($order_number)) {
+    http_response_code(400);
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Order number is required',
+        'data' => null,
+        'http_code' => 400
+    ]);
+    exit;
+}
+
+$orders = $orderProductModel->getByOrderNumber($order_number);
 if ($orders === false) {
     http_response_code(500);
     echo json_encode([
