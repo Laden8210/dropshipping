@@ -82,7 +82,7 @@ foreach ($request_body['items'] as $item) {
     }
 }
 
-// Generate order number if not provided
+
 if (empty($request_body['order_number'])) {
     $request_body['order_number'] = UIDGenerator::generateOrderNumber();
 }

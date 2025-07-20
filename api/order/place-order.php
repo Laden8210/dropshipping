@@ -53,6 +53,7 @@ try {
 
 
 
+// {"payment_method":"credit_card","subtotal":13008.55,"shipping":100,"tax":1561.0259999999998,"total":14669.576,"address_id":6,"products":[{"pid":23,"name":"Jenna Howe","price":13008.55,"quantity":1}]}
 
 if (
     !isset($request_body['payment_method']) ||
@@ -90,9 +91,16 @@ if (!isset($request_body['products']) || !is_array($request_body['products']) ||
     exit;
 }
 
-$order_number = UIDGenerator::generateOrderNumber();
+if (!isset($request_body['shipping_address_id']) || !is_numeric($request_body['shipping_address_id'])) {
+    http_response_code(400);
+    echo json_encode(['status' => 'error', 'message' => 'Invalid address ID']);
+    exit;
+}
 
-$data = $orderModel->createOrder($user_id, $order_number, $request_body);
+$order_number = UIDGenerator::generateOrderNumber();
+$tracking_number = UIDGenerator::generateTrackingNumber();
+
+$data = $orderModel->createOrder($user_id, $order_number, $tracking_number,$request_body);
 if ($data['status'] === 'success') {
     http_response_code(201);
     echo json_encode([

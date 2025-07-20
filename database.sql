@@ -190,8 +190,7 @@ create table order_status_history (
 
 CREATE TABLE user_shipping_address (
     address_id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    full_name VARCHAR(255) NOT NULL,
+    user_id CHAR(14) NOT NULL,
     address_line VARCHAR(255) NOT NULL,
     region VARCHAR(100) NOT NULL,
     city VARCHAR(100) NOT NULL,

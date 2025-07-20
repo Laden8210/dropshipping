@@ -472,7 +472,7 @@
                         const itemElement = document.createElement('div');
                         itemElement.className = 'd-flex align-items-center mb-4 pb-3 border-bottom';
                         itemElement.innerHTML = `
-                            <img src="public/images/products/${item.primary_image}" alt="Product">
+                            <img src="public/images/products/${item.primary_image   }" alt="Product">
                             <div class="flex-grow-1">
                                 <h6 class="mb-1">${item.product_name || 'Product'}</h6>
                                 <p class="mb-1 text-muted">SKU: ${item.sku || '-'}</p>
