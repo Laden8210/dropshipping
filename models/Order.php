@@ -1,4 +1,5 @@
 <?php
+require_once 'OrderStatusHistory.php';
 class Order
 {
     private $conn;
@@ -14,8 +15,6 @@ class Order
 
         try {
 
-
-            // Prepare and bind order insert
             $stmt = $this->conn->prepare("
                 INSERT INTO orders (
                     user_id, subtotal, shipping_fee, tax, total_amount,
@@ -61,6 +60,11 @@ class Order
                 }
             }
 
+            $orderStatusHistory = new OrderStatusHistory($this->conn);
+            if (!$orderStatusHistory->create($order_id, 'pending')) {
+                throw new Exception("Failed to create order status history.");
+            }
+
             $this->conn->commit();
 
             return [
@@ -79,7 +83,7 @@ class Order
 
     public function getOrderBy($order_number)
     {
-        // Fetch order only
+ 
         $sql = "
         SELECT 
             o.order_id,
@@ -118,6 +122,7 @@ class Order
         JOIN imported_product ip ON oi.product_id = ip.product_id
         WHERE oi.order_id = ?
     ";
+    
 
         $stmtItems = $this->conn->prepare($itemsSql);
         $stmtItems->bind_param("i", $order['order_id']);

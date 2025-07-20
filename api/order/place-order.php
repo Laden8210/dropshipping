@@ -53,7 +53,6 @@ try {
 
 
 
-// {"payment_method":"credit_card","subtotal":13008.55,"shipping":100,"tax":1561.0259999999998,"total":14669.576,"address_id":6,"products":[{"pid":23,"name":"Jenna Howe","price":13008.55,"quantity":1}]}
 
 if (
     !isset($request_body['payment_method']) ||

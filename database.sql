@@ -176,16 +176,24 @@ create table order_payments (
     CONSTRAINT fk_order_payments_order FOREIGN KEY (order_id) REFERENCES orders(order_id)
 );
 
-create table order_status_history (
+CREATE TABLE order_status_history (
     status_history_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     order_id BIGINT NOT NULL,
-    status ENUM('pending', 'completed', 'cancelled', 'refunded', 'failed', 'in_progress', 'shipped', 'delivered', 'processing') NOT NULL,
-    changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status ENUM(
+        'pending',
+        'processing',
+        'shipped',
+        'delivered',
+        'completed',
+        'cancelled',
+        'refunded',
+        'failed'
+    ) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
     CONSTRAINT fk_order_status_history_order FOREIGN KEY (order_id) REFERENCES orders(order_id)
 );
+
 
 
 CREATE TABLE user_shipping_address (

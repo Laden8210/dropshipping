@@ -1,3 +1,33 @@
+<style>
+.timeline-step {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.timeline-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+.timeline-step.completed .timeline-icon {
+    background-color: #28a745;
+}
+.timeline-step.active .timeline-icon {
+    background-color: #ffc107;
+}
+.timeline-step.pending .timeline-icon {
+    background-color: #6c757d;
+}
+.timeline-content p {
+    margin: 0;
+}
+</style>
+
 <div class="main-container" id="main-container">
     <div class="header-section text-center">
 
@@ -271,7 +301,7 @@
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-md-6">
-                                <p><strong>Order Date:</strong> <span class="order-info-date"></span></p>
+                                        <p><strong>Order Date:</strong> <span class="order-info-date"></span></p>
 
                                         <p><strong>Customer:</strong> John Smith</p>
                                         <p><strong>Email:</strong> john.smith@example.com</p>
@@ -286,7 +316,18 @@
                             </div>
                         </div>
 
-    
+
+                        <!-- Order Timeline -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-white">
+                                <h6 class="mb-0"><i class="fas fa-shipping-fast me-2"></i>Order Timeline</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="order-timeline order-status-history d-flex flex-column gap-4"></div>
+                            </div>
+                        </div>
+
+
                         <!-- Order Items -->
                         <div class="card mb-4">
                             <div class="card-header bg-white">
@@ -294,7 +335,7 @@
                             </div>
                             <div class="card-body order-items">
 
-                               
+
                             </div>
                         </div>
                     </div>
@@ -315,7 +356,7 @@
                                 <span>Tax:</span>
                                 <span>$19.92</span>
                             </div>
-                      
+
                             <div class="summary-row mt-3 pt-2 summary-total">
                                 <span>Total:</span>
                                 <span>$268.86</span>
@@ -335,12 +376,7 @@
                         <div class="order-summary-card">
                             <h6 class="mb-3"><i class="fas fa-cogs me-2"></i>Order Actions</h6>
                             <div class="d-grid gap-2">
-                                <button class="btn btn-primary mb-2">
-                                    <i class="fas fa-truck me-2"></i>Mark as Shipped
-                                </button>
-                                <button class="btn btn-outline-primary mb-2">
-                                    <i class="fas fa-edit me-2"></i>Update Status
-                                </button>
+                       
                                 <button class="btn btn-outline-warning mb-2">
                                     <i class="fas fa-print me-2"></i>Print Invoice
                                 </button>
@@ -394,7 +430,7 @@
                 if (err) return console.error("Error fetching user data:", err);
                 console.log("User data retrieved:", data);
 
-                // table 
+               
 
                 const tableBody = document.querySelector(".order-table tbody");
 
@@ -402,6 +438,15 @@
 
                 const newOrdersCount = document.getElementById("new-orders-count");
                 newOrdersCount.textContent = `${data.length} new orders`;
+
+                const totalOrderCount = document.querySelector(".order-stats .stat-card:nth-child(1) h3");
+                totalOrderCount.textContent = data.length;
+                const pendingOrderCount = document.querySelector(".order-stats .stat-card:nth-child(2) h3");
+                pendingOrderCount.textContent = data.filter(order => order.status.toLowerCase() === 'pending').length;
+                const processingOrderCount = document.querySelector(".order-stats .stat-card:nth-child(3) h3");
+                processingOrderCount.textContent = data.filter(order => order.status.toLowerCase() === 'processing').length;
+                const completedOrderCount = document.querySelector(".order-stats .stat-card:nth-child(4) h3");
+                completedOrderCount.textContent = data.filter(order => order.status.toLowerCase() === 'completed').length;
 
                 data.forEach(order => {
                     const row = document.createElement("tr");
@@ -498,18 +543,18 @@
                     if (summaryTotal) summaryTotal.textContent = `₱${parseFloat(data.total_amount).toFixed(2)}`;
                 }
 
-                // Shipping Address (if available)
+                const shippingAddress = data.shipping_address || {};
                 const shippingCard = document.querySelectorAll('.order-summary-card')[1];
                 if (shippingCard) {
                     shippingCard.innerHTML = `
                         <h6 class="mb-3"><i class="fas fa-map-marker-alt me-2"></i>Shipping Address</h6>
-                        <p class="mb-1">${customerName}</p>
-                        <p class="mb-1">N/A</p>
-                        <p class="mb-1"></p>
-                        <p class="mb-1"></p>
-                        <p class="mb-0"></p>
-                        <p class="mt-2 mb-0"><i class="fas fa-phone me-2"></i>N/A</p>
+                        <p class="mb-1"><i class="fas fa-user me-2"></i><strong>Name:</strong> ${customerName}</p>
+                        <p class="mb-1"><i class="fas fa-home me-2"></i><strong>Address:</strong> ${shippingAddress.address_line || '-'}</p>
+                        <p class="mb-1"><i class="fas fa-city me-2"></i><strong>City/Region:</strong> ${shippingAddress.city || '-'}, ${shippingAddress.region || '-'}</p>
+                        <p class="mb-1"><i class="fas fa-map-pin me-2"></i><strong>Barangay:</strong> ${shippingAddress.brgy || '-'}</p>
+                        <p class="mb-0"><i class="fas fa-mail-bulk me-2"></i><strong>Postal Code:</strong> ${shippingAddress.postal_code || '-'}</p>
                     `;
+
                 }
 
                 // Order Information (left column)
@@ -531,6 +576,10 @@
                     `;
                 }
 
+                // display order status history
+                const statusHistory = data.status_history || [];
+                renderStatusTimeline(statusHistory);
+
 
 
                 // Show modal
@@ -539,6 +588,45 @@
             }
         }).send();
     }
+
+    function renderStatusTimeline(statusHistory) {
+        const container = document.querySelector('.order-status-history');
+        if (!container) return;
+
+        container.innerHTML = "";
+
+        const allStatuses = ['pending', 'processing', 'shipped', 'delivered', 'completed']; // expected flow
+        const completedStatuses = statusHistory.map(s => s.status);
+        const latestStatus = completedStatuses[completedStatuses.length - 1];
+
+        allStatuses.forEach((status, index) => {
+            const statusData = statusHistory.find(s => s.status === status);
+            const isCompleted = completedStatuses.includes(status);
+            const isActive = latestStatus === status && !['completed', 'cancelled', 'refunded', 'failed'].includes(status);
+
+            const statusClass = isCompleted ? 'completed' : isActive ? 'active' : 'pending';
+            const dateText = statusData ? new Date(statusData.created_at).toLocaleString() : 'Not yet occurred';
+
+            const item = document.createElement('div');
+            item.className = `timeline-step ${statusClass}`;
+            item.innerHTML = `
+            <div class="timeline-icon">
+                <i class="fas ${isCompleted ? 'fa-check' : isActive ? 'fa-spinner fa-spin' : 'fa-clock'}"></i>
+            </div>
+            <div class="timeline-content">
+                <p class="mb-1"><strong>${capitalize(status)}</strong></p>
+                <p class="text-muted mb-0">${dateText}</p>
+            </div>
+        `;
+            container.appendChild(item);
+        });
+    }
+
+    // Helper
+    function capitalize(str) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
 
     function formatDateTime(datetimeStr) {
         const d = new Date(datetimeStr);
