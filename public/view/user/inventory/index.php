@@ -327,18 +327,17 @@
                 const totalLowStock = data.filter(product => product.totalInventory < 10).length;
 
                 const stats = document.querySelectorAll('.stat-card h3');
-                stats[0].textContent = totalProducts; // Total Products
-                stats[1].textContent = totalActive; // Active Products
+                stats[0].textContent = totalProducts; 
+                stats[1].textContent = totalActive; 
 
 
-                stats[2].textContent = totalInactive; // Inactive Products
-                stats[3].textContent = totalLowStock; // Low Stock Items
+                stats[2].textContent = totalInactive; 
+                stats[3].textContent = totalLowStock; 
 
 
 
-                // table 
                 const tableBody = document.querySelector('.inventory-table tbody');
-                tableBody.innerHTML = ''; // Clear existing rows
+                tableBody.innerHTML = '';
 
                 data.forEach(product => {
                     const row = document.createElement('tr');

@@ -11,7 +11,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit;
 }
 
-$orders = $orderProductModel->getAll();
+$orderNumber = $_GET['order_number'] ?? null;
+$orders = $orderProductModel->getByOrderNumber($orderNumber);
 if ($orders === false) {
     http_response_code(500);
     echo json_encode([

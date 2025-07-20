@@ -87,9 +87,9 @@ class OrderProduct
         return $order;
     }
 
-    // get order by order number
-    public function getByOrderNumber($orderNumber){
 
+    public function getByOrderNumber($orderNumber)
+    {
         $sql = "SELECT o.*, 
                        u.first_name, u.last_name, u.email AS user_email
                 FROM {$this->orderTable} o
@@ -101,8 +101,29 @@ class OrderProduct
         $order = $stmt->get_result()->fetch_assoc();
         $stmt->close();
 
-        // Get order items
-        $sqlItems = "SELECT * FROM {$this->orderItemTable} WHERE order_id = ?";
+        if (!$order) {
+            return null;
+        }
+
+     
+        $sqlItems = "SELECT oi.*, 
+                            p.product_name, p.product_sku, p.product_category, p.description, 
+                            pi.image_url AS primary_image, 
+                            pc.category_name
+                     FROM {$this->orderItemTable} oi
+                     LEFT JOIN products p ON oi.product_id = p.product_id
+                     LEFT JOIN (
+                         SELECT pi1.product_id, pi1.image_url
+                         FROM product_images pi1
+                         WHERE pi1.is_primary = 1
+                         AND pi1.image_id = (
+                             SELECT MIN(pi2.image_id)
+                             FROM product_images pi2
+                             WHERE pi2.product_id = pi1.product_id AND pi2.is_primary = 1
+                         )
+                     ) pi ON p.product_id = pi.product_id
+                     LEFT JOIN product_categories pc ON p.product_category = pc.category_id
+                     WHERE oi.order_id = ?";
         $stmt = $this->conn->prepare($sqlItems);
         $stmt->bind_param("i", $order['order_id']);
         $stmt->execute();

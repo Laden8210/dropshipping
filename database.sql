@@ -153,16 +153,38 @@ CREATE TABLE orders (
     shipping_fee DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     tax DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     total_amount DECIMAL(10, 2) NOT NULL,
-    status ENUM('pending', 'completed', 'cancelled') DEFAULT 'pending',
     order_number VARCHAR(50) NOT NULL UNIQUE,
-    payment_method ENUM('credit_card', 'paypal', 'bank_transfer', 'cod') NOT NULL,
     tracking_number VARCHAR(100) DEFAULT NULL,
     shipping_address_id BIGINT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
     CONSTRAINT fk_orders_user FOREIGN KEY (user_id) REFERENCES users(user_id),
     CONSTRAINT fk_orders_shipping_address FOREIGN KEY (shipping_address_id) REFERENCES user_shipping_address(address_id)
+);
+
+create table order_payments (
+    payment_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    order_id BIGINT NOT NULL,
+    payment_method ENUM('credit_card', 'paypal', 'bank_transfer', 'cash_on_delivery') NOT NULL,
+    account_number VARCHAR(100) DEFAULT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    status ENUM('pending', 'completed', 'failed', 'refunded') DEFAULT 'pending',
+    transaction_id VARCHAR(100) DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_order_payments_order FOREIGN KEY (order_id) REFERENCES orders(order_id)
+);
+
+create table order_status_history (
+    status_history_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    order_id BIGINT NOT NULL,
+    status ENUM('pending', 'completed', 'cancelled', 'refunded', 'failed', 'in_progress', 'shipped', 'delivered', 'processing') NOT NULL,
+    changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_order_status_history_order FOREIGN KEY (order_id) REFERENCES orders(order_id)
 );
 
 

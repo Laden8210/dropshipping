@@ -6,7 +6,7 @@ require_once '../../models/index.php';
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
-$JWT_SECRET_KEY = "your_jwt_secret_key"; 
+$JWT_SECRET_KEY = "dropshipping_8210"; 
 if (!$JWT_SECRET_KEY) {
 
     echo json_encode(['status' => 'error', 'message' => 'JWT secret key not set', 'http_code' => 500]);

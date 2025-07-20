@@ -41,7 +41,7 @@ if (!$authHeader || !preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
 $jwt = $matches[1];
 
 // Validate JWT token
-$secret_key = "your_jwt_secret_key";
+$secret_key = "dropshipping_8210";
 try {
     $decoded = JWT::decode($jwt, new Key(trim($secret_key), 'HS256'));
     $user_id = $decoded->sub;

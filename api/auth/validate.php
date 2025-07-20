@@ -4,7 +4,7 @@ require '../../vendor/autoload.php';
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
-$secret_key = "your_jwt_secret_key";
+$secret_key = "dropshipping_8210";
 
 // Set headers
 header('Content-Type: application/json; charset=utf-8');
