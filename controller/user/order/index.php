@@ -33,6 +33,7 @@ $request = preg_replace('/[^a-zA-Z0-9_-]/', '', $request);
 $request = $request ?: '';
 $action = isset($_GET['action']) ? $_GET['action'] : '';
 
+
 switch ($request) {
 
 
@@ -44,11 +45,30 @@ switch ($request) {
             case 'get-order-details':
                 require_once 'get-order-details.php';
                 break;
-    
+            case 'cancel-order':
+                require_once 'cancel-order.php';
+                break;
+
             default:
         }
         break;
-    
+    case 'POST':
+        switch ($action) {
+            case 'create-order':
+                require_once 'create-order.php';
+                break;
+            case 'update-order':
+                require_once 'update-order.php';
+                break;
+
+            case 'print-invoice':
+                require_once 'print-invoice.php';
+                break;
+
+            default:
+        }
+        break;
+
     default:
         http_response_code(404);
         echo json_encode(['error' => 'Invalid request']);

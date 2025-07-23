@@ -1,31 +1,36 @@
 <style>
-.timeline-step {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-.timeline-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background-color: #ddd;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-}
-.timeline-step.completed .timeline-icon {
-    background-color: #28a745;
-}
-.timeline-step.active .timeline-icon {
-    background-color: #ffc107;
-}
-.timeline-step.pending .timeline-icon {
-    background-color: #6c757d;
-}
-.timeline-content p {
-    margin: 0;
-}
+    .timeline-step {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .timeline-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: #ddd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+
+    .timeline-step.completed .timeline-icon {
+        background-color: #28a745;
+    }
+
+    .timeline-step.active .timeline-icon {
+        background-color: #ffc107;
+    }
+
+    .timeline-step.pending .timeline-icon {
+        background-color: #6c757d;
+    }
+
+    .timeline-content p {
+        margin: 0;
+    }
 </style>
 
 <div class="main-container" id="main-container">
@@ -376,11 +381,11 @@
                         <div class="order-summary-card">
                             <h6 class="mb-3"><i class="fas fa-cogs me-2"></i>Order Actions</h6>
                             <div class="d-grid gap-2">
-                       
-                                <button class="btn btn-outline-warning mb-2">
+
+                                <button class="btn btn-outline-warning mb-2" id="printInvoiceBtn" data-order-id="ORD-2023-00142">
                                     <i class="fas fa-print me-2"></i>Print Invoice
                                 </button>
-                                <button class="btn btn-outline-danger">
+                                <button class="btn btn-outline-danger" id="cancelOrderBtn" data-order-id="ORD-2023-00142">
                                     <i class="fas fa-times-circle me-2"></i>Cancel Order
                                 </button>
                             </div>
@@ -398,8 +403,43 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Simulated order timeline interaction
     document.addEventListener('DOMContentLoaded', function() {
+
+        const printBtn = document.getElementById("printInvoiceBtn");
+        const cancelBtn = document.getElementById("cancelOrderBtn");
+
+        printBtn.addEventListener("click", function() {
+            const orderId = this.getAttribute("data-order-id");
+
+        });
+
+ 
+        cancelBtn.addEventListener("click", function() {
+            const orderId = this.getAttribute("data-order-id");
+            // send a request to cancel the order
+            new GetRequest({
+                getUrl: "controller/user/order?action=cancel-order",
+                params: {
+                    order_number: orderId
+                },
+                callback: (err, res) => {
+                    if (err) {
+                        console.error("Error cancelling order:", err);
+                        return;
+                    }
+                    // sweet alert 
+                    Swal.fire({
+                        title: 'Order Cancelled',
+                        text: `Order #${orderId} has been cancelled successfully.`,
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+    
+                       window.location.reload();
+                    });
+                }
+            }).send();
+        });
         const timelineSteps = document.querySelectorAll('.timeline-step');
 
         timelineSteps.forEach(step => {
@@ -430,7 +470,7 @@
                 if (err) return console.error("Error fetching user data:", err);
                 console.log("User data retrieved:", data);
 
-               
+
 
                 const tableBody = document.querySelector(".order-table tbody");
 
@@ -450,7 +490,7 @@
 
                 data.forEach(order => {
                     const row = document.createElement("tr");
-                    // count the item quantity
+
                     order.items_count = order.items ?
                         order.items.reduce((sum, item) => sum + parseInt(item.quantity, 10), 0) :
                         0;
@@ -506,9 +546,9 @@
                 document.getElementById('orderModalLabel').textContent = `Order #${data.order_number}`;
                 document.querySelector('.order-info-date').textContent = formatDateTime(data.created_at);
 
-                // Customer info
+
                 const customerName = `${data.first_name} ${data.last_name}`;
-                // Order Items
+
                 const orderModalElement = document.getElementById('orderModal');
                 const orderItemsContainer = orderModalElement.querySelector('.order-items');
                 if (orderItemsContainer) {
@@ -529,7 +569,7 @@
                     });
                 }
 
-                // Order Summary
+
                 const summaryCard = document.querySelectorAll('.order-summary-card')[0];
                 if (summaryCard) {
                     const summaryRows = summaryCard.querySelectorAll('.summary-row');
@@ -537,7 +577,7 @@
                         summaryRows[0].children[1].textContent = `₱${parseFloat(data.subtotal).toFixed(2)}`;
                         summaryRows[1].children[1].textContent = `₱${parseFloat(data.shipping_fee).toFixed(2)}`;
                         summaryRows[2].children[1].textContent = `₱${parseFloat(data.tax).toFixed(2)}`;
-                        // Discount left as-is (static)
+
                     }
                     const summaryTotal = summaryCard.querySelector('.summary-total span:last-child');
                     if (summaryTotal) summaryTotal.textContent = `₱${parseFloat(data.total_amount).toFixed(2)}`;
@@ -576,13 +616,17 @@
                     `;
                 }
 
-                // display order status history
+                // get the buttons
+                const printBtn = document.getElementById("printInvoiceBtn");
+                const cancelBtn = document.getElementById("cancelOrderBtn");
+
+                printBtn.setAttribute("data-order-id", data.order_number);
+                cancelBtn.setAttribute("data-order-id", data.order_number);
+
+
                 const statusHistory = data.status_history || [];
                 renderStatusTimeline(statusHistory);
 
-
-
-                // Show modal
                 const orderModal = new bootstrap.Modal(document.getElementById('orderModal'));
                 orderModal.show();
             }

@@ -53,50 +53,40 @@
             </button>
         </div>
         <div class="card-body">
-            <form>
+
                 <div class="row g-3">
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <label for="order-id" class="form-label">Order ID</label>
                         <input type="text" class="form-control" id="order-id" placeholder="Order #">
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <label for="customer-name" class="form-label">Customer Name</label>
                         <input type="text" class="form-control" id="customer-name" placeholder="Customer name">
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <label for="order-status" class="form-label">Order Status</label>
                         <select class="form-select" id="order-status">
                             <option value="">All Statuses</option>
-                            <option>Pending</option>
-                            <option>Processing</option>
-                            <option>Shipped</option>
-                            <option>Delivered</option>
-                            <option>Cancelled</option>
+                            <option value="pending">Pending</option>
+                            <option value="processing">Processing</option>
+                            <option value="shipped">Shipped</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="cancelled">Cancelled</option>
                         </select>
                     </div>
-                    <div class="col-md-3">
-                        <label for="date-range" class="form-label">Date Range</label>
-                        <select class="form-select" id="date-range">
-                            <option>All Time</option>
-                            <option>Today</option>
-                            <option>Last 7 Days</option>
-                            <option>Last 30 Days</option>
-                            <option>This Month</option>
-                            <option>Custom Range</option>
-                        </select>
-                    </div>
+                 
                     <div class="col-md-12 d-flex justify-content-end">
                         <div class="d-flex gap-2">
-                            <button type="reset" class="btn btn-outline-secondary px-4">
+                            <button type="button" onclick="clearFilters()" class="btn btn-outline-secondary px-4">
                                 <i class="fas fa-redo me-2"></i>Clear
                             </button>
-                            <button type="submit" class="btn btn-primary px-4">
+                            <button type="button" onclick="applyFilters()" class="btn btn-primary px-4">
                                 <i class="fas fa-search me-2"></i>Apply Filters
                             </button>
                         </div>
                     </div>
                 </div>
-            </form>
+ 
         </div>
     </div>
 
@@ -124,111 +114,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>#ORD-2023-00142</td>
-                            <td>
-                                <div class="customer-info">
-                                    <div class="customer-avatar">JS</div>
-                                    <div>John Smith</div>
-                                </div>
-                            </td>
-                            <td>Oct 12, 2023</td>
-                            <td>3 items</td>
-                            <td>$248.95</td>
-                            <td><span class="status-badge status-processing">Processing</span></td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary action-btn" data-bs-toggle="modal" data-bs-target="#orderModal">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-info action-btn">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>#ORD-2023-00141</td>
-                            <td>
-                                <div class="customer-info">
-                                    <div class="customer-avatar">MJ</div>
-                                    <div>Mary Johnson</div>
-                                </div>
-                            </td>
-                            <td>Oct 11, 2023</td>
-                            <td>2 items</td>
-                            <td>$129.99</td>
-                            <td><span class="status-badge status-shipped">Shipped</span></td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary action-btn" data-bs-toggle="modal" data-bs-target="#orderModal">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-info action-btn">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>#ORD-2023-00140</td>
-                            <td>
-                                <div class="customer-info">
-                                    <div class="customer-avatar">RW</div>
-                                    <div>Robert Williams</div>
-                                </div>
-                            </td>
-                            <td>Oct 10, 2023</td>
-                            <td>1 item</td>
-                            <td>$89.95</td>
-                            <td><span class="status-badge status-pending">Pending</span></td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary action-btn" data-bs-toggle="modal" data-bs-target="#orderModal">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-info action-btn">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>#ORD-2023-00139</td>
-                            <td>
-                                <div class="customer-info">
-                                    <div class="customer-avatar">ED</div>
-                                    <div>Emily Davis</div>
-                                </div>
-                            </td>
-                            <td>Oct 9, 2023</td>
-                            <td>5 items</td>
-                            <td>$421.50</td>
-                            <td><span class="status-badge status-delivered">Delivered</span></td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary action-btn" data-bs-toggle="modal" data-bs-target="#orderModal">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-info action-btn">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>#ORD-2023-00138</td>
-                            <td>
-                                <div class="customer-info">
-                                    <div class="customer-avatar">TB</div>
-                                    <div>Thomas Brown</div>
-                                </div>
-                            </td>
-                            <td>Oct 8, 2023</td>
-                            <td>2 items</td>
-                            <td>$75.25</td>
-                            <td><span class="status-badge status-cancelled">Cancelled</span></td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary action-btn" data-bs-toggle="modal" data-bs-target="#orderModal">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-info action-btn">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                            </td>
-                        </tr>
+                  
                     </tbody>
                 </table>
             </div>
@@ -253,7 +139,7 @@
 </div>
 
 <!-- Order Detail Modal -->
-<div class="modal fade" id="orderModals" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
+<div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
@@ -271,7 +157,8 @@
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <p><strong>Order Date:</strong> Oct 12, 2023 14:25</p>
+                                        <p><strong>Order Date:</strong> <span class="order-info-date"></span></p>
+
                                         <p><strong>Customer:</strong> John Smith</p>
                                         <p><strong>Email:</strong> john.smith@example.com</p>
                                         <p><strong>Phone:</strong> (555) 123-4567</p>
@@ -285,80 +172,26 @@
                             </div>
                         </div>
 
+
                         <!-- Order Timeline -->
                         <div class="card mb-4">
                             <div class="card-header bg-white">
                                 <h6 class="mb-0"><i class="fas fa-shipping-fast me-2"></i>Order Timeline</h6>
                             </div>
                             <div class="card-body">
-                                <div class="order-timeline">
-                                    <div class="timeline-step completed">
-                                        <div class="timeline-content">
-                                            <p class="mb-1"><strong>Order Placed</strong></p>
-                                            <p class="text-muted mb-0">Oct 12, 2023 14:25</p>
-                                        </div>
-                                    </div>
-                                    <div class="timeline-step completed">
-                                        <div class="timeline-content">
-                                            <p class="mb-1"><strong>Payment Confirmed</strong></p>
-                                            <p class="text-muted mb-0">Oct 12, 2023 14:30</p>
-                                        </div>
-                                    </div>
-                                    <div class="timeline-step active">
-                                        <div class="timeline-content">
-                                            <p class="mb-1"><strong>Processing</strong></p>
-                                            <p class="text-muted mb-0">Currently in progress</p>
-                                        </div>
-                                    </div>
-                                    <div class="timeline-step">
-                                        <div class="timeline-content">
-                                            <p class="mb-1"><strong>Shipped</strong></p>
-                                            <p class="text-muted mb-0">Not yet shipped</p>
-                                        </div>
-                                    </div>
-                                    <div class="timeline-step">
-                                        <div class="timeline-content">
-                                            <p class="mb-1"><strong>Delivered</strong></p>
-                                            <p class="text-muted mb-0">Estimated delivery: Oct 18, 2023</p>
-                                        </div>
-                                    </div>
-                                </div>
+                                <div class="order-timeline order-status-history d-flex flex-column gap-4"></div>
                             </div>
                         </div>
+
 
                         <!-- Order Items -->
                         <div class="card mb-4">
                             <div class="card-header bg-white">
                                 <h6 class="mb-0"><i class="fas fa-box-open me-2"></i>Order Items</h6>
                             </div>
-                            <div class="card-body">
-                                <div class="d-flex align-items-center mb-4 pb-3 border-bottom order-items">
-                                    <img src="https://via.placeholder.com/150/4361ee/ffffff?text=Headphones" alt="Product">
-                                    <div class="flex-grow-1">
-                                        <h6 class="mb-1">Wireless Bluetooth Headphones Pro</h6>
-                                        <p class="mb-1 text-muted">SKU: HD-2023-PRO</p>
-                                        <p class="mb-0">Qty: 1 × $89.99</p>
-                                    </div>
-                                    <div class="fw-bold">$89.99</div>
-                                </div>
-                                <div class="d-flex align-items-center mb-4 pb-3 border-bottom order-items">
-                                    <img src="https://via.placeholder.com/150/3f37c9/ffffff?text=Smartwatch" alt="Product">
-                                    <div class="flex-grow-1">
-                                        <h6 class="mb-1">Smart Fitness Tracker Watch</h6>
-                                        <p class="mb-1 text-muted">SKU: SW-FT-2023</p>
-                                        <p class="mb-0">Qty: 1 × $129.99</p>
-                                    </div>
-                                    <div class="fw-bold">$129.99</div>
-                                </div>
-                                <div class="d-flex align-items-center order-items">
-                                    <img src="https://via.placeholder.com/150/4cc9f0/ffffff?text=Charger" alt="Product">
-                                    <div class="flex-grow-1">
-                                        <h6 class="mb-1">Fast Wireless Charger</h6>
-                                        <p class="mb-1 text-muted">SKU: CHG-WL-15W</p>
-                                        <p class="mb-0">Qty: 1 × $28.97</p>
-                                    </div>
-                                    <div class="fw-bold">$28.97</div>
-                                </div>
+                            <div class="card-body order-items">
+
+
                             </div>
                         </div>
                     </div>
@@ -379,10 +212,7 @@
                                 <span>Tax:</span>
                                 <span>$19.92</span>
                             </div>
-                            <div class="summary-row">
-                                <span>Discount:</span>
-                                <span class="text-danger">-$10.00</span>
-                            </div>
+
                             <div class="summary-row mt-3 pt-2 summary-total">
                                 <span>Total:</span>
                                 <span>$268.86</span>
@@ -402,16 +232,11 @@
                         <div class="order-summary-card">
                             <h6 class="mb-3"><i class="fas fa-cogs me-2"></i>Order Actions</h6>
                             <div class="d-grid gap-2">
-                                <button class="btn btn-primary mb-2">
-                                    <i class="fas fa-truck me-2"></i>Mark as Shipped
-                                </button>
-                                <button class="btn btn-outline-primary mb-2">
-                                    <i class="fas fa-edit me-2"></i>Update Status
-                                </button>
-                                <button class="btn btn-outline-warning mb-2">
+
+                                <button class="btn btn-outline-warning mb-2" id="printInvoiceBtn" data-order-id="ORD-2023-00142">
                                     <i class="fas fa-print me-2"></i>Print Invoice
                                 </button>
-                                <button class="btn btn-outline-danger">
+                                <button class="btn btn-outline-danger" id="cancelOrderBtn" data-order-id="ORD-2023-00142">
                                     <i class="fas fa-times-circle me-2"></i>Cancel Order
                                 </button>
                             </div>
@@ -421,7 +246,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save Changes</button>
+            
             </div>
         </div>
     </div>
@@ -486,20 +311,21 @@
     });
 
 
-    window.viewProduct = (keyword, sort_by) => {
+    window.viewProduct = (order_number, customer_name, order_status) => {
         new GetRequest({
             getUrl: "controller/supplier/order?action=get-orders",
             params: {
-                keyword,
+                order_number: order_number || "",
+                customer_name: customer_name || "",
+                order_status: order_status || "",
 
-                status,
 
             },
             callback: (err, data) => {
                 if (err) return console.error("Error fetching user data:", err);
                 console.log("User data retrieved:", data);
 
-                // table 
+            
 
                 const tableBody = document.querySelector(".order-table tbody");
 
@@ -507,6 +333,17 @@
 
                 const newOrdersCount = document.getElementById("new-orders-count");
                 newOrdersCount.textContent = `${data.length} new orders`;
+
+                // card kpi
+                const totalOrders = data.length;
+                const pendingOrders = data.filter(order => order.status === 'pending').length;
+                const processingOrders = data.filter(order => order.status === 'processing').length;
+                const completedOrders = data.filter(order => order.status === 'completed').length;
+                document.querySelector('.stat-card:nth-child(1) h3').textContent = totalOrders;
+                document.querySelector('.stat-card:nth-child(2) h3').textContent = pendingOrders;
+                document.querySelector('.stat-card:nth-child(3) h3').textContent = processingOrders;
+                document.querySelector('.stat-card:nth-child(4) h3').textContent = completedOrders;
+
 
                 data.forEach(order => {
                     const row = document.createElement("tr");
@@ -537,10 +374,7 @@
                                 <i class="fas fa-edit"></i>
                                 Edit
                             </button>
-                            <button class="btn btn-sm btn-outline-danger action-btn">
-                                <i class="fas fa-times-circle"></i>
-                                Cancel
-                            </button>
+                
                         </td>
                     `;
 
@@ -558,6 +392,7 @@
         updateStatusModal.show();
     }
 
+      // Function to fetch order details and populate the modal
     function getOrderDetails(orderNumber) {
         new GetRequest({
             getUrl: "controller/supplier/order?action=get-order-details",
@@ -565,58 +400,192 @@
                 order_number: orderNumber
             },
             callback: (err, res) => {
-                if (err) return console.error("Error fetching order details:", err);
-                console.log("Order details retrieved:", res);
+                if (err) {
+                    console.error("Error fetching order details:", err);
+                    return;
+                }
+                const data = res.data || res;
+                // Populate modal with order details
+                document.getElementById('orderModalLabel').textContent = `Order #${data.order_number}`;
+                document.querySelector('.order-info-date').textContent = formatDateTime(data.created_at);
 
-                const data = res;
 
-                document.getElementById("orderModalLabel").textContent = `Order #${data.order_number}`;
-                const modalBody = document.querySelector("#orderModals .modal-body");
-                modalBody.innerHTML = `
-                <div class="row">
-                    <div class="col-md-8">
-                        <h5>Order Information</h5>
-                        <p><strong>Order Date:</strong> ${data.created_at}</p>
-                        <p><strong>Customer:</strong> ${data.first_name} ${data.last_name}</p>
+                const customerName = `${data.first_name} ${data.last_name}`;
+
+                const orderModalElement = document.getElementById('orderModal');
+                const orderItemsContainer = orderModalElement.querySelector('.order-items');
+                if (orderItemsContainer) {
+                    orderItemsContainer.innerHTML = "";
+                    (data.items || []).forEach((item, idx) => {
+                        const itemElement = document.createElement('div');
+                        itemElement.className = 'd-flex align-items-center mb-4 pb-3 border-bottom';
+                        itemElement.innerHTML = `
+                            <img src="public/images/products/${item.primary_image   }" alt="Product">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">${item.product_name || 'Product'}</h6>
+                                <p class="mb-1 text-muted">SKU: ${item.sku || '-'}</p>
+                                <p class="mb-0">Qty: ${item.quantity} × ₱${parseFloat(item.price).toFixed(2)}</p>
+                            </div>
+                            <div class="fw-bold">₱${(parseFloat(item.quantity) * parseFloat(item.price)).toFixed(2)}</div>
+                        `;
+                        orderItemsContainer.appendChild(itemElement);
+                    });
+                }
+
+
+                const summaryCard = document.querySelectorAll('.order-summary-card')[0];
+                if (summaryCard) {
+                    const summaryRows = summaryCard.querySelectorAll('.summary-row');
+                    if (summaryRows.length >= 4) {
+                        summaryRows[0].children[1].textContent = `₱${parseFloat(data.subtotal).toFixed(2)}`;
+                        summaryRows[1].children[1].textContent = `₱${parseFloat(data.shipping_fee).toFixed(2)}`;
+                        summaryRows[2].children[1].textContent = `₱${parseFloat(data.tax).toFixed(2)}`;
+
+                    }
+                    const summaryTotal = summaryCard.querySelector('.summary-total span:last-child');
+                    if (summaryTotal) summaryTotal.textContent = `₱${parseFloat(data.total_amount).toFixed(2)}`;
+                }
+
+                const shippingAddress = data.shipping_address || {};
+                const shippingCard = document.querySelectorAll('.order-summary-card')[1];
+                if (shippingCard) {
+                    shippingCard.innerHTML = `
+                        <h6 class="mb-3"><i class="fas fa-map-marker-alt me-2"></i>Shipping Address</h6>
+                        <p class="mb-1"><i class="fas fa-user me-2"></i><strong>Name:</strong> ${customerName}</p>
+                        <p class="mb-1"><i class="fas fa-home me-2"></i><strong>Address:</strong> ${shippingAddress.address_line || '-'}</p>
+                        <p class="mb-1"><i class="fas fa-city me-2"></i><strong>City/Region:</strong> ${shippingAddress.city || '-'}, ${shippingAddress.region || '-'}</p>
+                        <p class="mb-1"><i class="fas fa-map-pin me-2"></i><strong>Barangay:</strong> ${shippingAddress.brgy || '-'}</p>
+                        <p class="mb-0"><i class="fas fa-mail-bulk me-2"></i><strong>Postal Code:</strong> ${shippingAddress.postal_code || '-'}</p>
+                    `;
+
+                }
+
+                // Order Information (left column)
+                const infoCol = document.querySelectorAll('.card-body .row .col-md-6')[0];
+                if (infoCol) {
+                    infoCol.innerHTML = `
+                        <p><strong>Order Date:</strong> <span class="order-info-date">${formatDateTime(data.created_at)}</span></p>
+                        <p><strong>Customer:</strong> ${customerName}</p>
                         <p><strong>Email:</strong> ${data.user_email}</p>
                         <p><strong>Phone:</strong> N/A</p>
-                        <p><strong>Status:</strong> 
-                            <span class="status-badge status-${data.status.toLowerCase()}">${data.status}</span>
-                        </p>
-                    </div>
-                    <div class="col-md-4">
-                        <h5>Order Summary</h5>
-                        <p><strong>Subtotal:</strong> ₱${data.subtotal}</p>
-                        <p><strong>Shipping Fee:</strong> ₱${data.shipping_fee}</p>
-                        <p><strong>Tax:</strong> ₱${data.tax}</p>
-                        <p><strong>Total Amount:</strong> <strong>₱${data.total_amount}</strong></p>
-                    </div>
-                </div>
-                <h5 class="mt-4">Items</h5>
-                <ul class="list-group">
-                    ${data.items.map(item => `
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <strong>Product ID:</strong> ${item.product_id}<br>
-                                Qty: ${item.quantity} × ₱${item.price}
-                            </div>
-                            <span class="badge bg-primary rounded-pill">₱${(item.quantity * parseFloat(item.price)).toFixed(2)}</span>
-                        </li>
-                    `).join("")}
-                </ul>
-            `;
-                const orderModal = new bootstrap.Modal(document.getElementById('orderModals'));
+                    `;
+                }
+                const infoCol2 = document.querySelectorAll('.card-body .row .col-md-6')[1];
+                if (infoCol2) {
+                    infoCol2.innerHTML = `
+                        <p><strong>Payment Method:</strong> ${formatPaymentMethod(data.payment_method)}</p>
+                        <p><strong>Payment Status:</strong> <span class="badge bg-success">Paid</span></p>
+                        <p><strong>Order Status:</strong> <span class="status-badge status-${data.status.toLowerCase()}">${capitalize(data.status)}</span></p>
+                    `;
+                }
+
+                // get the buttons
+                const printBtn = document.getElementById("printInvoiceBtn");
+                const cancelBtn = document.getElementById("cancelOrderBtn");
+
+                printBtn.setAttribute("data-order-id", data.order_number);
+                cancelBtn.setAttribute("data-order-id", data.order_number);
+
+
+                const statusHistory = data.status_history || [];
+                renderStatusTimeline(statusHistory);
+
+                const orderModal = new bootstrap.Modal(document.getElementById('orderModal'));
                 orderModal.show();
             }
         }).send();
     }
 
+    function renderStatusTimeline(statusHistory) {
+        const container = document.querySelector('.order-status-history');
+        if (!container) return;
 
+        container.innerHTML = "";
+
+        const allStatuses = ['pending', 'processing', 'shipped', 'delivered', 'completed']; // expected flow
+        const completedStatuses = statusHistory.map(s => s.status);
+        const latestStatus = completedStatuses[completedStatuses.length - 1];
+
+        allStatuses.forEach((status, index) => {
+            const statusData = statusHistory.find(s => s.status === status);
+            const isCompleted = completedStatuses.includes(status);
+            const isActive = latestStatus === status && !['completed', 'cancelled', 'refunded', 'failed'].includes(status);
+
+            const statusClass = isCompleted ? 'completed' : isActive ? 'active' : 'pending';
+            const dateText = statusData ? new Date(statusData.created_at).toLocaleString() : 'Not yet occurred';
+
+            const item = document.createElement('div');
+            item.className = `timeline-step ${statusClass}`;
+            item.innerHTML = `
+            <div class="timeline-icon">
+                <i class="fas ${isCompleted ? 'fa-check' : isActive ? 'fa-spinner fa-spin' : 'fa-clock'}"></i>
+            </div>
+            <div class="timeline-content">
+                <p class="mb-1"><strong>${capitalize(status)}</strong></p>
+                <p class="text-muted mb-0">${dateText}</p>
+            </div>
+        `;
+            container.appendChild(item);
+        });
+    }
+
+    // Helper
+    function capitalize(str) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+
+    function formatDateTime(datetimeStr) {
+        const d = new Date(datetimeStr);
+        return d.toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
+    function formatPaymentMethod(method) {
+        switch (method) {
+            case "credit_card":
+                return "Credit Card (**** **** **** 4242)";
+            default:
+                return method.replace("_", " ");
+        }
+    }
+
+    function capitalize(str) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function getColor(index) {
+        const colors = ["4361ee", "3f37c9", "4cc9f0"];
+        return colors[index % colors.length];
+    }
+
+    function clearFilters() {
+        document.getElementById("order-id").value = "";
+        document.getElementById("customer-name").value = "";
+        document.getElementById("order-status").value = "";
+        document.getElementById("date-range").value = "";
+        window.viewProduct("", "", "", "");
+    }
+    function applyFilters() {
+        const orderNumber = document.getElementById("order-id").value;
+        const customerName = document.getElementById("customer-name").value;
+        const orderStatus = document.getElementById("order-status").value;
+        const dateRange = document.getElementById("date-range").value;
+      window.viewProduct(orderNumber, customerName, orderStatus);
+  
+    }
 
     onload = () => {
-        const keyword = document.getElementById("order-id").value;
+        const orderNumber = document.getElementById("order-id").value;
         const status = document.getElementById("order-status").value;
 
-        window.viewProduct(keyword, status);
+        const customerName = document.getElementById("customer-name").value;
+
+        window.viewProduct(orderNumber, customerName, status);
     };
 </script>

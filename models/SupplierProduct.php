@@ -31,6 +31,18 @@ class SupplierProduct
         }
         return false;
     }
+
+    public function update_product($productId, $user_id, $productName, $category, $description = '', $status = 'active', $product_weight = 0)
+    {
+        $stmt = $this->conn->prepare("
+            UPDATE products 
+            SET user_id = ?, product_name = ?, product_category = ?, description = ?, status = ?, product_weight = ?
+            WHERE product_id = ?
+        ");
+        $stmt->bind_param("sssssii", $user_id, $productName, $category, $description, $status, $product_weight, $productId);
+        return $stmt->execute();
+    }
+    
     public function get_all_products()
     {
         $sql = "

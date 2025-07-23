@@ -2,6 +2,8 @@
 
 $action = $_GET['action'] ?? 'index';
 
+echo $action;
+
 switch ($action) {
     case 'index':
         include 'list-view.php';
@@ -11,7 +13,7 @@ switch ($action) {
         break;
     case 'edit':
         $title = 'Edit Inventory Item';
-        $content = __DIR__ . '/public/view/supplier/inventory/edit.php';
+        include 'edit.php';
         break;
     default:
         http_response_code(404);

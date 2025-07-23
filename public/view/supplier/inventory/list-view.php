@@ -69,18 +69,17 @@
                                 <label for="inv-status" class="form-label">Status</label>
                                 <select class="form-select" id="inv-status">
                                     <option value="">All Status</option>
-                                    <option>Active</option>
-                                    <option>Inactive</option>
-                                    <option>Low Stock</option>
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
                                 </select>
                             </div>
 
                             <div class="col-md-3 d-flex align-items-end">
                                 <div class="d-flex gap-2 w-100">
-                                    <button type="reset" class="btn btn-outline-secondary flex-grow-1">
+                                    <button type="button" class="btn btn-outline-secondary flex-grow-1" onclick="clearFilters()">
                                         <i class="fas fa-redo me-2"></i>Clear
                                     </button>
-                                    <button type="submit" class="btn btn-primary flex-grow-1">
+                                    <button type="button" onclick="applyFilters()" class="btn btn-primary flex-grow-1">
                                         <i class="fas fa-search me-2"></i>Apply
                                     </button>
                                 </div>
@@ -95,7 +94,7 @@
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-box me-2"></i>Inventory Items</h5>
                     <div>
-                        <span class="badge bg-primary rounded-pill me-2" id="stat">1,042 active items</span>
+                        <span class="badge bg-primary rounded-pill me-2" id="stat">0 active items</span>
                         <a href="inventory?action=add" class="btn btn-sm btn-success">
                             <i class="fas fa-plus me-1"></i>Add Product
                         </a>
@@ -144,7 +143,7 @@
 
                 <div class="d-flex align-items-center mb-3">
                     <p class="text-muted">View the history of stock movements for this product, including restocks, sales, and adjustments.</p>
-                   
+
                 </div>
                 <div class="row mb-3 text-center">
                     <div class="col-md-4">
@@ -243,7 +242,52 @@
     </div>
 </div>
 
+<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productModalLabel"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Product Info -->
+                <div class="row">
+                    <div class="col-md-8">
+                        <h4 id="productNameEn"></h4>
+                        <p><strong>Description:</strong></p>
+                        <div id="productDescription" class="mb-3"></div>
 
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>SKU:</strong> <span id="productSku"></span></p>
+                                <p><strong>Category:</strong> <span id="productCategory"></span></p>
+                                <p><strong>Status:</strong> <span id="status"></span></p>
+                                <p><strong>Warehouse:</strong> <span id="warehouseName"></span></p>
+                                <p><strong>Warehouse Address:</strong> <span id="warehouseAddress"></span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Price:</strong> <span id="price"></span></p>
+                                <p><strong>Currency:</strong> <span id="currency"></span></p>
+                                <p><strong>Weight:</strong> <span id="productWeight"></span>g</p>
+                                <p><strong>Stock:</strong> <span id="currentStock"></span></p>
+                                <p><strong>Change Date:</strong> <span id="changeDate"></span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 text-center">
+                        <img id="primaryImage" src="" class="img-fluid rounded mb-3" style="max-height: 300px;">
+                        <p class="text-muted"><small>Primary Image</small></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -254,27 +298,13 @@
             document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
             this.classList.add('active');
 
-            // In a real app, this would change the main image
+
             const newSrc = this.querySelector('img').src.replace('100', '400');
             document.getElementById('primaryImage').src = newSrc;
         });
     });
 
-    document.addEventListener('DOMContentLoaded', function() {
-        const searchForm = document.getElementById('search-form');
-        searchForm.addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent form submission
-
-            const keyword = document.getElementById('inv-keyword').value;
-
-            const status = document.getElementById('inv-status').value;
-
-
-            window.viewProduct(keyword, sort_by);
-        });
-    });
-
-    window.viewProduct = (keyword, sort_by) => {
+    window.viewProduct = (keyword, status) => {
         new GetRequest({
             getUrl: "controller/supplier/inventory/?action=get-inventory",
             params: {
@@ -285,25 +315,25 @@
                 if (err) return console.error("Error fetching user data:", err);
                 console.log("User data retrieved:", data);
 
-        
+
                 const totalProducts = data.length;
                 const cardHeader = document.querySelector('.card-header h5');
                 cardHeader.innerHTML = `<i class="fas fa-box me-2"></i>Inventory Items (${totalProducts})`;
 
                 const statBadge = document.getElementById('stat');
                 statBadge.textContent = `${data.filter(product => product.status_db === 'active').length} active items`;
-     
+
                 const totalActive = data ? data.filter(product => product.status_db === 'active').length : 0;
                 const totalInactive = data ? data.filter(product => product.status_db === 'inactive').length : 0;
                 const totalLowStock = data ? data.filter(product => product.totalInventory < 10).length : 0;
 
                 const stats = document.querySelectorAll('.stat-card h3');
-                stats[0].textContent = totalProducts; 
+                stats[0].textContent = totalProducts;
                 stats[1].textContent = totalActive;
 
 
                 stats[2].textContent = totalInactive;
-                stats[3].textContent = totalLowStock; 
+                stats[3].textContent = totalLowStock;
 
 
 
@@ -362,99 +392,62 @@
         }).send();
     };
 
+    function clearFilters() {
+        document.getElementById('inv-keyword').value = '';
+        document.getElementById('inv-status').value = '';
+        window.viewProduct('', '');
+    }
+
+    function applyFilters() {
+        const keyword = document.getElementById('inv-keyword').value;
+        const status = document.getElementById('inv-status').value;
+        console.log("Applying filters:", keyword, status);
+        window.viewProduct(keyword, status);
+    }
+
     function retrieveProduct(pid) {
         new GetRequest({
-            getUrl: "controller/product-import?action=single-product",
+            getUrl: "controller/supplier/product?action=single-product",
             params: {
                 pid
             },
             callback: (err, data) => {
-
                 if (err) return console.error("Error fetching product data:", err);
-                console.log("Product data retrieved:", data);
 
                 const modal = new bootstrap.Modal(document.getElementById('productModal'));
 
-                // Set modal title
-                document.getElementById('productModalLabel').textContent = data.productNameEn;
+                document.getElementById('productModalLabel').textContent = data.product_name || 'No Name';
+                document.getElementById('productNameEn').textContent = data.product_name || '—';
 
-                // Set primary product info
-                document.getElementById('productNameEn').textContent = data.productNameEn;
-                document.getElementById('productDescription').innerHTML = data.description;
-                document.getElementById('productSku').textContent = data.productSku;
-                document.getElementById('productCategory').textContent = data.categoryName;
-                document.getElementById('productType').textContent = data.productType;
-                document.getElementById('supplierName').textContent = data.supplierName;
-                document.getElementById('productWeight').textContent = data.productWeight;
-                document.getElementById('packingWeight').textContent = data.packingWeight;
-                document.getElementById('sellPrice').textContent = data.sellPrice;
-                document.getElementById('suggestSellPrice').textContent = data.suggestSellPrice;
-                document.getElementById('status').textContent = data.status;
-                document.getElementById('listedNum').textContent = data.listedNum;
-                document.getElementById('supplierId').textContent = data.supplierId;
+                document.getElementById('productDescription').textContent = data.description || '—';
+                document.getElementById('productSku').textContent = data.product_sku || '—';
 
-                // Set material info
-                document.getElementById('productMaterial').textContent =
-                    data.materialNameEnSet.join(', ');
 
-                // Set additional details
-                document.getElementById('materialDetails').textContent =
-                    `${data.materialNameSet.join(', ')} (${data.materialNameEnSet.join(', ')})`;
+                document.getElementById('productCategory').textContent = data.category_name || '—';
+                document.getElementById('status').textContent = data.status || '—';
 
-                document.getElementById('packingDetails').textContent =
-                    `${data.packingNameSet.join(', ')} (${data.packingNameEnSet.join(', ')})`;
 
-                document.getElementById('productProperties').textContent =
-                    `${data.productProSet.join(', ')} (${data.productProEnSet.join(', ')})`;
+                document.getElementById('warehouseName').textContent = data.warehouse_name || '—';
+                document.getElementById('warehouseAddress').textContent = data.warehouse_address || '—';
 
-                // Format and set created time
-                const createrTime = new Date(data.createrTime);
-                document.getElementById('createrTime').textContent =
-                    createrTime.toLocaleString();
 
-                // Set primary image (first image in the list)
-                if (data.productImageSet.length > 0) {
-                    document.getElementById('primaryImage').src = data.productImageSet[0];
-                }
+                document.getElementById('price').textContent = data.price || '0.00';
+                document.getElementById('currency').textContent = data.currency || '—';
+                document.getElementById('productWeight').textContent = data.product_weight || '—';
 
-                // Display product images
-                const imagesContainer = document.getElementById('productImages');
-                imagesContainer.innerHTML = '';
-                data.productImageSet.forEach(imgUrl => {
-                    const imgWrapper = document.createElement('div');
-                    imgWrapper.className = 'position-relative';
-                    imgWrapper.style.width = '120px';
-                    imgWrapper.style.height = '120px';
-                    imgWrapper.innerHTML = `
-                    <img src="${imgUrl}" 
-                         class="img-thumbnail h-100 w-100" 
-                         style="object-fit: cover; cursor: pointer"
-                         onclick="this.classList.toggle('img-enlarged')">
-                `;
-                    imagesContainer.appendChild(imgWrapper);
-                });
 
-                // Display variants table
-                const variantTableBody = document.getElementById('variantTableBody');
-                variantTableBody.innerHTML = '';
-                data.variants.forEach(variant => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                    <td>${variant.variantKey || 'N/A'}</td>
-                    <td><img src="${variant.variantImage}" style="height:50px"></td>
-                    <td>${variant.variantSku}</td>
-                    <td>${variant.variantLength}×${variant.variantWidth}×${variant.variantHeight}mm</td>
-                    <td>${variant.variantWeight}g</td>
-                    <td>$${variant.variantSellPrice}</td>
-                    <td>$${variant.variantSugSellPrice}</td>
-                `;
-                    variantTableBody.appendChild(row);
-                });
+                document.getElementById('currentStock').textContent = data.current_stock ?? 'N/A';
+                document.getElementById('changeDate').textContent = data.change_date || '—';
+
+
+                const imagePath = `public/images/products/${data.primary_image}`;
+                document.getElementById('primaryImage').src = imagePath;
 
                 modal.show();
             }
         }).send();
     }
+
 
     function showAddStockModal(productId) {
         document.getElementById('add-stock-form').reset();

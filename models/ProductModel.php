@@ -57,6 +57,7 @@ class ProductModel
                 products.description,
                 ip.profit_margin,
                 pc.category_name,
+                pc.category_id,
                 ph.price, 
                 ph.currency,
                 ph.change_date,
@@ -192,5 +193,22 @@ class ProductModel
         } else {
             return false;
         }
+    }
+    public function get_price_product_history($product_id)
+    {
+        $stmt = $this->conn->prepare("
+        SELECT price, currency, change_date 
+        FROM product_price_history 
+        WHERE product_id = ? 
+        ORDER BY change_date DESC
+    ");
+        $stmt->bind_param("i", $product_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $price_history = [];
+        while ($row = $result->fetch_assoc()) {
+            $price_history[] = $row;
+        }
+        return $price_history;
     }
 }

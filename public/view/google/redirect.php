@@ -1,6 +1,6 @@
   <?php
 
-
+    require 'vendor/autoload.php';
     require_once 'core/config.php';
     require_once 'function/UIDGenerator.php';
 
@@ -50,6 +50,7 @@
         echo 'Google ID: ' . $userInfo->id . '<br>';
 
         $userInfo = $user->loginWithGoogle($userInfo->id);
+
         if ($userInfo) {
 
             $_SESSION['auth'] = [
@@ -59,7 +60,7 @@
                 'ip_address' => $_SERVER['REMOTE_ADDR'],
                 'user_agent' => $_SERVER['HTTP_USER_AGENT']
             ];
-            echo 'User logged in successfully: ' . $userInfo['email'];
+            header('Location: dashboard');
         } else {
             echo 'User not found. Please register first.';
         }
@@ -86,11 +87,7 @@
         $response = $user->google_register($userInfo);
 
         if ($response['status'] === 'success') {
-            echo 'Google user registered: ' . $response['user_id'];
-
-            echo '<pre>';
-            print_r($userInfo);
-            echo '</pre>';
+            header('Location: dashboard');
         } else {
             echo 'Error: ' . $response['message'];
         }

@@ -7,10 +7,10 @@ if ($product_id <= 0) {
     exit;
 }
 
-$data = $inventoryModel->getStockMovements($product_id);
+$data = $productModel->get_price_product_history($product_id);
 if (!$data) {
     http_response_code(404);
-    echo json_encode(['status' => 'error', 'message' => 'No stock movements found for this product', 'http_code' => 404]);
+    echo json_encode(['status' => 'error', 'message' => 'No price history found for this product', 'http_code' => 404]);
     exit;
 }
 

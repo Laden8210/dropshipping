@@ -83,7 +83,7 @@ class Order
 
     public function getOrderBy($order_number)
     {
- 
+
         $sql = "
         SELECT 
             o.order_id,
@@ -92,7 +92,6 @@ class Order
             o.shipping_fee,
             o.tax,
             o.total_amount,
-            o.status,
             o.payment_method,
             o.order_number,
             o.created_at
@@ -122,7 +121,7 @@ class Order
         JOIN imported_product ip ON oi.product_id = ip.product_id
         WHERE oi.order_id = ?
     ";
-    
+
 
         $stmtItems = $this->conn->prepare($itemsSql);
         $stmtItems->bind_param("i", $order['order_id']);
@@ -144,20 +143,46 @@ class Order
 
     public function updateOrderStatus($order_number, $status)
     {
-        $sql = "UPDATE orders SET status = ? WHERE order_number = ?";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("ss", $status, $order_number);
+        // Start transaction
+        $this->conn->begin_transaction();
 
-        if (!$stmt->execute()) {
+        try {
+            // 1. Get order_id by order_number
+            $sql = "SELECT order_id FROM orders WHERE order_number = ?";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->bind_param("s", $order_number);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $order = $result->fetch_assoc();
+
+            if (!$order) {
+                return [
+                    'status' => 'error',
+                    'message' => 'Order not found.'
+                ];
+            }
+
+            $order_id = $order['order_id'];
+
+            // 2. Insert into order_status_history
+            $insertHistory = "INSERT INTO order_status_history (order_id, status) VALUES (?, ?)";
+            $stmt = $this->conn->prepare($insertHistory);
+            $stmt->bind_param("is", $order_id, $status);
+            $stmt->execute();
+
+
+            $this->conn->commit();
+
+            return [
+                'status' => 'success',
+                'message' => 'Order status updated successfully'
+            ];
+        } catch (Exception $e) {
+            $this->conn->rollback();
             return [
                 'status' => 'error',
-                'message' => 'Failed to update order status'
+                'message' => 'Failed to update order status: ' . $e->getMessage()
             ];
         }
-
-        return [
-            'status' => 'success',
-            'message' => 'Order status updated successfully'
-        ];
     }
 }

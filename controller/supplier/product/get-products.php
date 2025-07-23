@@ -1,5 +1,8 @@
 <?php
 
+$keyword = isset($_GET['keyword']) ? trim($_GET['keyword']) : '';
+$status = isset($_GET['status']) ? trim($_GET['status']) : '';
+
 $data = $supplierProductModel->get_inventory($_SESSION['auth']['user_id']);
 
 if (!$data) {
@@ -19,7 +22,7 @@ foreach ($data as $item) {
     }
 }
 
-// Step 2: Fetch exchange rates using open.er-api.com (base: USD)
+
 $apiUrl = "https://open.er-api.com/v6/latest/USD";
 $response = file_get_contents($apiUrl);
 
@@ -42,12 +45,12 @@ $conversionRates = [];
 
 foreach ($uniqueCurrencies as $currency) {
     if (isset($rates[$currency]) && isset($rates[$targetCurrency])) {
-        // Convert currency → PHP
+
         $conversionRates[$currency] = $rates[$targetCurrency] / $rates[$currency];
     }
 }
 
-// Step 3: Convert product prices
+
 foreach ($data as &$product) {
     $currency = strtoupper($product['currency']);
     if ($currency === $targetCurrency) {
@@ -60,6 +63,18 @@ foreach ($data as &$product) {
         $product['converted_price'] = null;
         $product['converted_currency'] = null;
     }
+}
+
+
+if ($keyword) {
+    $data = array_filter($data, function ($product) use ($keyword) {
+        return stripos($product['product'], $keyword) !== false || stripos($product['category'], $keyword) !== false || stripos($product['sku'], $keyword) !== false;
+    });
+}
+if ($status) {
+    $data = array_filter($data, function ($product) use ($status) {
+        return $product['status'] === $status;
+    });
 }
 
 echo json_encode([

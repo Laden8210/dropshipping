@@ -63,13 +63,16 @@ switch ($request) {
             case 'get-stock-movement':
                 require_once 'get-stock-movement.php';
                 break;
+            case 'price-history':
+                require_once 'price-history.php';
+                break;
             default:
                 http_response_code(404);
                 echo json_encode(['error' => 'Invalid action']);
                 break;
         }
         break;
-    
+
     default:
         http_response_code(404);
         echo json_encode(['error' => 'Invalid request']);

@@ -4,7 +4,8 @@
                 <h5 class="mb-0 text-white"><i class="fas fa-plus me-2"></i>Add New Product</h5>
             </div>
             <div class="card-body">
-                <form id="add-product-form" enctype="multipart/form-data">
+                <form id="edit-product-form" enctype="multipart/form-data">
+                    <input type="hidden" name="product_id" id="product_id" value="<?php echo $_GET['product_id'] ?? ''; ?>">
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label for="product_name" class="form-label">Product Name</label>
@@ -217,7 +218,7 @@
 
                         <div class="col-md-6">
                             <label for="product_image" class="form-label">Primary Image</label>
-                            <input class="form-control" type="file" id="product_image" name="product_image" accept="image/*" required>
+                            <input class="form-control" type="file" id="product_image" name="product_image" accept="image/*" >
                         </div>
 
                         <div class="col-12">
@@ -248,12 +249,12 @@
         document.addEventListener('DOMContentLoaded', function() {
             let selectedFiles = [];
 
-            document.getElementById('add-product-form').addEventListener('submit', function(event) {
+            document.getElementById('edit-product-form').addEventListener('submit', function(event) {
                 event.preventDefault();
 
                 // Create FormData and append all form fields
                 const formData = new FormData();
-
+                formData.append('product_id', document.getElementById('product_id').value);
                 // Append text fields
                 formData.append('product_name', document.getElementById('product_name').value);
                 formData.append('category', document.getElementById('category').value);
@@ -276,7 +277,7 @@
 
 
 
-                axios.post('controller/supplier/product/index.php?action=add-product', formData, {
+                axios.post('controller/supplier/product/index.php?action=update-product', formData, {
                         headers: {
                             'Content-Type': 'multipart/form-data'
                         }
@@ -285,16 +286,16 @@
                         if (response.data.status == 'success') {
                             Swal.fire({
                                 icon: 'success',
-                                title: 'Product added successfully!',
+                                title: 'Product updated successfully!',
                                 showConfirmButton: false,
                                 timer: 1500
                             }).then(() => {
-                                window.location.reload();
+                                window.location.href = 'product';
                             });
                         } else {
                             Swal.fire({
                                 icon: 'error',
-                                title: 'Error adding product',
+                                title: 'Error updating product',
                                 text: response.data.message || 'An error occurred.'
                             });
                         }
@@ -395,11 +396,36 @@
                         categorySelect.appendChild(option);
                     });
 
-
+                    const productId = document.getElementById('product_id').value;
+                    if (productId) {
+                        loadProductForEdit(productId);
+                    }
 
                 }
+
+        
             },
             promptMessage: 'Do you want to fetch the latest data?'
         });
         getRequest.send();
+
+        function loadProductForEdit(productId) {
+            axios.get('controller/supplier/product/index.php?action=single-product&pid=' + productId)
+                .then(response => {
+                    const product = response.data.data;
+                    if (!product) return;
+
+                    document.getElementById('product_name').value = product.product_name;
+                    document.getElementById('category').value = product.category_id;
+                    document.getElementById('price').value = product.price;
+                    document.getElementById('currency').value = product.currency;
+                    document.getElementById('status').value = product.status;
+                    document.getElementById('product_weight').value = product.product_weight;
+                    document.getElementById('description').value = product.description;
+
+                })
+                .catch(err => {
+                    console.error('Error fetching product:', err);
+                });
+        }
     </script>

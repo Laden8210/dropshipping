@@ -43,10 +43,12 @@ switch ($request) {
             case 'add-product':
                 require_once 'add-product.php';
                 break;
-               
+            case 'update-product':
+                require_once 'update-product.php';
+                break;
         }
         break;
-    
+
     case 'GET':
         switch ($action) {
             case 'get-products':
@@ -58,6 +60,10 @@ switch ($request) {
             case 'get-inventory':
                 require_once 'get-inventory.php';
                 break;
+            case 'single-product':
+                require_once 'single-product.php';
+                break;
+            default:
         }
         break;
     default:

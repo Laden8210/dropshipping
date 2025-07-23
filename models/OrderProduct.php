@@ -364,18 +364,110 @@ class OrderProduct
         return array_values($orders);
     }
 
-    
 
-    // Update order status and remark
+    public function is_order_exist($orderNumber)
+    {
+        $sql = "SELECT COUNT(*) as count FROM {$this->orderTable} WHERE order_number = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("s", $orderNumber);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        return $row['count'] > 0;
+    }
+
+    public function is_order_cancelled($orderNumber)
+    {
+        $sql = "SELECT COUNT(*) as count FROM order_status_history WHERE order_id = (SELECT order_id FROM {$this->orderTable} WHERE order_number = ?) AND status = 'cancelled'";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("s", $orderNumber);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        return $row['count'] > 0;
+    }
+
+    public function cancel_order($orderNumber)
+    {
+        $this->conn->begin_transaction();
+
+        try {
+            // Step 1: Get the order_id by order_number
+            $sql = "SELECT order_id FROM {$this->orderTable} WHERE order_number = ?";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->bind_param("s", $orderNumber);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($result->num_rows === 0) {
+                throw new Exception("Order not found.");
+            }
+
+            $order = $result->fetch_assoc();
+            $orderId = $order['order_id'];
+
+            // Optional: Check latest status to prevent double cancellation
+            $sql = "SELECT status FROM order_status_history WHERE order_id = ? ORDER BY created_at DESC LIMIT 1";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->bind_param("i", $orderId);
+            $stmt->execute();
+            $statusResult = $stmt->get_result();
+            if ($statusResult->num_rows > 0) {
+                $latestStatus = $statusResult->fetch_assoc()['status'];
+                if ($latestStatus === 'cancelled') {
+                    throw new Exception("Order already cancelled.");
+                }
+            }
+
+            // Step 2: Insert into order_status_history
+            $sql = "INSERT INTO order_status_history (order_id, status) VALUES (?, 'cancelled')";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->bind_param("i", $orderId);
+            $stmt->execute();
+
+ 
+            // $sql = "UPDATE order_payments SET status = 'refunded' WHERE order_id = ?";
+            // $stmt = $this->conn->prepare($sql);
+            // $stmt->bind_param("i", $orderId);
+            // $stmt->execute();
+
+            $this->conn->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->conn->rollback();
+            error_log("Cancel order error: " . $e->getMessage());
+            return $e->getMessage(); // return error message string
+        }
+    }
+
     public function update($orderId, $data)
     {
-        $sql = "UPDATE {$this->orderTable} SET 
-                    status = ?, remark = ?, updated_at = CURRENT_TIMESTAMP 
-                WHERE order_id = ?";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("ssi", $data['status'], $data['remark'], $orderId);
-        return $stmt->execute();
+        $this->conn->begin_transaction();
+
+        try {
+
+            $sql = "UPDATE {$this->orderTable} SET remark = ?, updated_at = CURRENT_TIMESTAMP WHERE order_id = ?";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->bind_param("si", $data['remark'], $orderId);
+            $stmt->execute();
+
+
+            if (!empty($data['status'])) {
+                $sql = "INSERT INTO order_status_history (order_id, status) VALUES (?, ?)";
+                $stmt = $this->conn->prepare($sql);
+                $stmt->bind_param("is", $orderId, $data['status']);
+                $stmt->execute();
+            }
+
+            $this->conn->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->conn->rollback();
+            error_log("Update order error: " . $e->getMessage());
+            return false;
+        }
     }
+
 
     // Delete order and related items
     public function delete($orderId)

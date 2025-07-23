@@ -17,7 +17,12 @@ try {
     $baseUrl = $isLocal ? 'http://localhost/dropshipping' : '';
     $request = trim(preg_replace('/[^a-zA-Z0-9_-]/', '', str_replace('/dropshipping/', '', explode('?', $_SERVER['REQUEST_URI'])[0])), '/');
 
-    // Define routes with role-based views
+    if($request === 'redirect') {
+        include_once __DIR__ . '/public/view/google/redirect.php';
+
+        exit;
+    }
+
     $routes = [
         // Public routes
         '' => [
@@ -42,7 +47,7 @@ try {
         ],
         'redirect' => [
             'auth_required' => false,
-            'file' => 'user/google/redirect.php',
+            'file' => 'google/redirect.php',
             'title' => 'Redirect'
         ],
 
