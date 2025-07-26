@@ -28,6 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
 $input = json_decode(file_get_contents('php://input'), true);
 $pid = isset($input['pid']) ? trim($input['pid']) : '';
+$store_id = isset($input['store_id']) ? trim($input['store_id']) : '';
 
 if (empty($pid)) {
     http_response_code(400);
@@ -39,8 +40,18 @@ if (empty($pid)) {
     exit;
 }
 
+if (empty($store_id)) {
+    http_response_code(400);
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Store ID is required.',
+        'http_code' => 400
+    ]);
+    exit;
+}
 
-$product = $productModel->get_single_product_by_id($pid);
+
+$product = $productModel->get_single_product_by_id_by_store($pid, $store_id);
 
 if (!$product || !isset($product['product_id'])) {
     http_response_code(404);

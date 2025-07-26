@@ -83,7 +83,7 @@ foreach ($data as &$product) {
         $product['converted_price'] = null;
         $product['converted_currency'] = null;
     }
-    // compute also profit margin for selling price
+
     $product['selling_price'] = $product['converted_price'] + ($product['converted_price'] * ($product['profit_margin'] / 100));
 
 }

@@ -88,6 +88,55 @@ class ProductModel
         return $result->fetch_assoc();
     }
 
+    public function get_single_product_by_id_by_store($product_id, $store_id)
+    {
+        $stmt = $this->conn->prepare("
+            SELECT 
+                products.product_id,
+                products.product_name,
+                products.product_sku,    
+                products.product_weight,
+                products.status,
+                products.description,
+                ip.profit_margin,
+                pc.category_name,
+                pc.category_id,
+                ph.price, 
+                ph.currency,
+                ph.change_date,
+                pi.image_url AS primary_image,
+                w.warehouse_name,
+                w.warehouse_address,
+                i.quantity AS current_stock,
+                sp.store_id,
+                sp.store_name,
+                sp.store_logo_url,
+                sp.store_address,
+                sp.store_logo_url
+            FROM imported_product ip
+            INNER JOIN products ON ip.product_id = products.product_id
+            JOIN product_categories pc ON products.product_category = pc.category_id
+            LEFT JOIN (
+                SELECT p1.*
+                FROM product_price_history p1
+                INNER JOIN (
+                    SELECT product_id, MAX(change_date) AS max_date
+                    FROM product_price_history
+                    GROUP BY product_id
+                ) p2 ON p1.product_id = p2.product_id AND p1.change_date = p2.max_date
+            ) ph ON products.product_id = ph.product_id
+            LEFT JOIN product_images pi ON products.product_id = pi.product_id AND pi.is_primary = 1
+            LEFT JOIN warehouse w ON products.user_id = w.user_id
+            LEFT JOIN inventory i ON products.product_id = i.product_id
+            LEFT JOIN store_profile sp ON ip.store_id = sp.store_id
+            WHERE ip.product_id = ? AND ip.store_id = ?
+        ");
+        $stmt->bind_param("ii",  $product_id, $store_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->fetch_assoc();
+    }
+
 
     public function get_all_products()
     {
@@ -99,6 +148,7 @@ class ProductModel
             products.product_weight,
             products.status,
             ip.profit_margin,
+            ip.store_id,
             pc.category_name,
             ph.price, 
             ph.currency,
