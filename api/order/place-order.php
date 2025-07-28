@@ -97,9 +97,8 @@ if (!isset($request_body['shipping_address_id']) || !is_numeric($request_body['s
 }
 
 $order_number = UIDGenerator::generateOrderNumber();
-$tracking_number = UIDGenerator::generateTrackingNumber();
 
-$data = $orderModel->createOrder($user_id, $order_number, $tracking_number,$request_body);
+$data = $orderModel->createOrder($user_id, $order_number,$request_body);
 if ($data['status'] === 'success') {
     http_response_code(201);
     echo json_encode([

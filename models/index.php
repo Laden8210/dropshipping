@@ -10,6 +10,7 @@ require_once 'Warehouse.php';
 require_once 'StoreProfile.php';
 require_once 'Order.php';
 require_once 'AddressModel.php';
+require_once 'CartModel.php';
 
 $userModel = new User($conn);
 $productModel = new ProductModel($conn);
@@ -21,3 +22,4 @@ $warehouseModel = new Warehouse($conn);
 $storeProfileModel = new StoreProfile($conn);
 $orderModel = new Order($conn);
 $addressModel = new AddressModel($conn);
+$cartModel = new CartModel($conn);

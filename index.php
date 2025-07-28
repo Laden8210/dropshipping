@@ -5,14 +5,13 @@ require __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/models/index.php';
 
 try {
-    // Security headers
+
     ini_set('session.cookie_httponly', 1);
     ini_set('session.cookie_secure', $_SERVER['HTTP_HOST'] !== 'localhost');
     ini_set('session.use_strict_mode', 1);
     ini_set('session.cookie_samesite', 'Lax');
     session_start();
 
-    // Base URL configuration
     $isLocal = $_SERVER['HTTP_HOST'] === 'localhost';
     $baseUrl = $isLocal ? 'http://localhost/dropshipping' : '';
     $request = trim(preg_replace('/[^a-zA-Z0-9_-]/', '', str_replace('/dropshipping/', '', explode('?', $_SERVER['REQUEST_URI'])[0])), '/');
@@ -23,8 +22,13 @@ try {
         exit;
     }
 
+    if ($request === 'print') {
+        require_once __DIR__ . '/public/view/report/index.php';
+        exit;
+    }
+
     $routes = [
-        // Public routes
+
         '' => [
             'auth_required' => false,
             'file' => 'auth/login.php',
@@ -51,7 +55,7 @@ try {
             'title' => 'Redirect'
         ],
 
-        // Protected routes - views determined by role
+
         'dashboard' => [
             'auth_required' => true,
             'user' => [

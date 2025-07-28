@@ -136,11 +136,12 @@ create table cart (
     user_id CHAR(14) NOT NULL,
     product_id BIGINT NOT NULL,
     quantity INT NOT NULL DEFAULT 1,
+    store_id BIGINT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
     CONSTRAINT fk_cart_user FOREIGN KEY (user_id) REFERENCES users(user_id),
-    CONSTRAINT fk_cart_product FOREIGN KEY (product_id) REFERENCES imported_product(product_id)
+    CONSTRAINT fk_cart_product FOREIGN KEY (product_id) REFERENCES imported_product(product_id),
+    CONSTRAINT fk_cart_store FOREIGN KEY (store_id) REFERENCES store_profile(store_id)
 );
 
 
@@ -161,6 +162,7 @@ CREATE TABLE orders (
     CONSTRAINT fk_orders_user FOREIGN KEY (user_id) REFERENCES users(user_id),
     CONSTRAINT fk_orders_shipping_address FOREIGN KEY (shipping_address_id) REFERENCES user_shipping_address(address_id)
 );
+
 
 create table order_payments (
     payment_id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -194,6 +196,17 @@ CREATE TABLE order_status_history (
     CONSTRAINT fk_order_status_history_order FOREIGN KEY (order_id) REFERENCES orders(order_id)
 );
 
+create table order_shipping_status (
+    shipping_status_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    order_id BIGINT NOT NULL,
+    remarks TEXT DEFAULT NULL,
+    tracking_number VARCHAR(100) DEFAULT NULL,
+    carrier VARCHAR(100) DEFAULT NULL,
+    current_location VARCHAR(255) DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_order_shipping_status_order FOREIGN KEY (order_id) REFERENCES orders(order_id)
+);
 
 
 CREATE TABLE user_shipping_address (

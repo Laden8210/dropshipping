@@ -54,9 +54,7 @@ $orders = array_filter($orders, function ($order) use ($order_number, $customer_
     if ($order_status && stripos($order['status'], $order_status) === false) {
         return false;
     }
-
-
-
+ 
     return true;
 });
 

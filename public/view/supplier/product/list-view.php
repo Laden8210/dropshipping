@@ -154,6 +154,11 @@
                         </tr>
                     </tbody>
                 </table>
+
+                <div class="mt-4">
+    
+                    <canvas id="priceChart" height="100"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -410,39 +415,130 @@
         }).send();
     }
 
+    async function viewProductHistory(productId) {
+        const modal = new bootstrap.Modal(document.getElementById('priceHistoryModal'));
+        const tbody = document.getElementById('price-history-body');
+        tbody.innerHTML = '<tr><td colspan="3">Loading...</td></tr>';
 
-    function viewProductHistory(productId) {
         new GetRequest({
             getUrl: "controller/supplier/inventory?action=price-history",
             params: {
                 productId
             },
-            callback: (err, response) => {
-                const modal = new bootstrap.Modal(document.getElementById('priceHistoryModal'));
-                const tbody = document.getElementById('price-history-body');
-                tbody.innerHTML = '';
-
-                if (err) {
+            callback: async (err, response) => {
+                if (err || !Array.isArray(response) || response.length === 0) {
                     console.error("Error fetching price history:", err);
                     tbody.innerHTML = '<tr><td colspan="3">Failed to load price history.</td></tr>';
                     modal.show();
                     return;
                 }
-      
+
+                const latestEntry = response.reduce((latest, entry) => {
+                    return new Date(entry.change_date) > new Date(latest.change_date) ? entry : latest;
+                });
+
+                const latestPrice = parseFloat(latestEntry.price);
+                const currency = latestEntry.currency.toUpperCase();
+
+                tbody.innerHTML = '';
                 response.forEach(entry => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                    <td>${entry.change_date}</td>
+                    <td>${entry.change_date.split(' ')[0]}</td>
                     <td>${entry.price}</td>
                     <td>${entry.currency}</td>
                 `;
                     tbody.appendChild(row);
                 });
 
+   
+                const today = new Date();
+                const startDate = new Date(today);
+                startDate.setDate(today.getDate() - 10);
+                const formatDate = d => d.toISOString().split('T')[0];
+
+                const start = formatDate(startDate);
+                const end = formatDate(today);
+
+                const fastForexApiKey = 'c76481541c-ec31d17071-t04ftg'; 
+                const url = `https://api.fastforex.io/time-series?from=${currency}&to=PHP&start=${start}&end=${end}&api_key=${fastForexApiKey}`;
+
+                let labels = [];
+                let convertedPrices = [];
+
+                try {
+                    const res = await fetch(url);
+                    const data = await res.json();
+
+                    if (data && data.results && data.results.PHP) {
+                        const sortedDates = Object.keys(data.results.PHP).sort();
+                        sortedDates.forEach(date => {
+                            const rate = data.results.PHP[date];
+                            labels.push(date);
+                            convertedPrices.push((latestPrice * rate).toFixed(2));
+                        });
+                    } else {
+                        throw new Error("FastForex response format invalid");
+                    }
+                } catch (e) {
+                    console.error("Failed to fetch time-series data from FastForex:", e);
+                }
+
+        
+                const chartCanvas = document.getElementById('priceChart');
+                if (chartCanvas) {
+                    const ctx = chartCanvas.getContext('2d');
+                    if (window.priceChartInstance) window.priceChartInstance.destroy();
+
+                    window.priceChartInstance = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: `Daily PHP Value of ${latestPrice} ${currency}`,
+                                data: convertedPrices,
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                tension: 0.4,
+                                fill: true,
+                                pointRadius: 3,
+                                pointHoverRadius: 5,
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Daily Converted Price (₱ PHP)'
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Date'
+                                    }
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'Price (₱)'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
                 modal.show();
             }
         }).send();
     }
+
+
+
+
 
 
     onload = () => {

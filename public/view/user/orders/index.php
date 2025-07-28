@@ -513,14 +513,7 @@
                                 onclick="getOrderDetails('${order.order_number}')">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            <button class="btn btn-sm btn-outline-info action-btn">
-                                <i class="fas fa-edit"></i>
-                                Edit
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger action-btn">
-                                <i class="fas fa-times-circle"></i>
-                                Cancel
-                            </button>
+                     
                         </td>
                     `;
 

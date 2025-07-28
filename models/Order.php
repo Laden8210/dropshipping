@@ -9,7 +9,7 @@ class Order
         $this->conn = $db;
     }
 
-    public function createOrder($user_id, $order_number, $tracking_number, $orderData)
+    public function createOrder($user_id, $order_number, $orderData)
     {
         $this->conn->begin_transaction();
 
@@ -18,8 +18,8 @@ class Order
             $stmt = $this->conn->prepare("
                 INSERT INTO orders (
                     user_id, subtotal, shipping_fee, tax, total_amount,
-                    order_number, payment_method, shipping_address_id, tracking_number
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    order_number, payment_method, shipping_address_id, tracking_number, store_id
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
 
             $stmt->bind_param(
@@ -32,7 +32,7 @@ class Order
                 $order_number,
                 $orderData['payment_method'],
                 $orderData['shipping_address_id'],
-                $tracking_number
+                ""
             );
 
             if (!$stmt->execute()) {
@@ -52,7 +52,7 @@ class Order
                     $order_id,
                     $product['pid'],
                     $product['quantity'],
-                    $product['price']
+                    $product['price'],
                 );
 
                 if (!$stmt->execute()) {
@@ -80,6 +80,9 @@ class Order
             ];
         }
     }
+
+
+    
 
     public function getOrderBy($order_number)
     {
