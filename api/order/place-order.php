@@ -96,16 +96,13 @@ if (!isset($request_body['shipping_address_id']) || !is_numeric($request_body['s
     exit;
 }
 
-$order_number = UIDGenerator::generateOrderNumber();
-
-$data = $orderModel->createOrder($user_id, $order_number,$request_body);
+$data = $orderModel->createOrder($user_id,$request_body);
 if ($data['status'] === 'success') {
     http_response_code(201);
     echo json_encode([
         'status' => 'success',
         'message' => 'Order placed successfully',
-        'order_id' => $data['order_id'],
-        'order_number' => $data['order_number']
+        'orders' => $data['orders']
     ]);
 } else {
     http_response_code(500);

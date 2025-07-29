@@ -35,6 +35,30 @@ if (empty($status)) {
     exit;
 }
 
+$statusHistory = $orderModel->getOrderHistoryStatus($order_number);
+
+if (!is_array($statusHistory)) {
+    http_response_code(500);
+    echo json_encode(['status' => 'error', 'message' => 'Failed to fetch status history', 'http_code' => 500]);
+    exit;
+}
+
+if (count($statusHistory) > 0) {
+    $lastStatus = $statusHistory[0];
+    if ($lastStatus['status'] === $status) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Order is already in the requested status', 'http_code' => 400]);
+        exit;
+    }
+}
+
+if (in_array($status, ['shipping', 'delivered']) && in_array($lastStatus['status'], ['cancelled', 'processing'])) {
+    http_response_code(400);
+    echo json_encode(['status' => 'error', 'message' => 'Cannot change status to ' . $status . ' from ' . $lastStatus['status'], 'http_code' => 400]);
+    exit;
+}
+
+
 
 $updatedOrder = $orderModel->updateOrderStatus($order_number, $status);
 
@@ -51,11 +75,25 @@ if ($status === 'processing') {
 
 
 
+
 if ($updatedOrder['status'] === 'error') {
     http_response_code(500);
     echo json_encode(['status' => 'error', 'message' => $updatedOrder['message'], 'http_code' => 500]);
     exit;
 }
+if ($status === 'shipped') {
+    $tracking_number = UIDGenerator::generateTrackingNumber();
+    $result = $orderModel->addTrackingNumber($order_number, $tracking_number);
+    if ($result['status'] === 'error') {
+        http_response_code(500);
+        echo json_encode(['status' => 'error', 'message' => $result['message'], 'http_code' => 500]);
+        exit;
+    }
+}
+
+
+
+
 echo json_encode([
     'status' => 'success',
     'message' => 'Order status updated successfully.',

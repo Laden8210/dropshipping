@@ -345,9 +345,6 @@
                                 <i class="fas fa-history"></i> View Price History
                             </button>
 
-                            <button class="btn btn-sm btn-warning" onclick="updateProductStatus(${product.product_id})">
-                                <i class="fas fa-sync-alt"></i> Update Status 
-                            </button>
 
                         </td>   
                         `;

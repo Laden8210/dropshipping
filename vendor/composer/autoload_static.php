@@ -31,6 +31,7 @@ class ComposerStaticInit5cd48b6645860e6f71f44390d4549abe
             'Psr\\Http\\Message\\' => 17,
             'Psr\\Http\\Client\\' => 16,
             'Psr\\Cache\\' => 10,
+            'Picqer\\Barcode\\' => 15,
             'ParagonIE\\ConstantTime\\' => 23,
         ),
         'M' => 
@@ -87,6 +88,10 @@ class ComposerStaticInit5cd48b6645860e6f71f44390d4549abe
         'Psr\\Cache\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/cache/src',
+        ),
+        'Picqer\\Barcode\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/picqer/php-barcode-generator/src',
         ),
         'ParagonIE\\ConstantTime\\' => 
         array (

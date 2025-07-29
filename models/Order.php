@@ -9,68 +9,123 @@ class Order
         $this->conn = $db;
     }
 
-    public function createOrder($user_id, $order_number, $orderData)
+    public function createOrder($user_id, $orderData)
     {
         $this->conn->begin_transaction();
 
         try {
-
-            $stmt = $this->conn->prepare("
-                INSERT INTO orders (
-                    user_id, subtotal, shipping_fee, tax, total_amount,
-                    order_number, payment_method, shipping_address_id, tracking_number, store_id
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ");
-
-            $stmt->bind_param(
-                "sddddssss",
-                $user_id,
-                $orderData['subtotal'],
-                $orderData['shipping'],
-                $orderData['tax'],
-                $orderData['total'],
-                $order_number,
-                $orderData['payment_method'],
-                $orderData['shipping_address_id'],
-                ""
-            );
-
-            if (!$stmt->execute()) {
-                throw new Exception("Failed to create order.");
+            if (empty($orderData['products'])) {
+                throw new Exception("Order must contain at least one product.");
             }
 
-            $order_id = $this->conn->insert_id;
-
-            // Insert order items
+            // Group products by store
+            $productsByStore = [];
             foreach ($orderData['products'] as $product) {
+                $productsByStore[$product['store_id']][] = $product;
+            }
+
+            $orderResponses = [];
+
+            foreach ($productsByStore as $store_id => $products) {
+                // Recalculate amounts per store
+                $subtotal = 0;
+                foreach ($products as $product) {
+                    $subtotal += $product['price'] * $product['quantity'];
+                }
+
+                $shipping = $orderData['shipping'] ?? 0;
+                $tax = $orderData['tax'] ?? 0;
+                $total = $subtotal + $shipping + $tax;
+
+                $order_number = UIDGenerator::generateOrderNumber();
+
+                // Insert order
                 $stmt = $this->conn->prepare("
-                    INSERT INTO order_items (order_id, product_id, quantity, price)
-                    VALUES (?, ?, ?, ?)
-                ");
+                INSERT INTO orders (
+                    user_id, subtotal, shipping_fee, tax, total_amount,
+                    order_number, shipping_address_id, store_id
+                ) VALUES (?, ?,  ?, ?, ?, ?, ?, ?)
+            ");
+
                 $stmt->bind_param(
-                    "iiid",
-                    $order_id,
-                    $product['pid'],
-                    $product['quantity'],
-                    $product['price'],
+                    "sddddsii",
+                    $user_id,
+                    $subtotal,
+                    $shipping,
+                    $tax,
+                    $total,
+                    $order_number,
+                    $orderData['shipping_address_id'],
+                    $store_id
                 );
 
                 if (!$stmt->execute()) {
-                    throw new Exception("Failed to insert order item.");
+                    throw new Exception("Failed to create order for store $store_id: " . $stmt->error);
                 }
-            }
 
-            $orderStatusHistory = new OrderStatusHistory($this->conn);
-            if (!$orderStatusHistory->create($order_id, 'pending')) {
-                throw new Exception("Failed to create order status history.");
+                $order_id = $this->conn->insert_id;
+
+                // Insert order items for this store
+                foreach ($products as $product) {
+                    $stmt = $this->conn->prepare("
+                    INSERT INTO order_items (order_id, product_id, quantity, price)
+                    VALUES (?, ?, ?, ?)
+                ");
+                    $stmt->bind_param(
+                        "iiid",
+                        $order_id,
+                        $product['pid'],
+                        $product['quantity'],
+                        $product['price']
+                    );
+
+                    if (!$stmt->execute()) {
+                        throw new Exception("Failed to insert item for store $store_id: " . $stmt->error);
+                    }
+                }
+
+            
+                $stmt = $this->conn->prepare("
+                    INSERT INTO order_payments (
+                        order_id, payment_method, amount, status, transaction_id
+                    ) VALUES (?, ?, ?, ?, ?)
+                ");
+
+
+                $transaction_id = UIDGenerator::generateTransactionId(); 
+                $paymentMethod = $orderData['payment_method'] ?? 'unknown';
+                $paymentStatus = 'pending';
+
+                $stmt->bind_param(
+                    "isdss",
+                    $order_id,
+                    $paymentMethod,
+                    $total,
+                    $paymentStatus,
+                    $transaction_id
+                );
+
+                if (!$stmt->execute()) {
+                    throw new Exception("Failed to create payment record for order $order_id: " . $stmt->error);
+                }
+
+                $orderStatusHistory = new OrderStatusHistory($this->conn);
+                if (!$orderStatusHistory->create($order_id, 'pending')) {
+                    throw new Exception("Failed to create order status for store $store_id.");
+                }
+
+                $orderResponses[] = [
+                    'store_id' => $store_id,
+                    'order_id' => $order_id,
+                    'order_number' => $order_number
+                ];
             }
 
             $this->conn->commit();
 
             return [
                 'status' => 'success',
-                'order_id' => $order_id,
-                'order_number' => $order_number
+                'orders' => $orderResponses
             ];
         } catch (Exception $e) {
             $this->conn->rollback();
@@ -82,7 +137,8 @@ class Order
     }
 
 
-    
+
+
 
     public function getOrderBy($order_number)
     {
@@ -95,7 +151,7 @@ class Order
             o.shipping_fee,
             o.tax,
             o.total_amount,
-            o.payment_method,
+
             o.order_number,
             o.created_at
         FROM orders o
@@ -146,7 +202,7 @@ class Order
 
     public function updateOrderStatus($order_number, $status)
     {
-        // Start transaction
+
         $this->conn->begin_transaction();
 
         try {
@@ -167,7 +223,6 @@ class Order
 
             $order_id = $order['order_id'];
 
-            // 2. Insert into order_status_history
             $insertHistory = "INSERT INTO order_status_history (order_id, status) VALUES (?, ?)";
             $stmt = $this->conn->prepare($insertHistory);
             $stmt->bind_param("is", $order_id, $status);
@@ -188,4 +243,43 @@ class Order
             ];
         }
     }
+
+    public function getOrderHistoryStatus($order_number)
+    {
+
+        $sql = "SELECT osh.status, osh.created_at 
+                FROM order_status_history osh
+                JOIN orders o ON osh.order_id = o.order_id
+                WHERE o.order_number = ?
+                ORDER BY osh.created_at DESC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("s", $order_number);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $history = [];
+        while ($row = $result->fetch_assoc()) {
+            $history[] = $row;
+        }
+        return $history;
+    }
+
+    public function addTrackingNumber($order_number, $tracking_number)
+    {
+
+        $sql = "UPDATE orders SET tracking_number = ? WHERE order_number = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("ss", $tracking_number, $order_number);
+        if (!$stmt->execute()) {
+            return [
+                'status' => 'error',
+                'message' => 'Failed to add tracking number: ' . $stmt->error
+            ];
+        }
+        return [
+            'status' => 'success',
+            'message' => 'Tracking number added successfully'
+        ];
+    }
+
 }

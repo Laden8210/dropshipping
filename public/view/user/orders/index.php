@@ -1,38 +1,3 @@
-<style>
-    .timeline-step {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .timeline-icon {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background-color: #ddd;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-    }
-
-    .timeline-step.completed .timeline-icon {
-        background-color: #28a745;
-    }
-
-    .timeline-step.active .timeline-icon {
-        background-color: #ffc107;
-    }
-
-    .timeline-step.pending .timeline-icon {
-        background-color: #6c757d;
-    }
-
-    .timeline-content p {
-        margin: 0;
-    }
-</style>
-
 <div class="main-container" id="main-container">
     <div class="header-section text-center">
 
@@ -88,50 +53,40 @@
             </button>
         </div>
         <div class="card-body">
-            <form>
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <label for="order-id" class="form-label">Order ID</label>
-                        <input type="text" class="form-control" id="order-id" placeholder="Order #">
-                    </div>
-                    <div class="col-md-3">
-                        <label for="customer-name" class="form-label">Customer Name</label>
-                        <input type="text" class="form-control" id="customer-name" placeholder="Customer name">
-                    </div>
-                    <div class="col-md-3">
-                        <label for="order-status" class="form-label">Order Status</label>
-                        <select class="form-select" id="order-status">
-                            <option value="">All Statuses</option>
-                            <option>Pending</option>
-                            <option>Processing</option>
-                            <option>Shipped</option>
-                            <option>Delivered</option>
-                            <option>Cancelled</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label for="date-range" class="form-label">Date Range</label>
-                        <select class="form-select" id="date-range">
-                            <option>All Time</option>
-                            <option>Today</option>
-                            <option>Last 7 Days</option>
-                            <option>Last 30 Days</option>
-                            <option>This Month</option>
-                            <option>Custom Range</option>
-                        </select>
-                    </div>
-                    <div class="col-md-12 d-flex justify-content-end">
-                        <div class="d-flex gap-2">
-                            <button type="reset" class="btn btn-outline-secondary px-4">
-                                <i class="fas fa-redo me-2"></i>Clear
-                            </button>
-                            <button type="submit" class="btn btn-primary px-4">
-                                <i class="fas fa-search me-2"></i>Apply Filters
-                            </button>
-                        </div>
+
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label for="order-id" class="form-label">Order ID</label>
+                    <input type="text" class="form-control" id="order-id" placeholder="Order #">
+                </div>
+                <div class="col-md-4">
+                    <label for="customer-name" class="form-label">Customer Name</label>
+                    <input type="text" class="form-control" id="customer-name" placeholder="Customer name">
+                </div>
+                <div class="col-md-4">
+                    <label for="order-status" class="form-label">Order Status</label>
+                    <select class="form-select" id="order-status">
+                        <option value="">All Statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+
+                <div class="col-md-12 d-flex justify-content-end">
+                    <div class="d-flex gap-2">
+                        <button type="button" onclick="clearFilters()" class="btn btn-outline-secondary px-4">
+                            <i class="fas fa-redo me-2"></i>Clear
+                        </button>
+                        <button type="button" onclick="applyFilters()" class="btn btn-primary px-4">
+                            <i class="fas fa-search me-2"></i>Apply Filters
+                        </button>
                     </div>
                 </div>
-            </form>
+            </div>
+
         </div>
     </div>
 
@@ -159,111 +114,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>#ORD-2023-00142</td>
-                            <td>
-                                <div class="customer-info">
-                                    <div class="customer-avatar">JS</div>
-                                    <div>John Smith</div>
-                                </div>
-                            </td>
-                            <td>Oct 12, 2023</td>
-                            <td>3 items</td>
-                            <td>$248.95</td>
-                            <td><span class="status-badge status-processing">Processing</span></td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary action-btn" data-bs-toggle="modal" data-bs-target="#orderModal">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-info action-btn">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>#ORD-2023-00141</td>
-                            <td>
-                                <div class="customer-info">
-                                    <div class="customer-avatar">MJ</div>
-                                    <div>Mary Johnson</div>
-                                </div>
-                            </td>
-                            <td>Oct 11, 2023</td>
-                            <td>2 items</td>
-                            <td>$129.99</td>
-                            <td><span class="status-badge status-shipped">Shipped</span></td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary action-btn" data-bs-toggle="modal" data-bs-target="#orderModal">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-info action-btn">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>#ORD-2023-00140</td>
-                            <td>
-                                <div class="customer-info">
-                                    <div class="customer-avatar">RW</div>
-                                    <div>Robert Williams</div>
-                                </div>
-                            </td>
-                            <td>Oct 10, 2023</td>
-                            <td>1 item</td>
-                            <td>$89.95</td>
-                            <td><span class="status-badge status-pending">Pending</span></td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary action-btn" data-bs-toggle="modal" data-bs-target="#orderModal">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-info action-btn">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>#ORD-2023-00139</td>
-                            <td>
-                                <div class="customer-info">
-                                    <div class="customer-avatar">ED</div>
-                                    <div>Emily Davis</div>
-                                </div>
-                            </td>
-                            <td>Oct 9, 2023</td>
-                            <td>5 items</td>
-                            <td>$421.50</td>
-                            <td><span class="status-badge status-delivered">Delivered</span></td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary action-btn" data-bs-toggle="modal" data-bs-target="#orderModal">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-info action-btn">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>#ORD-2023-00138</td>
-                            <td>
-                                <div class="customer-info">
-                                    <div class="customer-avatar">TB</div>
-                                    <div>Thomas Brown</div>
-                                </div>
-                            </td>
-                            <td>Oct 8, 2023</td>
-                            <td>2 items</td>
-                            <td>$75.25</td>
-                            <td><span class="status-badge status-cancelled">Cancelled</span></td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary action-btn" data-bs-toggle="modal" data-bs-target="#orderModal">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-info action-btn">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                            </td>
-                        </tr>
+
                     </tbody>
                 </table>
             </div>
@@ -314,6 +165,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <p><strong>Payment Method:</strong> Credit Card (Visa **** 4242)</p>
+                                        <p><strong>Transaction Num:</strong> <span class="order-info-transaction-id"></span></p>
                                         <p><strong>Payment Status:</strong> <span class="badge bg-success">Paid</span></p>
                                         <p><strong>Order Status:</strong> <span class="status-badge status-processing">Processing</span></p>
                                     </div>
@@ -382,12 +234,16 @@
                             <h6 class="mb-3"><i class="fas fa-cogs me-2"></i>Order Actions</h6>
                             <div class="d-grid gap-2">
 
-                                <button class="btn btn-outline-warning mb-2" id="printInvoiceBtn" data-order-id="ORD-2023-00142">
+                                <button class="btn btn-outline-warning mb-2" id="printInvoiceBtn"
+                                    onclick="printInvoice(this.getAttribute('data-order-id'))">
                                     <i class="fas fa-print me-2"></i>Print Invoice
                                 </button>
-                                <button class="btn btn-outline-danger" id="cancelOrderBtn" data-order-id="ORD-2023-00142">
-                                    <i class="fas fa-times-circle me-2"></i>Cancel Order
+                                <button class="btn btn-outline-danger" id="cancelOrderBtn"
+                                    onclick="editOrder(this.getAttribute('data-order-id'))">
+                                    <i class="fas fa-times me-2"></i>Cancel Order
                                 </button>
+
+
                             </div>
                         </div>
                     </div>
@@ -395,51 +251,46 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save Changes</button>
+
             </div>
         </div>
     </div>
 </div>
 
+<div class="modal class" id="update_status_modal" tabindex="-1" aria-labelledby="updateStatusModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateStatusModalLabel">Update Order Status</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="updateStatusForm" action="controller/supplier/order/index.php?action=update-order-status" method="POST">
+                    <input type="hidden" name="order_id" value="" id="order_id">
+                    <div class="mb-3">
+                        <label for="order-status-select" class="form-label">Select New Status</label>
+                        <select class="form-select" id="order-status-select" required name="status">
+                            <option value="" disabled selected>Select status</option>
+                            <option value="processing">Processing</option>
+                            <option value="shipped">Shipped</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" form="updateStatusForm" class="btn btn-primary" id="update-status-btn">Update Status</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-
-        const printBtn = document.getElementById("printInvoiceBtn");
-        const cancelBtn = document.getElementById("cancelOrderBtn");
-
-        printBtn.addEventListener("click", function() {
-            const orderId = this.getAttribute("data-order-id");
-
-        });
-
- 
-        cancelBtn.addEventListener("click", function() {
-            const orderId = this.getAttribute("data-order-id");
-            // send a request to cancel the order
-            new GetRequest({
-                getUrl: "controller/user/order?action=cancel-order",
-                params: {
-                    order_number: orderId
-                },
-                callback: (err, res) => {
-                    if (err) {
-                        console.error("Error cancelling order:", err);
-                        return;
-                    }
-                    // sweet alert 
-                    Swal.fire({
-                        title: 'Order Cancelled',
-                        text: `Order #${orderId} has been cancelled successfully.`,
-                        icon: 'success',
-                        confirmButtonText: 'OK'
-                    }).then(() => {
-    
-                       window.location.reload();
-                    });
-                }
-            }).send();
-        });
         const timelineSteps = document.querySelectorAll('.timeline-step');
 
         timelineSteps.forEach(step => {
@@ -456,14 +307,33 @@
         });
     });
 
+    new CreateRequest({
+        formSelector: '#updateStatusForm',
+        submitButtonSelector: '#update-status-btn',
+        callback: (err, res) => err ? console.error("Form submission error:", err) : console.log("Form submitted successfully:", res),
+        redirectUrl: 'orders',
+    });
 
-    window.viewProduct = (keyword, sort_by) => {
+
+    printInvoice = (orderId) => {
+        console.log("Printing invoice for order:", orderId);
+
+        const printWindow = window.open(`print?action=print-invoice&order_id=${orderId}`, '_blank');
+        if (printWindow) {
+            printWindow.focus();
+        } else {
+            console.error("Failed to open print window. Please allow pop-ups for this site.");
+        }
+    };
+
+    window.viewProduct = (order_number, customer_name, order_status) => {
         new GetRequest({
             getUrl: "controller/user/order?action=get-orders",
             params: {
-                keyword,
+                order_number: order_number || "",
+                customer_name: customer_name || "",
+                order_status: order_status || "",
 
-                status,
 
             },
             callback: (err, data) => {
@@ -479,18 +349,20 @@
                 const newOrdersCount = document.getElementById("new-orders-count");
                 newOrdersCount.textContent = `${data.length} new orders`;
 
-                const totalOrderCount = document.querySelector(".order-stats .stat-card:nth-child(1) h3");
-                totalOrderCount.textContent = data.length;
-                const pendingOrderCount = document.querySelector(".order-stats .stat-card:nth-child(2) h3");
-                pendingOrderCount.textContent = data.filter(order => order.status.toLowerCase() === 'pending').length;
-                const processingOrderCount = document.querySelector(".order-stats .stat-card:nth-child(3) h3");
-                processingOrderCount.textContent = data.filter(order => order.status.toLowerCase() === 'processing').length;
-                const completedOrderCount = document.querySelector(".order-stats .stat-card:nth-child(4) h3");
-                completedOrderCount.textContent = data.filter(order => order.status.toLowerCase() === 'completed').length;
+                // card kpi
+                const totalOrders = data.length;
+                const pendingOrders = data.filter(order => order.status === 'pending').length;
+                const processingOrders = data.filter(order => order.status === 'processing').length;
+                const completedOrders = data.filter(order => order.status === 'completed').length;
+                document.querySelector('.stat-card:nth-child(1) h3').textContent = totalOrders;
+                document.querySelector('.stat-card:nth-child(2) h3').textContent = pendingOrders;
+                document.querySelector('.stat-card:nth-child(3) h3').textContent = processingOrders;
+                document.querySelector('.stat-card:nth-child(4) h3').textContent = completedOrders;
+
 
                 data.forEach(order => {
                     const row = document.createElement("tr");
-
+                    // count the item quantity
                     order.items_count = order.items ?
                         order.items.reduce((sum, item) => sum + parseInt(item.quantity, 10), 0) :
                         0;
@@ -509,11 +381,15 @@
                         <td>${order.total_amount}</td>
                         <td><span class="status-badge status-${order.status.toLowerCase()}">${order.status}</span></td>
                         <td>
-                            <button class="btn btn-sm btn-outline-primary action-btn" data-bs-toggle="modal" data-bs-target="#orderModal"
+                            <button class="btn btn-sm btn-outline-primary action-btn"
                                 onclick="getOrderDetails('${order.order_number}')">
                                 <i class="fas fa-eye"></i>
                             </button>
-                     
+                            <button class="btn btn-sm btn-outline-info action-btn" onclick="editOrder('${order.order_number}')">
+                                <i class="fas fa-edit"></i>
+                                Edit
+                            </button>
+                
                         </td>
                     `;
 
@@ -522,6 +398,15 @@
             }
         }).send();
     };
+
+    function editOrder(orderNumber) {
+        console.log("Editing order:", orderNumber);
+
+        document.getElementById("order_id").value = orderNumber;
+        const updateStatusModal = new bootstrap.Modal(document.getElementById('update_status_modal'));
+        updateStatusModal.show();
+    }
+
     // Function to fetch order details and populate the modal
     function getOrderDetails(orderNumber) {
         new GetRequest({
@@ -529,13 +414,11 @@
             params: {
                 order_number: orderNumber
             },
-            callback: (err, res) => {
-                if (err) {
-                    console.error("Error fetching order details:", err);
-                    return;
-                }
-                const data = res.data || res;
-                // Populate modal with order details
+            callback: (err, data) => {
+
+
+                console.log("Order details retrieved:", data.order_number);
+
                 document.getElementById('orderModalLabel').textContent = `Order #${data.order_number}`;
                 document.querySelector('.order-info-date').textContent = formatDateTime(data.created_at);
 
@@ -601,20 +484,23 @@
                     `;
                 }
                 const infoCol2 = document.querySelectorAll('.card-body .row .col-md-6')[1];
+
                 if (infoCol2) {
                     infoCol2.innerHTML = `
-                        <p><strong>Payment Method:</strong> ${formatPaymentMethod(data.payment_method)}</p>
-                        <p><strong>Payment Status:</strong> <span class="badge bg-success">Paid</span></p>
+                        <p><strong>Payment Method:</strong> ${data.payment && data.payment.payment_method ? formatPaymentMethod(data.payment.payment_method) : '-'}</p>
+                        <p><strong>Payment Status:</strong> <span class="badge bg-success">${data.payment && data.payment.status ? capitalize(data.payment.status) : '-'}</span></p>
                         <p><strong>Order Status:</strong> <span class="status-badge status-${data.status.toLowerCase()}">${capitalize(data.status)}</span></p>
-                    `;
+                    
+                        <p><strong>Transaction Num:</strong> <span class="order-info-transaction-id">${data.payment && data.payment.transaction_id ? data.payment.transaction_id : '-'}</span></p>`;
                 }
+
 
                 // get the buttons
                 const printBtn = document.getElementById("printInvoiceBtn");
-                const cancelBtn = document.getElementById("cancelOrderBtn");
+                // const cancelBtn = document.getElementById("cancelOrderBtn");
 
                 printBtn.setAttribute("data-order-id", data.order_number);
-                cancelBtn.setAttribute("data-order-id", data.order_number);
+                // cancelBtn.setAttribute("data-order-id", data.order_number);
 
 
                 const statusHistory = data.status_history || [];
@@ -694,10 +580,29 @@
         return colors[index % colors.length];
     }
 
+    function clearFilters() {
+        document.getElementById("order-id").value = "";
+        document.getElementById("customer-name").value = "";
+        document.getElementById("order-status").value = "";
+        document.getElementById("date-range").value = "";
+        window.viewProduct("", "", "", "");
+    }
+
+    function applyFilters() {
+        const orderNumber = document.getElementById("order-id").value;
+        const customerName = document.getElementById("customer-name").value;
+        const orderStatus = document.getElementById("order-status").value;
+        const dateRange = document.getElementById("date-range").value;
+        window.viewProduct(orderNumber, customerName, orderStatus);
+
+    }
+
     onload = () => {
-        const keyword = document.getElementById("order-id").value;
+        const orderNumber = document.getElementById("order-id").value;
         const status = document.getElementById("order-status").value;
 
-        window.viewProduct(keyword, status);
+        const customerName = document.getElementById("customer-name").value;
+
+        window.viewProduct(orderNumber, customerName, status);
     };
 </script>

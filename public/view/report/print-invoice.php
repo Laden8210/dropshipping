@@ -333,7 +333,7 @@ ob_start();
         <div class="payment-info">
             <div class="payment-method">
                 <div class="info-title">Payment Method</div>
-                <div class="info-value"><?= strtoupper($order['payment_method']) ?></div>
+                <div class="info-value"><?= strtoupper($order['payment']['payment_method']) ?></div>
             </div>
             <div class="tracking-info">
                 <div class="info-title">Tracking Number</div>

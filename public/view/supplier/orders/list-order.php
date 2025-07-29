@@ -54,39 +54,39 @@
         </div>
         <div class="card-body">
 
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <label for="order-id" class="form-label">Order ID</label>
-                        <input type="text" class="form-control" id="order-id" placeholder="Order #">
-                    </div>
-                    <div class="col-md-4">
-                        <label for="customer-name" class="form-label">Customer Name</label>
-                        <input type="text" class="form-control" id="customer-name" placeholder="Customer name">
-                    </div>
-                    <div class="col-md-4">
-                        <label for="order-status" class="form-label">Order Status</label>
-                        <select class="form-select" id="order-status">
-                            <option value="">All Statuses</option>
-                            <option value="pending">Pending</option>
-                            <option value="processing">Processing</option>
-                            <option value="shipped">Shipped</option>
-                            <option value="delivered">Delivered</option>
-                            <option value="cancelled">Cancelled</option>
-                        </select>
-                    </div>
-                 
-                    <div class="col-md-12 d-flex justify-content-end">
-                        <div class="d-flex gap-2">
-                            <button type="button" onclick="clearFilters()" class="btn btn-outline-secondary px-4">
-                                <i class="fas fa-redo me-2"></i>Clear
-                            </button>
-                            <button type="button" onclick="applyFilters()" class="btn btn-primary px-4">
-                                <i class="fas fa-search me-2"></i>Apply Filters
-                            </button>
-                        </div>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label for="order-id" class="form-label">Order ID</label>
+                    <input type="text" class="form-control" id="order-id" placeholder="Order #">
+                </div>
+                <div class="col-md-4">
+                    <label for="customer-name" class="form-label">Customer Name</label>
+                    <input type="text" class="form-control" id="customer-name" placeholder="Customer name">
+                </div>
+                <div class="col-md-4">
+                    <label for="order-status" class="form-label">Order Status</label>
+                    <select class="form-select" id="order-status">
+                        <option value="">All Statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+
+                <div class="col-md-12 d-flex justify-content-end">
+                    <div class="d-flex gap-2">
+                        <button type="button" onclick="clearFilters()" class="btn btn-outline-secondary px-4">
+                            <i class="fas fa-redo me-2"></i>Clear
+                        </button>
+                        <button type="button" onclick="applyFilters()" class="btn btn-primary px-4">
+                            <i class="fas fa-search me-2"></i>Apply Filters
+                        </button>
                     </div>
                 </div>
- 
+            </div>
+
         </div>
     </div>
 
@@ -110,11 +110,12 @@
                             <th>Items</th>
                             <th>Total</th>
                             <th>Status</th>
+                            <th>Tracking Number</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                  
+
                     </tbody>
                 </table>
             </div>
@@ -165,6 +166,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <p><strong>Payment Method:</strong> Credit Card (Visa **** 4242)</p>
+                                        <p><strong>Transaction Num:</strong> <span class="order-info-transaction-id"></span></p>
                                         <p><strong>Payment Status:</strong> <span class="badge bg-success">Paid</span></p>
                                         <p><strong>Order Status:</strong> <span class="status-badge status-processing">Processing</span></p>
                                     </div>
@@ -234,10 +236,18 @@
                             <div class="d-grid gap-2">
 
                                 <button class="btn btn-outline-warning mb-2" id="printInvoiceBtn"
-                                onclick="printInvoice(this.getAttribute('data-order-id'))">
+                                    onclick="printInvoice(this.getAttribute('data-order-id'))">
                                     <i class="fas fa-print me-2"></i>Print Invoice
                                 </button>
-            
+                                <button class="btn btn-outline-danger" id="cancelOrderBtn"
+                                    onclick="editOrder(this.getAttribute('data-order-id'))">
+                                    <i class="fas fa-times me-2"></i>Cancel Order
+                                </button>
+
+                               
+                                
+
+
                             </div>
                         </div>
                     </div>
@@ -245,7 +255,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            
+
             </div>
         </div>
     </div>
@@ -284,7 +294,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    
     document.addEventListener('DOMContentLoaded', function() {
         const timelineSteps = document.querySelectorAll('.timeline-step');
 
@@ -312,8 +321,7 @@
 
     printInvoice = (orderId) => {
         console.log("Printing invoice for order:", orderId);
-        // Implement the print functionality here
-        // For example, you can open a new window with the invoice details
+
         const printWindow = window.open(`print?action=print-invoice&order_id=${orderId}`, '_blank');
         if (printWindow) {
             printWindow.focus();
@@ -336,7 +344,7 @@
                 if (err) return console.error("Error fetching user data:", err);
                 console.log("User data retrieved:", data);
 
-            
+
 
                 const tableBody = document.querySelector(".order-table tbody");
 
@@ -376,7 +384,8 @@
                         <td>${order.items_count} items</td>
                         <td>${order.total_amount}</td>
                         <td><span class="status-badge status-${order.status.toLowerCase()}">${order.status}</span></td>
-                        <td>
+                        <td>${order.tracking_number || '-'}</td>
+                        <td class="d-flex gap-1 align-content-center">
                             <button class="btn btn-sm btn-outline-primary action-btn"
                                 onclick="getOrderDetails('${order.order_number}')">
                                 <i class="fas fa-eye"></i>
@@ -385,6 +394,15 @@
                                 <i class="fas fa-edit"></i>
                                 Edit
                             </button>
+                 
+                            ${order.tracking_number ? `
+                                <button class="btn btn-sm btn-outline-secondary action-btn" onclick="window.open('track?tracking_number=${order.tracking_number}', '_blank')">
+                                    <i class="fas fa-truck"></i> Track
+                                </button>
+                                 <button class="btn btn-sm btn-outline-secondary action-btn" onclick="window.open('print?action=print-awb&tracking_number=${order.tracking_number}', '_blank')">
+                                     <i class="fas fa-print"></i> Print AWB
+                                 </button>
+                            ` : ''}
                 
                         </td>
                     `;
@@ -403,17 +421,18 @@
         updateStatusModal.show();
     }
 
-      // Function to fetch order details and populate the modal
+    // Function to fetch order details and populate the modal
     function getOrderDetails(orderNumber) {
         new GetRequest({
             getUrl: "controller/supplier/order?action=get-order-details",
             params: {
                 order_number: orderNumber
             },
-            callback: (err, res) => {
-             
-                const data = res.data || res;
-                // Populate modal with order details
+            callback: (err, data) => {
+
+
+                console.log("Order details retrieved:", data.order_number);
+
                 document.getElementById('orderModalLabel').textContent = `Order #${data.order_number}`;
                 document.querySelector('.order-info-date').textContent = formatDateTime(data.created_at);
 
@@ -479,12 +498,14 @@
                     `;
                 }
                 const infoCol2 = document.querySelectorAll('.card-body .row .col-md-6')[1];
+
                 if (infoCol2) {
                     infoCol2.innerHTML = `
-                        <p><strong>Payment Method:</strong> ${formatPaymentMethod(data.payment_method)}</p>
-                        <p><strong>Payment Status:</strong> <span class="badge bg-success">Paid</span></p>
+                        <p><strong>Payment Method:</strong> ${data.payment && data.payment.payment_method ? formatPaymentMethod(data.payment.payment_method) : '-'}</p>
+                        <p><strong>Payment Status:</strong> <span class="badge bg-success">${data.payment && data.payment.status ? capitalize(data.payment.status) : '-'}</span></p>
                         <p><strong>Order Status:</strong> <span class="status-badge status-${data.status.toLowerCase()}">${capitalize(data.status)}</span></p>
-                    `;
+                    
+                        <p><strong>Transaction Num:</strong> <span class="order-info-transaction-id">${data.payment && data.payment.transaction_id ? data.payment.transaction_id : '-'}</span></p>`;
                 }
 
                 // get the buttons
@@ -579,13 +600,14 @@
         document.getElementById("date-range").value = "";
         window.viewProduct("", "", "", "");
     }
+
     function applyFilters() {
         const orderNumber = document.getElementById("order-id").value;
         const customerName = document.getElementById("customer-name").value;
         const orderStatus = document.getElementById("order-status").value;
         const dateRange = document.getElementById("date-range").value;
-      window.viewProduct(orderNumber, customerName, orderStatus);
-  
+        window.viewProduct(orderNumber, customerName, orderStatus);
+
     }
 
     onload = () => {

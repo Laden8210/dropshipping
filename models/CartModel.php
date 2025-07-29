@@ -1,14 +1,17 @@
 <?php
 
-class CartModel {
+class CartModel
+{
     private $db;
 
-    public function __construct(mysqli $db) {
+    public function __construct(mysqli $db)
+    {
         $this->db = $db;
     }
 
-   
-    public function addToCart($userId, $productId, $quantity, $storeId) {
+
+    public function addToCart($userId, $productId, $quantity, $storeId)
+    {
 
         $check = $this->db->prepare("SELECT cart_id, quantity FROM cart WHERE user_id = ? AND product_id = ?");
         $check->bind_param("si", $userId, $productId);
@@ -16,7 +19,7 @@ class CartModel {
         $result = $check->get_result();
 
         if ($result->num_rows > 0) {
-        
+
             $row = $result->fetch_assoc();
             $newQuantity = $row['quantity'] + $quantity;
 
@@ -24,51 +27,95 @@ class CartModel {
             $update->bind_param("ii", $newQuantity, $row['cart_id']);
             return $update->execute();
         } else {
-            // Insert new
+
             $stmt = $this->db->prepare("INSERT INTO cart (user_id, product_id, quantity, store_id) VALUES (?, ?, ?, ?)");
             $stmt->bind_param("siii", $userId, $productId, $quantity, $storeId);
             return $stmt->execute();
         }
     }
 
-
-    public function getCartItems($userId) {
+    public function getCartItems($userId)
+    {
         $stmt = $this->db->prepare("
-            SELECT c.cart_id, c.quantity, c.created_at, c.updated_at,
-                   p.product_name, p.product_sku, p.description,
-                   sp.store_name
-            FROM cart c
-            JOIN imported_product ip ON c.product_id = ip.imported_product_id
-            JOIN products p ON ip.product_id = p.product_id
-            JOIN store_profile sp ON c.store_id = sp.store_id
-            WHERE c.user_id = ?
-        ");
+        SELECT 
+            c.cart_id, 
+            c.quantity, 
+            c.created_at, 
+            c.updated_at,
+            p.product_name, 
+            p.product_sku, 
+            p.description,
+            p.product_id,
+            pi.image_url AS product_image,
+            sp.store_id,   
+            sp.store_name,
+            ROUND(pph.price * (1 + ip.profit_margin / 100), 2) AS selling_price,
+            pph.currency,
+            ip.profit_margin,
+            pph.price AS base_price
+        FROM cart c
+        JOIN imported_product ip 
+            ON c.product_id = ip.product_id 
+            AND c.store_id = ip.store_id
+        JOIN products p 
+            ON ip.product_id = p.product_id
+        JOIN store_profile sp 
+            ON c.store_id = sp.store_id
+        JOIN (
+            SELECT 
+                product_id, 
+                price, 
+                currency,
+                ROW_NUMBER() OVER (PARTITION BY product_id ORDER BY change_date DESC) as rn
+            FROM product_price_history
+        ) pph ON p.product_id = pph.product_id AND pph.rn = 1
+        LEFT JOIN product_images pi 
+            ON p.product_id = pi.product_id 
+            AND pi.is_primary = 1
+        WHERE c.user_id = ?
+    ");
         $stmt->bind_param("s", $userId);
         $stmt->execute();
         $result = $stmt->get_result();
-        $items = [];
+
+        $groupedItems = [];
         while ($row = $result->fetch_assoc()) {
-            $items[] = $row;
+            $storeId = $row['store_id'];
+
+            if (!isset($groupedItems[$storeId])) {
+                $groupedItems[$storeId] = [
+                    'store_id' => $storeId,
+                    'store_name' => $row['store_name'],
+                    'items' => []
+                ];
+            }
+
+            $item = $row;
+            unset($item['store_id'], $item['store_name']);
+            $groupedItems[$storeId]['items'][] = $item;
         }
-        return $items;
+
+        return array_values($groupedItems);
     }
 
-
-    public function updateQuantity($cartId, $quantity) {
+    public function updateQuantity($cartId, $quantity)
+    {
         $stmt = $this->db->prepare("UPDATE cart SET quantity = ?, updated_at = CURRENT_TIMESTAMP WHERE cart_id = ?");
         $stmt->bind_param("ii", $quantity, $cartId);
         return $stmt->execute();
     }
 
 
-    public function removeFromCart($cartId) {
+    public function removeFromCart($cartId)
+    {
         $stmt = $this->db->prepare("DELETE FROM cart WHERE cart_id = ?");
         $stmt->bind_param("i", $cartId);
         return $stmt->execute();
     }
 
 
-    public function clearCart($userId, $selectProducts) {
+    public function clearCart($userId, $selectProducts)
+    {
         $placeholders = implode(',', array_fill(0, count($selectProducts), '?'));
         $types = str_repeat('i', count($selectProducts));
 
@@ -77,7 +124,8 @@ class CartModel {
         return $stmt->execute();
     }
 
-    public function getCartCount($userId) {
+    public function getCartCount($userId)
+    {
         $stmt = $this->db->prepare("SELECT SUM(quantity) as total_items FROM cart WHERE user_id = ?");
         $stmt->bind_param("s", $userId);
         $stmt->execute();

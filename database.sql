@@ -53,6 +53,7 @@ CREATE TABLE imported_product (
     user_id CHAR(14) NOT NULL,
     product_id BIGINT NOT NULL,
     store_id BIGINT NOT NULL,
+    profit_margin DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_imported_product_user FOREIGN KEY (user_id) REFERENCES users(user_id),
@@ -150,6 +151,7 @@ create table cart (
 CREATE TABLE orders (
     order_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id CHAR(14) NOT NULL,
+    store_id BIGINT NOT NULL,
     subtotal DECIMAL(10, 2) NOT NULL,
     shipping_fee DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     tax DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
@@ -160,14 +162,15 @@ CREATE TABLE orders (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_orders_user FOREIGN KEY (user_id) REFERENCES users(user_id),
-    CONSTRAINT fk_orders_shipping_address FOREIGN KEY (shipping_address_id) REFERENCES user_shipping_address(address_id)
+    CONSTRAINT fk_orders_shipping_address FOREIGN KEY (shipping_address_id) REFERENCES user_shipping_address(address_id),
+    CONSTRAINT fk_orders_store FOREIGN KEY (store_id) REFERENCES store_profile(store_id)
 );
 
 
 create table order_payments (
     payment_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     order_id BIGINT NOT NULL,
-    payment_method ENUM('credit_card', 'paypal', 'bank_transfer', 'cash_on_delivery') NOT NULL,
+    payment_method VARCHAR(50) NOT NULL,
     account_number VARCHAR(100) DEFAULT NULL,
     amount DECIMAL(10, 2) NOT NULL,
     status ENUM('pending', 'completed', 'failed', 'refunded') DEFAULT 'pending',
@@ -201,7 +204,6 @@ create table order_shipping_status (
     order_id BIGINT NOT NULL,
     remarks TEXT DEFAULT NULL,
     tracking_number VARCHAR(100) DEFAULT NULL,
-    carrier VARCHAR(100) DEFAULT NULL,
     current_location VARCHAR(255) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

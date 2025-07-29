@@ -16,7 +16,19 @@ $customer_name = isset($_GET['customer_name']) ? trim($_GET['customer_name']) : 
 $order_status = isset($_GET['order_status']) ? trim($_GET['order_status']) : '';
 $date_range = isset($_GET['date_range']) ? trim($_GET['date_range']) : '';
 
-$orders = $orderProductModel->getAll();
+$store_id= $_SESSION['auth']['store_id'] ?? null;
+if (!$store_id) {
+    http_response_code(403);
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Unauthorized access',
+        'data' => null,
+        'http_code' => 403
+    ]);
+    exit;
+}
+
+$orders = $orderProductModel->getByStoreId($store_id);
 if ($orders === false) {
     http_response_code(500);
     echo json_encode([

@@ -15,8 +15,9 @@ $order_number = isset($_GET['order_number']) ? trim($_GET['order_number']) : '';
 $customer_name = isset($_GET['customer_name']) ? trim($_GET['customer_name']) : '';
 $order_status = isset($_GET['order_status']) ? trim($_GET['order_status']) : '';
 $date_range = isset($_GET['date_range']) ? trim($_GET['date_range']) : '';
+$supplier_id = $_SESSION['auth']['user_id'] ?? null;
 
-$orders = $orderProductModel->getAll();
+$orders = $orderProductModel->getBySupplierId($supplier_id);
 if ($orders === false) {
     http_response_code(500);
     echo json_encode([

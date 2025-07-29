@@ -70,4 +70,18 @@ class UIDGenerator
 
         return $trackingNumber;
     }
+
+    public static function generateTransactionId()
+    {
+        $dateTimePart = date('Ymd-His');
+        $randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        $randomPart = substr(str_shuffle($randomChars), 0, 4);
+        $transactionId = 'TXN-' . $dateTimePart . '-' . $randomPart;
+
+        if (!preg_match('/^TXN-\d{8}-\d{6}-[A-Z0-9]{4}$/', $transactionId)) {
+            return self::generateTransactionId();
+        }
+
+        return $transactionId;
+    }
 }

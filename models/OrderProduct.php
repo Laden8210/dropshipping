@@ -65,6 +65,7 @@ class OrderProduct
                         p.product_name, p.product_sku, p.product_category, p.description, 
                         pi.image_url AS primary_image, 
                         pc.category_name
+                
                  FROM {$this->orderItemTable} oi
                  LEFT JOIN products p ON oi.product_id = p.product_id
                  LEFT JOIN (
@@ -92,6 +93,16 @@ class OrderProduct
 
         $order['items'] = $items;
 
+        // get payment details if exists
+        $sqlPayment = "SELECT * FROM order_payments WHERE order_id = ?";
+        $stmt = $this->conn->prepare($sqlPayment);
+        $stmt->bind_param("i", $order['order_id']);
+        $stmt->execute();
+        $paymentResult = $stmt->get_result();
+        $order['payment'] = $paymentResult->fetch_assoc();
+        $stmt->close();
+
+
         if (!empty($order['address_line'])) {
             $order['shipping_address'] = [
                 'address_line' => $order['address_line'],
@@ -104,7 +115,7 @@ class OrderProduct
             $order['shipping_address'] = null;
         }
 
-        // Get order status history sql
+
         $sqlStatusHistory = "SELECT osh.status, osh.created_at 
                              FROM order_status_history osh 
                              WHERE osh.order_id = ? 
@@ -126,6 +137,7 @@ class OrderProduct
         } else {
             $order['status'] = 'pending';
         }
+
 
 
         unset($order['address_line'], $order['region'], $order['city'], $order['brgy'], $order['postal_code']);
@@ -277,6 +289,132 @@ class OrderProduct
                     'total_amount' => $row['total_amount'],
                     'created_at' => $row['created_at'],
                     'status' => $row['latest_status'] ?? '',
+                    'tracking_number' => $row['tracking_number'] ?? null,
+                    'user' => [
+                        'first_name' => $row['first_name'],
+                        'last_name' => $row['last_name'],
+                        'email' => $row['user_email'],
+                    ],
+                    'items' => []
+                ];
+            }
+
+            if (!empty($row['order_item_id'])) {
+                $orders[$oid]['items'][] = [
+                    'order_item_id' => $row['order_item_id'],
+                    'product_id' => $row['product_id'],
+                    'quantity' => $row['quantity'],
+                    'price' => $row['price'],
+                ];
+            }
+        }
+
+        return array_values($orders);
+    }
+
+    public function getBySupplierId($supplier_id)
+    {
+        $sql = "SELECT 
+                o.*, 
+                u.first_name, u.last_name, u.email AS user_email,
+                oi.order_item_id, oi.product_id, oi.quantity, oi.price,
+                osh.status AS latest_status
+            FROM {$this->orderTable} o
+            LEFT JOIN {$this->userTable} u ON o.user_id = u.user_id
+            LEFT JOIN {$this->orderItemTable} oi ON o.order_id = oi.order_id
+            LEFT JOIN (
+                SELECT osh1.order_id, osh1.status
+                FROM order_status_history osh1
+                INNER JOIN (
+                    SELECT order_id, MAX(created_at) AS latest_created
+                    FROM order_status_history
+                    GROUP BY order_id
+                ) osh2 ON osh1.order_id = osh2.order_id AND osh1.created_at = osh2.latest_created
+            ) osh ON o.order_id = osh.order_id
+            LEFT JOIN products p ON oi.product_id = p.product_id
+            WHERE p.user_id = ?
+            ORDER BY o.created_at DESC";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("s", $supplier_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $orders = [];
+
+        while ($row = $result->fetch_assoc()) {
+            $oid = $row['order_id'];
+
+            if (!isset($orders[$oid])) {
+                $orders[$oid] = [
+                    'order_id' => $row['order_id'],
+                    'user_id' => $row['user_id'],
+                    'order_number' => $row['order_number'],
+                    'total_amount' => $row['total_amount'],
+                    'created_at' => $row['created_at'],
+                    'status' => $row['latest_status'] ?? '',
+                    'tracking_number' => $row['tracking_number'] ?? null,
+                    'user' => [
+                        'first_name' => $row['first_name'],
+                        'last_name' => $row['last_name'],
+                        'email' => $row['user_email'],
+                    ],
+                    'items' => []
+                ];
+            }
+
+            if (!empty($row['order_item_id'])) {
+                $orders[$oid]['items'][] = [
+                    'order_item_id' => $row['order_item_id'],
+                    'product_id' => $row['product_id'],
+                    'quantity' => $row['quantity'],
+                    'price' => $row['price'],
+                ];
+            }
+        }
+
+        return array_values($orders);
+    }
+
+    public function getByStoreId($store_id)
+    {
+        $sql = "SELECT 
+                o.*, 
+                u.first_name, u.last_name, u.email AS user_email,
+                oi.order_item_id, oi.product_id, oi.quantity, oi.price,
+                osh.status AS latest_status
+            FROM {$this->orderTable} o
+            LEFT JOIN {$this->userTable} u ON o.user_id = u.user_id
+            LEFT JOIN {$this->orderItemTable} oi ON o.order_id = oi.order_id
+            LEFT JOIN (
+                SELECT osh1.order_id, osh1.status
+                FROM order_status_history osh1
+                INNER JOIN (
+                    SELECT order_id, MAX(created_at) AS latest_created
+                    FROM order_status_history
+                    GROUP BY order_id
+                ) osh2 ON osh1.order_id = osh2.order_id AND osh1.created_at = osh2.latest_created
+            ) osh ON o.order_id = osh.order_id
+            WHERE o.store_id = ?
+            ORDER BY o.created_at DESC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $store_id);
+
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $orders = [];
+
+        while ($row = $result->fetch_assoc()) {
+            $oid = $row['order_id'];
+
+            if (!isset($orders[$oid])) {
+                $orders[$oid] = [
+                    'order_id' => $row['order_id'],
+                    'user_id' => $row['user_id'],
+                    'order_number' => $row['order_number'],
+                    'total_amount' => $row['total_amount'],
+                    'created_at' => $row['created_at'],
+                    'status' => $row['latest_status'] ?? '',
+                    'tracking_number' => $row['tracking_number'] ?? null,
                     'user' => [
                         'first_name' => $row['first_name'],
                         'last_name' => $row['last_name'],
@@ -425,7 +563,7 @@ class OrderProduct
             $stmt->bind_param("i", $orderId);
             $stmt->execute();
 
- 
+
             // $sql = "UPDATE order_payments SET status = 'refunded' WHERE order_id = ?";
             // $stmt = $this->conn->prepare($sql);
             // $stmt->bind_param("i", $orderId);
@@ -490,6 +628,94 @@ class OrderProduct
         } catch (Exception $e) {
             $this->conn->rollback();
             return false;
+        }
+    }
+
+    public function printAWB($tracking_number)
+    {
+        try {
+
+            $orderQuery = "
+                SELECT 
+                    o.order_id,
+                    o.order_number,
+                    o.tracking_number,
+                    o.created_at,
+                    sp.store_name,
+                    sp.store_address,
+                    sp.store_phone,
+                    usa.address_line,
+                    usa.region,
+                    usa.city,
+                    usa.brgy,
+                    usa.postal_code,
+                    u.first_name,
+                    u.last_name
+                FROM orders o
+                JOIN store_profile sp ON o.store_id = sp.store_id
+                JOIN user_shipping_address usa ON o.shipping_address_id = usa.address_id
+                JOIN users u ON o.user_id = u.user_id
+                WHERE o.tracking_number = ?
+            ";
+
+            $stmt = $this->conn->prepare($orderQuery);
+            $stmt->bind_param("s", $tracking_number);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $orderData = $result->fetch_assoc();
+            $stmt->close();
+
+            if (!$orderData) {
+                throw new Exception("Order not found");
+            }
+
+
+            $itemsQuery = "
+                        SELECT 
+                            p.product_name,
+                            oi.quantity
+                        FROM order_items oi
+                        JOIN imported_product ip ON oi.product_id = ip.imported_product_id
+                        JOIN products p ON ip.product_id = p.product_id
+                        WHERE oi.order_id = ?
+                    ";
+
+
+            $stmt = $this->conn->prepare($itemsQuery);
+            $stmt->bind_param("i", $orderData['order_id']);
+            $stmt->execute();
+            $itemsResult = $stmt->get_result();
+
+            $orderItems = [];
+            while ($row = $itemsResult->fetch_assoc()) {
+                $orderItems[] = $row;
+            }
+            $stmt->close();
+
+
+            $order = [
+                'order_number' => $orderData['order_number'],
+                'tracking_number' => $orderData['tracking_number'],
+                'shipping_address' => [
+                    'first_name' => $orderData['first_name'],
+                    'last_name' => $orderData['last_name'],
+                    'address_line' => $orderData['address_line'],
+                    'brgy' => $orderData['brgy'],
+                    'city' => $orderData['city'],
+                    'region' => $orderData['region'],
+                    'postal_code' => $orderData['postal_code']
+                ],
+                'store_profile' => [
+                    'store_name' => $orderData['store_name'],
+                    'store_address' => $orderData['store_address'],
+                    'store_phone' => $orderData['store_phone']
+                ],
+                'items' => $orderItems,
+                'service_type' => 'Standard Delivery'
+            ];
+            return $order;
+        } catch (Exception $e) {
+            die("Error: " . $e->getMessage());
         }
     }
 }

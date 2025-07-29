@@ -1,6 +1,6 @@
 <?php
 
-$product_id = isset($_GET['productId']) ? intval($_GET['productId']) : 0;
+$product_id = isset($_GET['product_id']) ? intval($_GET['product_id']) : 0;
 if ($product_id <= 0) {
     http_response_code(400);
     echo json_encode(['status' => 'error', 'message' => 'Valid product ID is required', 'http_code' => 400]);
