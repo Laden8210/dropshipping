@@ -48,6 +48,9 @@ switch ($request) {
             case 'cancel-order':
                 require_once 'cancel-order.php';
                 break;
+            case 'track-order':
+                require_once 'track-order.php';
+                break;
 
             default:
         }

@@ -16,7 +16,7 @@ try {
     $baseUrl = $isLocal ? 'http://localhost/dropshipping' : '';
     $request = trim(preg_replace('/[^a-zA-Z0-9_-]/', '', str_replace('/dropshipping/', '', explode('?', $_SERVER['REQUEST_URI'])[0])), '/');
 
-    if($request === 'redirect') {
+    if ($request === 'redirect') {
         include_once __DIR__ . '/public/view/google/redirect.php';
 
         exit;
@@ -89,7 +89,7 @@ try {
                 'title' => 'Order Management'
             ],
             'supplier' => [
-                'file' => 'supplier/orders/index.php',
+            'file' => 'supplier/orders/index.php',
                 'title' => 'Supplier Orders'
             ]
         ],
@@ -102,6 +102,21 @@ try {
             'supplier' => [
                 'file' => 'supplier/reports/index.php',
                 'title' => 'Supplier Reports'
+            ]
+        ],
+        'track' => [
+            'auth_required' => true,
+            'user' => [
+                'file' => 'user/track/index.php',
+                'title' => 'Track Orders'
+            ],
+            'supplier' => [
+                'file' => 'supplier/track/index.php',
+                'title' => 'Supplier Track'
+            ],
+            'courier' => [
+                'file' => 'courier/track/index.php',
+                'title' => 'Courier Track'
             ]
         ],
         'settings' => [

@@ -22,7 +22,6 @@ class OrderStatusHistory
         }
     }
 
-    // Get status history for a specific order
     public function getByOrderId($orderId)
     {
         $stmt = $this->conn->prepare("SELECT * FROM {$this->table} WHERE order_id = ? ORDER BY created_at DESC");

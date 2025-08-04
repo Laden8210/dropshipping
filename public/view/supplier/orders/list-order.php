@@ -243,11 +243,6 @@
                                     onclick="editOrder(this.getAttribute('data-order-id'))">
                                     <i class="fas fa-times me-2"></i>Cancel Order
                                 </button>
-
-                               
-                                
-
-
                             </div>
                         </div>
                     </div>
@@ -292,87 +287,105 @@
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const timelineSteps = document.querySelectorAll('.timeline-step');
+// tracking modal
+<div class="modal fade" id="trackingModal" tabindex="-1" aria-labelledby="trackingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="trackingModalLabel">Track Order</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="trackingInfoContainer">
+                    <!-- Tracking information will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-        timelineSteps.forEach(step => {
-            step.addEventListener('click', function() {
-                if (this.classList.contains('active')) {
-                    this.classList.remove('active');
-                    this.classList.add('completed');
-                } else if (this.classList.contains('completed')) {
-                    this.classList.remove('completed');
-                } else {
-                    this.classList.add('active');
-                }
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const timelineSteps = document.querySelectorAll('.timeline-step');
+
+            timelineSteps.forEach(step => {
+                step.addEventListener('click', function() {
+                    if (this.classList.contains('active')) {
+                        this.classList.remove('active');
+                        this.classList.add('completed');
+                    } else if (this.classList.contains('completed')) {
+                        this.classList.remove('completed');
+                    } else {
+                        this.classList.add('active');
+                    }
+                });
             });
         });
-    });
 
-    new CreateRequest({
-        formSelector: '#updateStatusForm',
-        submitButtonSelector: '#update-status-btn',
-        callback: (err, res) => err ? console.error("Form submission error:", err) : console.log("Form submitted successfully:", res),
-        redirectUrl: 'orders',
-    });
-
-
-    printInvoice = (orderId) => {
-        console.log("Printing invoice for order:", orderId);
-
-        const printWindow = window.open(`print?action=print-invoice&order_id=${orderId}`, '_blank');
-        if (printWindow) {
-            printWindow.focus();
-        } else {
-            console.error("Failed to open print window. Please allow pop-ups for this site.");
-        }
-    };
-
-    window.viewProduct = (order_number, customer_name, order_status) => {
-        new GetRequest({
-            getUrl: "controller/supplier/order?action=get-orders",
-            params: {
-                order_number: order_number || "",
-                customer_name: customer_name || "",
-                order_status: order_status || "",
+        new CreateRequest({
+            formSelector: '#updateStatusForm',
+            submitButtonSelector: '#update-status-btn',
+            callback: (err, res) => err ? console.error("Form submission error:", err) : console.log("Form submitted successfully:", res),
+            redirectUrl: 'orders',
+        });
 
 
-            },
-            callback: (err, data) => {
-                if (err) return console.error("Error fetching user data:", err);
-                console.log("User data retrieved:", data);
+        printInvoice = (orderId) => {
+            console.log("Printing invoice for order:", orderId);
+
+            const printWindow = window.open(`print?action=print-invoice&order_id=${orderId}`, '_blank');
+            if (printWindow) {
+                printWindow.focus();
+            } else {
+                console.error("Failed to open print window. Please allow pop-ups for this site.");
+            }
+        };
+
+        window.viewProduct = (order_number, customer_name, order_status) => {
+            new GetRequest({
+                getUrl: "controller/supplier/order?action=get-orders",
+                params: {
+                    order_number: order_number || "",
+                    customer_name: customer_name || "",
+                    order_status: order_status || "",
+
+
+                },
+                callback: (err, data) => {
+                    if (err) return console.error("Error fetching user data:", err);
+                    console.log("User data retrieved:", data);
 
 
 
-                const tableBody = document.querySelector(".order-table tbody");
+                    const tableBody = document.querySelector(".order-table tbody");
 
-                tableBody.innerHTML = "";
+                    tableBody.innerHTML = "";
 
-                const newOrdersCount = document.getElementById("new-orders-count");
-                newOrdersCount.textContent = `${data.length} new orders`;
+                    const newOrdersCount = document.getElementById("new-orders-count");
+                    newOrdersCount.textContent = `${data.length} new orders`;
 
-                // card kpi
-                const totalOrders = data.length;
-                const pendingOrders = data.filter(order => order.status === 'pending').length;
-                const processingOrders = data.filter(order => order.status === 'processing').length;
-                const completedOrders = data.filter(order => order.status === 'completed').length;
-                document.querySelector('.stat-card:nth-child(1) h3').textContent = totalOrders;
-                document.querySelector('.stat-card:nth-child(2) h3').textContent = pendingOrders;
-                document.querySelector('.stat-card:nth-child(3) h3').textContent = processingOrders;
-                document.querySelector('.stat-card:nth-child(4) h3').textContent = completedOrders;
+                    // card kpi
+                    const totalOrders = data.length;
+                    const pendingOrders = data.filter(order => order.status === 'pending').length;
+                    const processingOrders = data.filter(order => order.status === 'processing').length;
+                    const completedOrders = data.filter(order => order.status === 'completed').length;
+                    document.querySelector('.stat-card:nth-child(1) h3').textContent = totalOrders;
+                    document.querySelector('.stat-card:nth-child(2) h3').textContent = pendingOrders;
+                    document.querySelector('.stat-card:nth-child(3) h3').textContent = processingOrders;
+                    document.querySelector('.stat-card:nth-child(4) h3').textContent = completedOrders;
 
 
-                data.forEach(order => {
-                    const row = document.createElement("tr");
-                    // count the item quantity
-                    order.items_count = order.items ?
-                        order.items.reduce((sum, item) => sum + parseInt(item.quantity, 10), 0) :
-                        0;
+                    data.forEach(order => {
+                        const row = document.createElement("tr");
+                        // count the item quantity
+                        order.items_count = order.items ?
+                            order.items.reduce((sum, item) => sum + parseInt(item.quantity, 10), 0) :
+                            0;
 
-                    const customerName = `${order.user.first_name} ${order.user.last_name}`;
-                    row.innerHTML = `
+                        const customerName = `${order.user.first_name} ${order.user.last_name}`;
+                        row.innerHTML = `
                         <td>${order.order_number}</td>
                         <td>
                             <div class="customer-info">
@@ -396,7 +409,7 @@
                             </button>
                  
                             ${order.tracking_number ? `
-                                <button class="btn btn-sm btn-outline-secondary action-btn" onclick="window.open('track?tracking_number=${order.tracking_number}', '_blank')">
+                                <button class="btn btn-sm btn-outline-secondary action-btn" onclick="trackOrder('${order.tracking_number}')">
                                     <i class="fas fa-truck"></i> Track
                                 </button>
                                  <button class="btn btn-sm btn-outline-secondary action-btn" onclick="window.open('print?action=print-awb&tracking_number=${order.tracking_number}', '_blank')">
@@ -407,46 +420,129 @@
                         </td>
                     `;
 
-                    tableBody.appendChild(row);
-                });
-            }
-        }).send();
-    };
+                        tableBody.appendChild(row);
+                    });
+                }
+            }).send();
+        };
 
-    function editOrder(orderNumber) {
-        console.log("Editing order:", orderNumber);
-
-        document.getElementById("order_id").value = orderNumber;
-        const updateStatusModal = new bootstrap.Modal(document.getElementById('update_status_modal'));
-        updateStatusModal.show();
-    }
-
-    // Function to fetch order details and populate the modal
-    function getOrderDetails(orderNumber) {
-        new GetRequest({
-            getUrl: "controller/supplier/order?action=get-order-details",
-            params: {
-                order_number: orderNumber
-            },
-            callback: (err, data) => {
+        function trackOrder(trackingNumber) {
+            new GetRequest({
+                getUrl: "controller/supplier/order?action=track-order",
+                params: {
+                    tracking_number: trackingNumber
+                },
+                callback: (err, res) => {
 
 
-                console.log("Order details retrieved:", data.order_number);
+                    const data = res;
+                    const customer = data.customer;
+                    const store = data.store;
+                    const shipping = data.shipping_address;
+                    const products = data.products;
+                    const statuses = data.shipping_statuses;
 
-                document.getElementById('orderModalLabel').textContent = `Order #${data.order_number}`;
-                document.querySelector('.order-info-date').textContent = formatDateTime(data.created_at);
+                    const statusHTML = statuses.map(status => `
+                <li class="mb-3">
+                    <div class="fw-bold">${status.remarks}</div>
+                    <small class="text-muted">${status.update_time}</small><br>
+                    <small class="text-secondary">${status.location}</small>
+                </li>
+            `).join('');
+
+                    const productsHTML = products.map(p => `
+                <div class="d-flex gap-3 mb-3 align-items-center border p-2 rounded">
+                    <img src="images/products/${p.primary_image}" alt="${p.name}" width="60" class="rounded">
+                    <div>
+                        <div class="fw-bold">${p.name}</div>
+                        <div>SKU: ${p.sku}</div>
+                        <div>Qty: ${p.quantity} | ₱${p.price}</div>
+                    </div>
+                </div>
+            `).join('');
+
+                    document.getElementById("trackingInfoContainer").innerHTML = `
+                <div class="mb-3">
+                    <h6 class="mb-2">Order Info</h6>
+                    <div><strong>Order Number:</strong> ${data.order_number}</div>
+                    <div><strong>Tracking Number:</strong> ${data.tracking_number}</div>
+                    <div><strong>Total Amount:</strong> ₱${data.total_amount}</div>
+                    <div><strong>Order Date:</strong> ${data.order_date}</div>
+                </div>
+
+                <div class="mb-3">
+                    <h6 class="mb-2">Customer</h6>
+                    <div>${customer.first_name} ${customer.last_name}</div>
+                    <div>Email: ${customer.email}</div>
+                    <div>Phone: ${customer.phone}</div>
+                </div>
+
+                <div class="mb-3">
+                    <h6 class="mb-2">Shipping Address</h6>
+                    <div>${shipping.address_line}, ${shipping.barangay}, ${shipping.city}, ${shipping.region}, ${shipping.postal_code}</div>
+                </div>
+
+                <div class="mb-3">
+                    <h6 class="mb-2">Store</h6>
+                    <div>${store.store_name}</div>
+                    <div>Contact: ${store.store_contact}</div>
+                    <img src="images/store_logo/${store.store_logo_url}" alt="Store Logo" width="80">
+                </div>
+
+                <div class="mb-3">
+                    <h6 class="mb-2">Products</h6>
+                    ${productsHTML}
+                </div>
+
+                <div>
+                    <h6 class="mb-2">Shipping Status</h6>
+                    <ul class="list-unstyled border-start ps-3">
+                        ${statusHTML}
+                    </ul>
+                </div>
+            `;
+
+                    // Show the modal after populating content
+                    const trackingModal = new bootstrap.Modal(document.getElementById('trackingModal'));
+                    trackingModal.show();
+                }
+            }).send();
+        }
+
+        function editOrder(orderNumber) {
+            console.log("Editing order:", orderNumber);
+
+            document.getElementById("order_id").value = orderNumber;
+            const updateStatusModal = new bootstrap.Modal(document.getElementById('update_status_modal'));
+            updateStatusModal.show();
+        }
 
 
-                const customerName = `${data.first_name} ${data.last_name}`;
+        function getOrderDetails(orderNumber) {
+            new GetRequest({
+                getUrl: "controller/supplier/order?action=get-order-details",
+                params: {
+                    order_number: orderNumber
+                },
+                callback: (err, data) => {
 
-                const orderModalElement = document.getElementById('orderModal');
-                const orderItemsContainer = orderModalElement.querySelector('.order-items');
-                if (orderItemsContainer) {
-                    orderItemsContainer.innerHTML = "";
-                    (data.items || []).forEach((item, idx) => {
-                        const itemElement = document.createElement('div');
-                        itemElement.className = 'd-flex align-items-center mb-4 pb-3 border-bottom';
-                        itemElement.innerHTML = `
+
+                    console.log("Order details retrieved:", data.order_number);
+
+                    document.getElementById('orderModalLabel').textContent = `Order #${data.order_number}`;
+                    document.querySelector('.order-info-date').textContent = formatDateTime(data.created_at);
+
+
+                    const customerName = `${data.first_name} ${data.last_name}`;
+
+                    const orderModalElement = document.getElementById('orderModal');
+                    const orderItemsContainer = orderModalElement.querySelector('.order-items');
+                    if (orderItemsContainer) {
+                        orderItemsContainer.innerHTML = "";
+                        (data.items || []).forEach((item, idx) => {
+                            const itemElement = document.createElement('div');
+                            itemElement.className = 'd-flex align-items-center mb-4 pb-3 border-bottom';
+                            itemElement.innerHTML = `
                             <img src="public/images/products/${item.primary_image   }" alt="Product">
                             <div class="flex-grow-1">
                                 <h6 class="mb-1">${item.product_name || 'Product'}</h6>
@@ -455,28 +551,28 @@
                             </div>
                             <div class="fw-bold">₱${(parseFloat(item.quantity) * parseFloat(item.price)).toFixed(2)}</div>
                         `;
-                        orderItemsContainer.appendChild(itemElement);
-                    });
-                }
-
-
-                const summaryCard = document.querySelectorAll('.order-summary-card')[0];
-                if (summaryCard) {
-                    const summaryRows = summaryCard.querySelectorAll('.summary-row');
-                    if (summaryRows.length >= 4) {
-                        summaryRows[0].children[1].textContent = `₱${parseFloat(data.subtotal).toFixed(2)}`;
-                        summaryRows[1].children[1].textContent = `₱${parseFloat(data.shipping_fee).toFixed(2)}`;
-                        summaryRows[2].children[1].textContent = `₱${parseFloat(data.tax).toFixed(2)}`;
-
+                            orderItemsContainer.appendChild(itemElement);
+                        });
                     }
-                    const summaryTotal = summaryCard.querySelector('.summary-total span:last-child');
-                    if (summaryTotal) summaryTotal.textContent = `₱${parseFloat(data.total_amount).toFixed(2)}`;
-                }
 
-                const shippingAddress = data.shipping_address || {};
-                const shippingCard = document.querySelectorAll('.order-summary-card')[1];
-                if (shippingCard) {
-                    shippingCard.innerHTML = `
+
+                    const summaryCard = document.querySelectorAll('.order-summary-card')[0];
+                    if (summaryCard) {
+                        const summaryRows = summaryCard.querySelectorAll('.summary-row');
+                        if (summaryRows.length >= 4) {
+                            summaryRows[0].children[1].textContent = `₱${parseFloat(data.subtotal).toFixed(2)}`;
+                            summaryRows[1].children[1].textContent = `₱${parseFloat(data.shipping_fee).toFixed(2)}`;
+                            summaryRows[2].children[1].textContent = `₱${parseFloat(data.tax).toFixed(2)}`;
+
+                        }
+                        const summaryTotal = summaryCard.querySelector('.summary-total span:last-child');
+                        if (summaryTotal) summaryTotal.textContent = `₱${parseFloat(data.total_amount).toFixed(2)}`;
+                    }
+
+                    const shippingAddress = data.shipping_address || {};
+                    const shippingCard = document.querySelectorAll('.order-summary-card')[1];
+                    if (shippingCard) {
+                        shippingCard.innerHTML = `
                         <h6 class="mb-3"><i class="fas fa-map-marker-alt me-2"></i>Shipping Address</h6>
                         <p class="mb-1"><i class="fas fa-user me-2"></i><strong>Name:</strong> ${customerName}</p>
                         <p class="mb-1"><i class="fas fa-home me-2"></i><strong>Address:</strong> ${shippingAddress.address_line || '-'}</p>
@@ -485,67 +581,67 @@
                         <p class="mb-0"><i class="fas fa-mail-bulk me-2"></i><strong>Postal Code:</strong> ${shippingAddress.postal_code || '-'}</p>
                     `;
 
-                }
+                    }
 
-                // Order Information (left column)
-                const infoCol = document.querySelectorAll('.card-body .row .col-md-6')[0];
-                if (infoCol) {
-                    infoCol.innerHTML = `
+                    // Order Information (left column)
+                    const infoCol = document.querySelectorAll('.card-body .row .col-md-6')[0];
+                    if (infoCol) {
+                        infoCol.innerHTML = `
                         <p><strong>Order Date:</strong> <span class="order-info-date">${formatDateTime(data.created_at)}</span></p>
                         <p><strong>Customer:</strong> ${customerName}</p>
                         <p><strong>Email:</strong> ${data.user_email}</p>
                         <p><strong>Phone:</strong> N/A</p>
                     `;
-                }
-                const infoCol2 = document.querySelectorAll('.card-body .row .col-md-6')[1];
+                    }
+                    const infoCol2 = document.querySelectorAll('.card-body .row .col-md-6')[1];
 
-                if (infoCol2) {
-                    infoCol2.innerHTML = `
+                    if (infoCol2) {
+                        infoCol2.innerHTML = `
                         <p><strong>Payment Method:</strong> ${data.payment && data.payment.payment_method ? formatPaymentMethod(data.payment.payment_method) : '-'}</p>
                         <p><strong>Payment Status:</strong> <span class="badge bg-success">${data.payment && data.payment.status ? capitalize(data.payment.status) : '-'}</span></p>
                         <p><strong>Order Status:</strong> <span class="status-badge status-${data.status.toLowerCase()}">${capitalize(data.status)}</span></p>
                     
                         <p><strong>Transaction Num:</strong> <span class="order-info-transaction-id">${data.payment && data.payment.transaction_id ? data.payment.transaction_id : '-'}</span></p>`;
+                    }
+
+                    // get the buttons
+                    const printBtn = document.getElementById("printInvoiceBtn");
+                    // const cancelBtn = document.getElementById("cancelOrderBtn");
+
+                    printBtn.setAttribute("data-order-id", data.order_number);
+                    // cancelBtn.setAttribute("data-order-id", data.order_number);
+
+
+                    const statusHistory = data.status_history || [];
+                    renderStatusTimeline(statusHistory);
+
+                    const orderModal = new bootstrap.Modal(document.getElementById('orderModal'));
+                    orderModal.show();
                 }
+            }).send();
+        }
 
-                // get the buttons
-                const printBtn = document.getElementById("printInvoiceBtn");
-                // const cancelBtn = document.getElementById("cancelOrderBtn");
+        function renderStatusTimeline(statusHistory) {
+            const container = document.querySelector('.order-status-history');
+            if (!container) return;
 
-                printBtn.setAttribute("data-order-id", data.order_number);
-                // cancelBtn.setAttribute("data-order-id", data.order_number);
+            container.innerHTML = "";
 
+            const allStatuses = ['pending', 'processing', 'shipped', 'delivered', 'completed']; // expected flow
+            const completedStatuses = statusHistory.map(s => s.status);
+            const latestStatus = completedStatuses[completedStatuses.length - 1];
 
-                const statusHistory = data.status_history || [];
-                renderStatusTimeline(statusHistory);
+            allStatuses.forEach((status, index) => {
+                const statusData = statusHistory.find(s => s.status === status);
+                const isCompleted = completedStatuses.includes(status);
+                const isActive = latestStatus === status && !['completed', 'cancelled', 'refunded', 'failed'].includes(status);
 
-                const orderModal = new bootstrap.Modal(document.getElementById('orderModal'));
-                orderModal.show();
-            }
-        }).send();
-    }
+                const statusClass = isCompleted ? 'completed' : isActive ? 'active' : 'pending';
+                const dateText = statusData ? new Date(statusData.created_at).toLocaleString() : 'Not yet occurred';
 
-    function renderStatusTimeline(statusHistory) {
-        const container = document.querySelector('.order-status-history');
-        if (!container) return;
-
-        container.innerHTML = "";
-
-        const allStatuses = ['pending', 'processing', 'shipped', 'delivered', 'completed']; // expected flow
-        const completedStatuses = statusHistory.map(s => s.status);
-        const latestStatus = completedStatuses[completedStatuses.length - 1];
-
-        allStatuses.forEach((status, index) => {
-            const statusData = statusHistory.find(s => s.status === status);
-            const isCompleted = completedStatuses.includes(status);
-            const isActive = latestStatus === status && !['completed', 'cancelled', 'refunded', 'failed'].includes(status);
-
-            const statusClass = isCompleted ? 'completed' : isActive ? 'active' : 'pending';
-            const dateText = statusData ? new Date(statusData.created_at).toLocaleString() : 'Not yet occurred';
-
-            const item = document.createElement('div');
-            item.className = `timeline-step ${statusClass}`;
-            item.innerHTML = `
+                const item = document.createElement('div');
+                item.className = `timeline-step ${statusClass}`;
+                item.innerHTML = `
             <div class="timeline-icon">
                 <i class="fas ${isCompleted ? 'fa-check' : isActive ? 'fa-spinner fa-spin' : 'fa-clock'}"></i>
             </div>
@@ -554,68 +650,68 @@
                 <p class="text-muted mb-0">${dateText}</p>
             </div>
         `;
-            container.appendChild(item);
-        });
-    }
-
-    // Helper
-    function capitalize(str) {
-        return str.charAt(0).toUpperCase() + str.slice(1);
-    }
-
-
-    function formatDateTime(datetimeStr) {
-        const d = new Date(datetimeStr);
-        return d.toLocaleString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    }
-
-    function formatPaymentMethod(method) {
-        switch (method) {
-            case "credit_card":
-                return "Credit Card (**** **** **** 4242)";
-            default:
-                return method.replace("_", " ");
+                container.appendChild(item);
+            });
         }
-    }
 
-    function capitalize(str) {
-        return str.charAt(0).toUpperCase() + str.slice(1);
-    }
+        // Helper
+        function capitalize(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
 
-    function getColor(index) {
-        const colors = ["4361ee", "3f37c9", "4cc9f0"];
-        return colors[index % colors.length];
-    }
 
-    function clearFilters() {
-        document.getElementById("order-id").value = "";
-        document.getElementById("customer-name").value = "";
-        document.getElementById("order-status").value = "";
-        document.getElementById("date-range").value = "";
-        window.viewProduct("", "", "", "");
-    }
+        function formatDateTime(datetimeStr) {
+            const d = new Date(datetimeStr);
+            return d.toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
 
-    function applyFilters() {
-        const orderNumber = document.getElementById("order-id").value;
-        const customerName = document.getElementById("customer-name").value;
-        const orderStatus = document.getElementById("order-status").value;
-        const dateRange = document.getElementById("date-range").value;
-        window.viewProduct(orderNumber, customerName, orderStatus);
+        function formatPaymentMethod(method) {
+            switch (method) {
+                case "credit_card":
+                    return "Credit Card (**** **** **** 4242)";
+                default:
+                    return method.replace("_", " ");
+            }
+        }
 
-    }
+        function capitalize(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
 
-    onload = () => {
-        const orderNumber = document.getElementById("order-id").value;
-        const status = document.getElementById("order-status").value;
+        function getColor(index) {
+            const colors = ["4361ee", "3f37c9", "4cc9f0"];
+            return colors[index % colors.length];
+        }
 
-        const customerName = document.getElementById("customer-name").value;
+        function clearFilters() {
+            document.getElementById("order-id").value = "";
+            document.getElementById("customer-name").value = "";
+            document.getElementById("order-status").value = "";
+            document.getElementById("date-range").value = "";
+            window.viewProduct("", "", "", "");
+        }
 
-        window.viewProduct(orderNumber, customerName, status);
-    };
-</script>
+        function applyFilters() {
+            const orderNumber = document.getElementById("order-id").value;
+            const customerName = document.getElementById("customer-name").value;
+            const orderStatus = document.getElementById("order-status").value;
+            const dateRange = document.getElementById("date-range").value;
+            window.viewProduct(orderNumber, customerName, orderStatus);
+
+        }
+
+        onload = () => {
+            const orderNumber = document.getElementById("order-id").value;
+            const status = document.getElementById("order-status").value;
+
+            const customerName = document.getElementById("customer-name").value;
+
+            window.viewProduct(orderNumber, customerName, status);
+        };
+    </script>

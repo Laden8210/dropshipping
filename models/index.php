@@ -11,6 +11,7 @@ require_once 'StoreProfile.php';
 require_once 'Order.php';
 require_once 'AddressModel.php';
 require_once 'CartModel.php';
+require_once 'OrderShippingStatus.php';
 
 $userModel = new User($conn);
 $productModel = new ProductModel($conn);
@@ -23,3 +24,4 @@ $storeProfileModel = new StoreProfile($conn);
 $orderModel = new Order($conn);
 $addressModel = new AddressModel($conn);
 $cartModel = new CartModel($conn);
+$orderShippingStatusModel = new OrderShippingStatus($conn);

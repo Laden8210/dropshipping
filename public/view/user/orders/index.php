@@ -288,6 +288,23 @@
 
 </div>
 
+<div class="modal fade" id="trackingModal" tabindex="-1" aria-labelledby="trackingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="trackingModalLabel">Track Order</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="trackingInfoContainer">
+                    <!-- Tracking information will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -389,6 +406,13 @@
                                 <i class="fas fa-edit"></i>
                                 Edit
                             </button>
+
+                                      ${order.tracking_number ? `
+                                <button class="btn btn-sm btn-outline-secondary action-btn" onclick="trackOrder('${order.tracking_number}')">
+                                    <i class="fas fa-truck"></i> Track
+                                </button>
+                     
+                            ` : ''}
                 
                         </td>
                     `;
@@ -398,6 +422,91 @@
             }
         }).send();
     };
+
+
+    function trackOrder(trackingNumber) {
+        new GetRequest({
+            getUrl: "controller/user/order?action=track-order",
+            params: {
+                tracking_number: trackingNumber
+            },
+            callback: (err, res) => {
+
+
+                const data = res;
+                const customer = data.customer;
+                const store = data.store;
+                const shipping = data.shipping_address;
+                const products = data.products;
+                const statuses = data.shipping_statuses;
+
+                const statusHTML = statuses.map(status => `
+                <li class="mb-3">
+                    <div class="fw-bold">${status.remarks}</div>
+                    <small class="text-muted">${status.update_time}</small><br>
+                    <small class="text-secondary">${status.location}</small>
+                </li>
+            `).join('');
+
+                const productsHTML = products.map(p => `
+                <div class="d-flex gap-3 mb-3 align-items-center border p-2 rounded">
+                    <img src="images/products/${p.primary_image}" alt="${p.name}" width="60" class="rounded">
+                    <div>
+                        <div class="fw-bold">${p.name}</div>
+                        <div>SKU: ${p.sku}</div>
+                        <div>Qty: ${p.quantity} | ₱${p.price}</div>
+                    </div>
+                </div>
+            `).join('');
+
+                document.getElementById("trackingInfoContainer").innerHTML = `
+                <div class="mb-3">
+                    <h6 class="mb-2">Order Info</h6>
+                    <div><strong>Order Number:</strong> ${data.order_number}</div>
+                    <div><strong>Tracking Number:</strong> ${data.tracking_number}</div>
+                    <div><strong>Total Amount:</strong> ₱${data.total_amount}</div>
+                    <div><strong>Order Date:</strong> ${data.order_date}</div>
+                </div>
+
+                <div class="mb-3">
+                    <h6 class="mb-2">Customer</h6>
+                    <div>${customer.first_name} ${customer.last_name}</div>
+                    <div>Email: ${customer.email}</div>
+                    <div>Phone: ${customer.phone}</div>
+                </div>
+
+                <div class="mb-3">
+                    <h6 class="mb-2">Shipping Address</h6>
+                    <div>${shipping.address_line}, ${shipping.barangay}, ${shipping.city}, ${shipping.region}, ${shipping.postal_code}</div>
+                </div>
+
+                <div class="mb-3">
+                    <h6 class="mb-2">Store</h6>
+                    <div>${store.store_name}</div>
+                    <div>Contact: ${store.store_contact}</div>
+                    <img src="images/store_logo/${store.store_logo_url}" alt="Store Logo" width="80">
+                </div>
+
+                <div class="mb-3">
+                    <h6 class="mb-2">Products</h6>
+                    ${productsHTML}
+                </div>
+
+                <div>
+                    <h6 class="mb-2">Shipping Status</h6>
+                    <ul class="list-unstyled border-start ps-3">
+                        ${statusHTML}
+                    </ul>
+                </div>
+            `;
+
+                // Show the modal after populating content
+                const trackingModal = new bootstrap.Modal(document.getElementById('trackingModal'));
+                trackingModal.show();
+            }
+        }).send();
+    }
+
 
     function editOrder(orderNumber) {
         console.log("Editing order:", orderNumber);

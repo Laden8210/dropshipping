@@ -201,10 +201,11 @@ CREATE TABLE order_status_history (
 
 create table order_shipping_status (
     shipping_status_id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    order_id BIGINT NOT NULL,
     remarks TEXT DEFAULT NULL,
     tracking_number VARCHAR(100) DEFAULT NULL,
     current_location VARCHAR(255) DEFAULT NULL,
+    latitude DECIMAL(10, 8) DEFAULT NULL,
+    longitude DECIMAL(11, 8) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_order_shipping_status_order FOREIGN KEY (order_id) REFERENCES orders(order_id)

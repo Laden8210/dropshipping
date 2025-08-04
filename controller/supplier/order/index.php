@@ -43,6 +43,7 @@ switch ($request) {
             case 'update-order-status':
                 require_once 'update-order-status.php';
                 break;
+
             default:
                 http_response_code(404);
                 echo json_encode(['error' => 'Invalid request']);
@@ -59,11 +60,13 @@ switch ($request) {
             case 'get-order-details':
                 require_once 'get-order-details.php';
                 break;
-    
+            case 'track-order':
+                require_once 'track-order.php';
+
             default:
         }
         break;
-    
+
     default:
         http_response_code(404);
         echo json_encode(['error' => 'Invalid request']);
