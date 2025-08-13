@@ -49,7 +49,11 @@
         }
         echo 'Google ID: ' . $userInfo->id . '<br>';
 
+        print_r($userInfo);
+
         $userInfo = $user->loginWithGoogle($userInfo->id);
+
+
 
         if ($userInfo) {
 

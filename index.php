@@ -276,6 +276,6 @@ try {
 } catch (Exception $e) {
     error_log($e->getMessage());
     http_response_code(500);
-    include 'public/view/error/500.php';
+    echo $e->getMessage();
     exit;
 }

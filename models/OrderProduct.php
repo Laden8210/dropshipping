@@ -375,6 +375,69 @@ class OrderProduct
         return array_values($orders);
     }
 
+    public function getByCourier()
+    {
+        $sql = "SELECT 
+                o.*, 
+                u.first_name, u.last_name, u.email AS user_email,
+                oi.order_item_id, oi.product_id, oi.quantity, oi.price,
+                osh.status AS latest_status
+            FROM {$this->orderTable} o
+            LEFT JOIN {$this->userTable} u ON o.user_id = u.user_id
+            LEFT JOIN {$this->orderItemTable} oi ON o.order_id = oi.order_id
+            LEFT JOIN (
+                SELECT osh1.order_id, osh1.status
+                FROM order_status_history osh1
+                INNER JOIN (
+                    SELECT order_id, MAX(created_at) AS latest_created
+                    FROM order_status_history
+                    GROUP BY order_id
+                ) osh2 ON osh1.order_id = osh2.order_id AND osh1.created_at = osh2.latest_created
+            ) osh ON o.order_id = osh.order_id
+            LEFT JOIN products p ON oi.product_id = p.product_id
+            WHERE o.tracking_number IS NOT NULL
+            ORDER BY o.created_at DESC";
+
+        $stmt = $this->conn->prepare($sql);
+
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $orders = [];
+
+        while ($row = $result->fetch_assoc()) {
+            $oid = $row['order_id'];
+
+            if (!isset($orders[$oid])) {
+                $orders[$oid] = [
+                    'order_id' => $row['order_id'],
+                    'user_id' => $row['user_id'],
+                    'order_number' => $row['order_number'],
+                    'total_amount' => $row['total_amount'],
+                    'created_at' => $row['created_at'],
+                    'status' => $row['latest_status'] ?? '',
+                    'tracking_number' => $row['tracking_number'] ?? null,
+                    'user' => [
+                        'first_name' => $row['first_name'],
+                        'last_name' => $row['last_name'],
+                        'email' => $row['user_email'],
+                    ],
+                    'items' => []
+                ];
+            }
+
+            if (!empty($row['order_item_id'])) {
+                $orders[$oid]['items'][] = [
+                    'order_item_id' => $row['order_item_id'],
+                    'product_id' => $row['product_id'],
+                    'quantity' => $row['quantity'],
+                    'price' => $row['price'],
+                ];
+            }
+        }
+
+        return array_values($orders);
+    }
+
     public function getByStoreId($store_id)
     {
         $sql = "SELECT 

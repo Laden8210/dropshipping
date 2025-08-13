@@ -91,6 +91,32 @@ if (!isset($request_body['role']) || !in_array($request_body['role'], ['user', '
 $user =  $userModel->register($request_body);
 
 
+$csvFile = __DIR__ . '/../../data/users.csv';
+if (!file_exists(dirname($csvFile))) {
+    mkdir(dirname($csvFile), 0777, true);
+}
+if (!file_exists($csvFile)) {
+    touch($csvFile);
+}
+$csvData = [
+    $request_body['first_name'],
+    $request_body['last_name'],
+    $request_body['email'],
+    $request_body['phone_number'],
+    password_hash($request_body['password'], PASSWORD_DEFAULT),
+    $request_body['role'],
+    date('Y-m-d H:i:s')
+];
+
+$fileExists = file_exists($csvFile);
+$fp = fopen($csvFile, 'a');
+if (!$fileExists) {
+    fputcsv($fp, ['first_name', 'last_name', 'email', 'phone_number', 'password_hash', 'role', 'created_at']);
+}
+fputcsv($fp, $csvData);
+fclose($fp);
+
+
 if ($user == false) {
     http_response_code(500);
     echo json_encode(['status' => 'error', 'message' => 'Error registering user', 'http_code' => 500]);
