@@ -299,3 +299,16 @@ create table support_ticket_chat_logs (
     CONSTRAINT fk_support_ticket_chat_logs_ticket FOREIGN KEY (ticket_id) REFERENCES support_tickets(ticket_id),
     CONSTRAINT fk_support_ticket_chat_logs_user FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
+
+
+create table customer_notification (
+    notification_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id CHAR(14) NOT NULL,
+    order_id BIGINT NOT NULL,
+    message TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_customer_notification_user FOREIGN KEY (user_id) REFERENCES users(user_id),
+    CONSTRAINT fk_customer_notification_order FOREIGN KEY (order_id) REFERENCES orders(order_id)
+);

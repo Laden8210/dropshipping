@@ -228,20 +228,7 @@
                             <p class="mt-2 mb-0"><i class="fas fa-phone me-2"></i>(555) 123-4567</p>
                         </div>
 
-                        <div class="order-summary-card">
-                            <h6 class="mb-3"><i class="fas fa-cogs me-2"></i>Order Actions</h6>
-                            <div class="d-grid gap-2">
-
-                                <button class="btn btn-outline-warning mb-2" id="printInvoiceBtn"
-                                    onclick="printInvoice(this.getAttribute('data-order-id'))">
-                                    <i class="fas fa-print me-2"></i>Print Invoice
-                                </button>
-                                <button class="btn btn-outline-danger" id="cancelOrderBtn"
-                                    onclick="editOrder(this.getAttribute('data-order-id'))">
-                                    <i class="fas fa-times me-2"></i>Cancel Order
-                                </button>
-                            </div>
-                        </div>
+             
                     </div>
                 </div>
             </div>
@@ -300,16 +287,6 @@
     });
 
 
-    printInvoice = (orderId) => {
-        console.log("Printing invoice for order:", orderId);
-
-        const printWindow = window.open(`print?action=print-invoice&order_id=${orderId}`, '_blank');
-        if (printWindow) {
-            printWindow.focus();
-        } else {
-            console.error("Failed to open print window. Please allow pop-ups for this site.");
-        }
-    };
 
     window.viewProduct = (order_number, customer_name, order_status) => {
         new GetRequest({
@@ -554,12 +531,6 @@
                 }
                 const infoCol2 = document.querySelectorAll('.card-body .row .col-md-6')[1];
 
-                // get the buttons
-                const printBtn = document.getElementById("printInvoiceBtn");
-                // const cancelBtn = document.getElementById("cancelOrderBtn");
-
-                printBtn.setAttribute("data-order-id", data.order_number);
-                // cancelBtn.setAttribute("data-order-id", data.order_number);
 
 
                 const statusHistory = data.status_history || [];

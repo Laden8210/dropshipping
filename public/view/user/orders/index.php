@@ -265,7 +265,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="updateStatusForm" action="controller/supplier/order/index.php?action=update-order-status" method="POST">
+                <form id="updateStatusForm" action="controller/user/order/index.php?action=update-order-status" method="POST">
                     <input type="hidden" name="order_id" value="" id="order_id">
                     <div class="mb-3">
                         <label for="order-status-select" class="form-label">Select New Status</label>

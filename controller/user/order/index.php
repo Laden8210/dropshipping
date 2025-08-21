@@ -15,7 +15,7 @@ session_start();
 
 if (!isset($_SESSION['auth']['user_id']) || $_SESSION['auth']['role'] !== 'user') {
     http_response_code(403);
-    echo json_encode(['status' => 'error', 'message' => 'Forbidden: You do not have permission to access this resource.']);
+    echo json_encode(['status' => 'error', 'message' => 'Forbidden: You do not have permission to access this resource.' ]);
     exit;
 }
 

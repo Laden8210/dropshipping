@@ -93,6 +93,7 @@ class OrderShippingStatus
                 o.total_amount,
                 o.created_at AS order_date,
                 
+                
                 -- Customer details
                 u.user_id AS customer_id,
                 u.first_name,
@@ -120,9 +121,14 @@ class OrderShippingStatus
                 s.current_location,
                 s.latitude,
                 s.longitude,
-                s.created_at AS status_update_time
+                s.created_at AS status_update_time,
+
+                -- Status history
+                sh.status,
+                sh.created_at
               FROM orders o
               INNER JOIN order_shipping_status s ON o.tracking_number = s.tracking_number
+              INNER JOIN order_status_history sh ON o.order_id = sh.order_id
               INNER JOIN users u ON o.user_id = u.user_id
               LEFT JOIN user_shipping_address usa ON o.shipping_address_id = usa.address_id
               INNER JOIN store_profile sp ON o.store_id = sp.store_id
@@ -169,7 +175,8 @@ class OrderShippingStatus
                         'store_contact' => $row['store_contact']
                     ],
                     'products' => $this->getOrderProducts($orderId),
-                    'shipping_statuses' => []
+                    'shipping_statuses' => [],
+                    'status_history' => []
                 ];
             }
 
@@ -183,6 +190,12 @@ class OrderShippingStatus
                     'longitude' => $row['longitude']
                 ],
                 'update_time' => $row['status_update_time']
+            ];
+
+            // add order status 
+            $orders[$orderId]['status_history'][] = [
+                'status' => $row['status'],
+                'update_time' => $row['created_at']
             ];
         }
 
