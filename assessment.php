@@ -409,6 +409,31 @@ function saveToFile($data, $filename)
 
     file_put_contents($exportPath . $filename, json_encode($data, JSON_PRETTY_PRINT));
 }
+
+function arrayToXml($data, $rootElement = 'root', $xml = null)
+{
+    if ($xml === null) {
+        $xml = new SimpleXMLElement("<?xml version='1.0' encoding='UTF-8'?><{$rootElement}></{$rootElement}>");
+    }
+
+    foreach ($data as $key => $value) {
+        if (is_numeric($key)) {
+            $key = 'item' . $key;
+        }
+
+
+        $key = preg_replace('/[^a-zA-Z0-9_]/', '_', $key);
+
+        if (is_array($value) || is_object($value)) {
+            $subNode = $xml->addChild($key);
+            arrayToXml((array)$value, $key, $subNode);
+        } else {
+            $xml->addChild($key, htmlspecialchars($value ?? ''));
+        }
+    }
+
+    return $xml->asXML();
+}
 ?>
 
 <!DOCTYPE html>
@@ -715,6 +740,7 @@ function saveToFile($data, $filename)
                 <div id="output" style="display: none;">
                     <h3>Processing Results
                         <button id="downloadBtn" class="btn download-btn">💾 Download JSON</button>
+                        <button id="downloadBtnXml" class="btn download-btn">💾 Download XML</button>
                     </h3>
                     <div id="summary" class="summary"></div>
                     <pre id="jsonOutput" class="json-output"></pre>
@@ -829,6 +855,39 @@ function saveToFile($data, $filename)
             }, 5000);
         }
 
+        function jsonToXml(obj, rootName = 'data') {
+            function convertValue(value, key = '') {
+                if (value === null || value === undefined) {
+                    return `<${key}></${key}>`;
+                }
+                
+                if (typeof value === 'object') {
+                    if (Array.isArray(value)) {
+                        return value.map((item, index) => {
+                            const itemKey = key.replace(/s$/, '') || 'item';
+                            return convertValue(item, itemKey);
+                        }).join('');
+                    } else {
+                        const xmlContent = Object.keys(value)
+                            .map(k => convertValue(value[k], k))
+                            .join('');
+                        return key ? `<${key}>${xmlContent}</${key}>` : xmlContent;
+                    }
+                } else {
+                    const escapedValue = String(value)
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/"/g, '&quot;')
+                        .replace(/'/g, '&apos;');
+                    return `<${key}>${escapedValue}</${key}>`;
+                }
+            }
+            
+            const xmlContent = convertValue(obj);
+            return '<?xml version="1.0" encoding="UTF-8"?>\n<' + rootName + '>\n' + xmlContent + '\n</' + rootName + '>';
+        }
+
         // Download functionality
         document.getElementById('downloadBtn').addEventListener('click', function() {
             if (currentData) {
@@ -841,6 +900,24 @@ function saveToFile($data, $filename)
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = currentFileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+        });
+
+        document.getElementById('downloadBtnXml').addEventListener('click', function() {
+            if (currentData) {
+                const xmlStr = jsonToXml(currentData);
+                const blob = new Blob([xmlStr], {
+                    type: 'application/xml'
+                });
+                const url = URL.createObjectURL(blob);
+
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = currentFileName.replace('.json', '.xml');
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);

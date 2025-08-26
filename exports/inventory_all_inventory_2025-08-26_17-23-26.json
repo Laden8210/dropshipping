@@ -1,0 +1,128 @@
+{
+    "report_type": "inventory_analysis",
+    "analysis_type": "all_inventory",
+    "generated_at": "2025-08-26 17:23:26",
+    "parameters": {
+        "threshold": 10
+    },
+    "data": [
+        {
+            "product_name": "Athena Jacobs",
+            "product_sku": "SKU-A625-0922-M12E",
+            "current_stock": "0",
+            "category_name": "dasda",
+            "status": "inactive"
+        },
+        {
+            "product_name": "Germane Byrd",
+            "product_sku": "SKU-4646-W522-F021",
+            "current_stock": "0",
+            "category_name": "dasda",
+            "status": "active"
+        },
+        {
+            "product_name": "Germane Byrd",
+            "product_sku": "SKU-2525-0271-7042",
+            "current_stock": "0",
+            "category_name": "dasda",
+            "status": "active"
+        },
+        {
+            "product_name": "Germane Byrd",
+            "product_sku": "SKU-1135-0Q26-7221",
+            "current_stock": "0",
+            "category_name": "dasda",
+            "status": "active"
+        },
+        {
+            "product_name": "Germane Byrd",
+            "product_sku": "SKU-316B-7252-0452",
+            "current_stock": "0",
+            "category_name": "dasda",
+            "status": "active"
+        },
+        {
+            "product_name": "Germane Byrd",
+            "product_sku": "SKU-5422-6N24-I7W0",
+            "current_stock": "0",
+            "category_name": "dasda",
+            "status": "active"
+        },
+        {
+            "product_name": "Germane Byrd",
+            "product_sku": "SKU-07K2-2569-24I4",
+            "current_stock": "0",
+            "category_name": "dasda",
+            "status": "active"
+        },
+        {
+            "product_name": "Iris Deleon",
+            "product_sku": "SKU-2619-052Q-4250",
+            "current_stock": "0",
+            "category_name": "dasda",
+            "status": "archived"
+        },
+        {
+            "product_name": "Jenna Howe",
+            "product_sku": "SKU-4512-5072-D30Z",
+            "current_stock": "88",
+            "category_name": "dasddasda",
+            "status": "active"
+        },
+        {
+            "product_name": "Jenna Howe",
+            "product_sku": "SKU-1250-2D41-58A7",
+            "current_stock": "0",
+            "category_name": "dasddasda",
+            "status": "active"
+        },
+        {
+            "product_name": "Leigh Ochoa",
+            "product_sku": "SKU-8R21-024Y-05HF",
+            "current_stock": "0",
+            "category_name": "dasda",
+            "status": "active"
+        },
+        {
+            "product_name": "Mannix Richardson",
+            "product_sku": "SKU-412Y-6920-12H5",
+            "current_stock": "0",
+            "category_name": "dasda",
+            "status": "archived"
+        },
+        {
+            "product_name": "s",
+            "product_sku": "SKU-4152-27A5-0256",
+            "current_stock": "4",
+            "category_name": "dasda",
+            "status": "active"
+        },
+        {
+            "product_name": "Tanner Turner",
+            "product_sku": "SKU-2485-G023-C021",
+            "current_stock": "0",
+            "category_name": "dasddasda",
+            "status": "inactive"
+        },
+        {
+            "product_name": "Teegan Oliver",
+            "product_sku": "SKU-5620-2C58-09ZV",
+            "current_stock": "0",
+            "category_name": "dasddsd",
+            "status": "active"
+        },
+        {
+            "product_name": "Tyrone Jenkins",
+            "product_sku": "SKU-0142-06Q5-A352",
+            "current_stock": "0",
+            "category_name": "dasda",
+            "status": "inactive"
+        }
+    ],
+    "summary": {
+        "total_records": 16,
+        "out_of_stock": 14,
+        "critical_stock": 1,
+        "low_stock": 0
+    }
+}
