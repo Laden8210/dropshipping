@@ -311,4 +311,4 @@ create table customer_notification (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_customer_notification_user FOREIGN KEY (user_id) REFERENCES users(user_id),
     CONSTRAINT fk_customer_notification_order FOREIGN KEY (order_id) REFERENCES orders(order_id)
-);
+);\

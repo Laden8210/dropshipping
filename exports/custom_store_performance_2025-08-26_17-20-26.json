@@ -1,0 +1,26 @@
+{
+    "report_type": "custom_report",
+    "report_name": "store_performance",
+    "generated_at": "2025-08-26 17:20:26",
+    "data": [
+        {
+            "store_name": "dasdad",
+            "store_email": "dad@gmail.com",
+            "total_orders": "49",
+            "total_revenue": "190038.52",
+            "total_products": "7",
+            "store_status": "active"
+        },
+        {
+            "store_name": "test",
+            "store_email": "adsda@gmail.com",
+            "total_orders": "4",
+            "total_revenue": "3377.40",
+            "total_products": "1",
+            "store_status": "active"
+        }
+    ],
+    "summary": {
+        "total_records": 2
+    }
+}

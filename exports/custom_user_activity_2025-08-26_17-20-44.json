@@ -1,0 +1,91 @@
+{
+    "report_type": "custom_report",
+    "report_name": "user_activity",
+    "generated_at": "2025-08-26 17:20:44",
+    "data": [
+        {
+            "user_id": "650A-0543-J926",
+            "full_name": "John Michael Domingo",
+            "email": "kimatong874@gmail.com",
+            "total_orders": "11",
+            "total_spent": "30525.76",
+            "last_order_date": "2025-07-30 04:10:49",
+            "registration_date": "2025-06-09 12:34:23"
+        },
+        {
+            "user_id": "0206-5510-970L",
+            "full_name": "Wynne Morrow",
+            "email": "joqydep@mailinator.com",
+            "total_orders": "0",
+            "total_spent": "0.00",
+            "last_order_date": null,
+            "registration_date": "2025-06-05 13:39:56"
+        },
+        {
+            "user_id": "0282-M506-5970",
+            "full_name": "dsds sdsdsd",
+            "email": "sdsdd@gmail.com",
+            "total_orders": "0",
+            "total_spent": "0.00",
+            "last_order_date": null,
+            "registration_date": "2025-08-10 13:56:55"
+        },
+        {
+            "user_id": "0566-J531-5049",
+            "full_name": "John Michael Domingo",
+            "email": "domingo.laden@gmail.com",
+            "total_orders": "0",
+            "total_spent": "0.00",
+            "last_order_date": null,
+            "registration_date": "2025-06-08 22:34:59"
+        },
+        {
+            "user_id": "241T-S405-0P32",
+            "full_name": "ddsa dasddasd",
+            "email": "dadsd@gmail.com",
+            "total_orders": "0",
+            "total_spent": "0.00",
+            "last_order_date": null,
+            "registration_date": "2025-06-24 10:13:00"
+        },
+        {
+            "user_id": "2602-M7XY-0322",
+            "full_name": "Wanda Wilkerson",
+            "email": "lawinofuj@mailinator.com",
+            "total_orders": "0",
+            "total_spent": "0.00",
+            "last_order_date": null,
+            "registration_date": "2025-07-06 19:25:12"
+        },
+        {
+            "user_id": "2Z01-52Y6-2074",
+            "full_name": "dasd dasd",
+            "email": "dasd@gmail.com",
+            "total_orders": "0",
+            "total_spent": "0.00",
+            "last_order_date": null,
+            "registration_date": "2025-06-24 10:12:17"
+        },
+        {
+            "user_id": "4263-004D-OX25",
+            "full_name": "dasdadsa dsdsd",
+            "email": "ddsdsd@gmail.com",
+            "total_orders": "0",
+            "total_spent": "0.00",
+            "last_order_date": null,
+            "registration_date": "2025-06-24 10:09:23"
+        },
+        {
+            "user_id": "758J-0N08-P058",
+            "full_name": "dsds sdsdsd",
+            "email": "sddsdsdd@gmail.com",
+            "total_orders": "0",
+            "total_spent": "0.00",
+            "last_order_date": null,
+            "registration_date": "2025-08-10 13:58:18"
+        }
+    ],
+    "summary": {
+        "total_records": 9
+    }
+}
