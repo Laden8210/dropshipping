@@ -211,13 +211,13 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="">Home</a>
+                        <a class="nav-link active" href="">Home</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#features">Features</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="about">About</a>
+                        <a class="nav-link " href="about">About</a>
                     </li>
                  
                     <li class="nav-item ms-3">
