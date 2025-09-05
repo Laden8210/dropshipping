@@ -31,8 +31,18 @@ try {
 
         '' => [
             'auth_required' => false,
-            'file' => 'auth/login.php',
-            'title' => 'Login'
+            'file' => 'home/index.php',
+            'title' => 'home'
+        ],
+        'home' => [
+            'auth_required' => false,
+            'file' => 'home/index.php',
+            'title' => 'home'
+        ],
+        'about' => [
+            'auth_required' => false,
+            'file' => 'home/about.php',
+            'title' => 'About Us'
         ],
         'login' => [
             'auth_required' => false,
