@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,13 +23,25 @@
         }
 
         .navbar {
-            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color)) !important;
+            backdrop-filter: blur(20px);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
             padding: 1rem 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            background: rgba(44, 62, 80, 0.95) !important;
+            padding: 0.5rem 0;
         }
 
         .navbar-brand img {
             max-height: 40px;
+            transition: all 0.3s ease;
         }
 
         .navbar-nav .nav-link {
@@ -36,11 +49,23 @@
             font-weight: 500;
             margin: 0 10px;
             transition: all 0.3s ease;
+            position: relative;
         }
 
         .navbar-nav .nav-link:hover {
             color: #ffd700 !important;
             transform: translateY(-2px);
+        }
+
+        .navbar-nav .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #ffd700;
+            border-radius: 2px;
         }
 
         .hero-section {
@@ -71,7 +96,7 @@
             font-size: 3.5rem;
             font-weight: bold;
             margin-bottom: 1rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         .hero-subtitle {
@@ -106,14 +131,14 @@
             border-radius: 15px;
             padding: 40px 30px;
             text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
             height: 100%;
         }
 
         .feature-card:hover {
             transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
         }
 
         .feature-icon {
@@ -183,27 +208,74 @@
             color: white;
         }
 
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Parallax Effect */
+        .parallax-bg {
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
         @media (max-width: 768px) {
             .hero-title {
                 font-size: 2.5rem;
             }
-            
+
             .hero-subtitle {
                 font-size: 1.1rem;
             }
-            
+
             .philippines-map {
                 display: none;
             }
         }
     </style>
 </head>
+
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg fixed-top">
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Sticky Navigation -->
+    <nav class="navbar navbar-expand-lg" id="mainNavbar">
         <div class="container">
             <a class="navbar-brand" href="#home">
-                <img src="assets/img/logo.png" alt="LuzViMinDrop" class="img-fluid">
+                <img src="https://via.placeholder.com/120x40/3498db/ffffff?text=LuzViMinDrop" alt="LuzViMinDrop" class="img-fluid">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -211,17 +283,13 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" href="">Home</a>
+                        <a class="nav-link active" href="home">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#features">Features</a>
+                        <a class="nav-link" href="about">About Us</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link " href="about">About</a>
-                    </li>
-                 
-                    <li class="nav-item ms-3">
-                        <a class="btn btn-outline-light" href="login">Login</a>
+                        <a class="nav-link" href="login">Login</a>
                     </li>
                 </ul>
             </div>
@@ -236,7 +304,7 @@
                     <div class="hero-content">
                         <h1 class="hero-title">Welcome to LuzViMinDrop</h1>
                         <p class="hero-subtitle">
-                            Your AI-powered dropshipping partner connecting businesses across Luzon, Visayas, and Mindanao. 
+                            Your AI-powered dropshipping partner connecting businesses across Luzon, Visayas, and Mindanao.
                             Start your e-commerce journey with intelligent automation and nationwide reach.
                         </p>
                         <div class="d-flex flex-wrap gap-3">
@@ -251,10 +319,10 @@
                 </div>
                 <div class="col-lg-4 position-relative">
                     <svg class="philippines-map" viewBox="0 0 400 500" fill="currentColor">
-                        <path d="M200,50 L250,80 L280,120 L300,180 L280,240 L250,300 L220,350 L180,380 L140,350 L120,300 L100,240 L120,180 L140,120 L170,80 Z"/>
-                        <circle cx="160" cy="150" r="3"/>
-                        <circle cx="200" cy="200" r="3"/>
-                        <circle cx="180" cy="280" r="3"/>
+                        <path d="M200,50 L250,80 L280,120 L300,180 L280,240 L250,300 L220,350 L180,380 L140,350 L120,300 L100,240 L120,180 L140,120 L170,80 Z" />
+                        <circle cx="160" cy="150" r="3" />
+                        <circle cx="200" cy="200" r="3" />
+                        <circle cx="180" cy="280" r="3" />
                     </svg>
                 </div>
             </div>
@@ -446,7 +514,7 @@
                     <p class="mb-0">&copy; 2024 LuzViMinDrop. All rights reserved.</p>
                 </div>
                 <div class="col-md-6 text-md-end">
-                  
+
                 </div>
             </div>
         </div>
@@ -454,9 +522,19 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
+
+
+        // Hide loading overlay when page loads
+        window.addEventListener('load', function() {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.style.opacity = '0';
+            setTimeout(() => {
+                loadingOverlay.style.display = 'none';
+            }, 500);
+        });
         // Smooth scrolling for navigation links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
+            anchor.addEventListener('click', function(e) {
                 e.preventDefault();
                 const target = document.querySelector(this.getAttribute('href'));
                 if (target) {
@@ -488,7 +566,7 @@
                         const finalValue = target.textContent;
                         let currentValue = 0;
                         const increment = parseInt(finalValue.replace(/\D/g, '')) / 50;
-                        
+
                         const updateValue = () => {
                             if (currentValue < parseInt(finalValue.replace(/\D/g, ''))) {
                                 currentValue += increment;
@@ -511,7 +589,7 @@
                     }
                 });
             });
-            
+
             statNumbers.forEach(stat => observer.observe(stat));
         };
 
@@ -519,4 +597,5 @@
         document.addEventListener('DOMContentLoaded', animateStats);
     </script>
 </body>
+
 </html>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -40,7 +41,7 @@
             width: 100%;
             z-index: 1000;
             padding: 1rem 0;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
         }
 
@@ -126,8 +127,15 @@
         }
 
         @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
         }
 
         .scroll-indicator {
@@ -136,13 +144,26 @@
             left: 50%;
             transform: translateX(-50%);
             animation: bounce 2s infinite;
-            color: rgba(255,255,255,0.8);
+            color: rgba(255, 255, 255, 0.8);
         }
 
         @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
-            40% { transform: translateX(-50%) translateY(-10px); }
-            60% { transform: translateX(-50%) translateY(-5px); }
+
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: translateX(-50%) translateY(0);
+            }
+
+            40% {
+                transform: translateX(-50%) translateY(-10px);
+            }
+
+            60% {
+                transform: translateX(-50%) translateY(-5px);
+            }
         }
 
         /* Project Info Section */
@@ -156,15 +177,15 @@
             background: white;
             border-radius: 20px;
             padding: 40px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
             margin-bottom: 40px;
-            border: 1px solid rgba(0,0,0,0.05);
+            border: 1px solid rgba(0, 0, 0, 0.05);
             transition: all 0.3s ease;
         }
 
         .info-card:hover {
             transform: translateY(-10px);
-            box-shadow: 0 30px 80px rgba(0,0,0,0.15);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.15);
         }
 
         .info-icon {
@@ -178,10 +199,25 @@
             margin-bottom: 20px;
         }
 
-        .info-icon.primary { background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); color: white; }
-        .info-icon.secondary { background: linear-gradient(135deg, var(--secondary-color), #c0392b); color: white; }
-        .info-icon.success { background: linear-gradient(135deg, var(--success-color), #2ecc71); color: white; }
-        .info-icon.gold { background: linear-gradient(135deg, var(--gold), #e67e22); color: white; }
+        .info-icon.primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+        }
+
+        .info-icon.secondary {
+            background: linear-gradient(135deg, var(--secondary-color), #c0392b);
+            color: white;
+        }
+
+        .info-icon.success {
+            background: linear-gradient(135deg, var(--success-color), #2ecc71);
+            color: white;
+        }
+
+        .info-icon.gold {
+            background: linear-gradient(135deg, var(--gold), #e67e22);
+            color: white;
+        }
 
         /* Sticky Stacking Sections for Proponents */
         .proponents-section {
@@ -199,10 +235,21 @@
             z-index: 10;
         }
 
-        .proponent-stack:nth-child(1) { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .proponent-stack:nth-child(2) { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-        .proponent-stack:nth-child(3) { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-        .proponent-stack:nth-child(4) { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .proponent-stack:nth-child(1) {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .proponent-stack:nth-child(2) {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .proponent-stack:nth-child(3) {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .proponent-stack:nth-child(4) {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
 
         .proponent-card {
             background: rgba(255, 255, 255, 0.95);
@@ -211,7 +258,7 @@
             padding: 50px;
             margin: 0 auto;
             max-width: 900px;
-            box-shadow: 0 30px 100px rgba(0,0,0,0.2);
+            box-shadow: 0 30px 100px rgba(0, 0, 0, 0.2);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
@@ -226,7 +273,7 @@
             font-size: 4rem;
             color: white;
             margin: 0 auto 30px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
             position: relative;
             overflow: hidden;
         }
@@ -238,13 +285,18 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
             animation: shimmer 3s infinite;
         }
 
         @keyframes shimmer {
-            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+            0% {
+                transform: translateX(-100%) translateY(-100%) rotate(45deg);
+            }
+
+            100% {
+                transform: translateX(100%) translateY(100%) rotate(45deg);
+            }
         }
 
         .role-badge {
@@ -277,14 +329,14 @@
             background: white;
             padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             text-align: center;
             transition: all 0.3s ease;
         }
 
         .feature-item:hover {
             transform: translateY(-10px);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
         }
 
         .feature-icon {
@@ -339,15 +391,20 @@
         .loading-spinner {
             width: 50px;
             height: 50px;
-            border: 3px solid rgba(255,255,255,0.3);
+            border: 3px solid rgba(255, 255, 255, 0.3);
             border-top: 3px solid white;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         /* Parallax Effect */
@@ -359,6 +416,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
@@ -377,16 +435,13 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#home">Home</a>
+                        <a class="nav-link active" href="home">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#project">Project Info</a>
+                        <a class="nav-link" href="about">About Us</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#team">Our Team</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#features">Features</a>
+                        <a class="nav-link" href="login">Login</a>
                     </li>
                 </ul>
             </div>
@@ -516,7 +571,7 @@
             <div class="proponent-card" data-aos="zoom-in">
                 <div class="text-center">
                     <div class="proponent-avatar">
-                        <i class="fas fa-palette"></i>
+                        <img src="public/images/Arfe.png" alt="Arfe May I. Bancua" class="img-fluid" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
                     <div class="role-badge">UI/UX Designer & Documentation</div>
                     <h3 class="fw-bold mb-3">Arfe May I. Bancua</h3>
@@ -534,7 +589,7 @@
             <div class="proponent-card" data-aos="zoom-in">
                 <div class="text-center">
                     <div class="proponent-avatar">
-                        <i class="fas fa-code"></i>
+                        <img src="public/images/Mansour.png" alt="Mansour J. Asha" class="img-fluid" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
                     <div class="role-badge">Web Programmer</div>
                     <h3 class="fw-bold mb-3">Mansour J. Asha</h3>
@@ -552,7 +607,7 @@
             <div class="proponent-card" data-aos="zoom-in">
                 <div class="text-center">
                     <div class="proponent-avatar">
-                        <i class="fas fa-tools"></i>
+                        <img src="public/images/Denand.png" alt="Denand S. Garcia" class="img-fluid" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
                     <div class="role-badge">Documentation & UI/UX Designer</div>
                     <h3 class="fw-bold mb-3">Denand S. Garcia</h3>
@@ -570,7 +625,7 @@
             <div class="proponent-card" data-aos="zoom-in">
                 <div class="text-center">
                     <div class="proponent-avatar">
-                        <i class="fas fa-mobile-alt"></i>
+                        <img src="public/images/Axel.png" alt="Axel Edwin Moncillo" class="img-fluid" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
                     <div class="role-badge">Mobile App Programmer & Documentation</div>
                     <h3 class="fw-bold mb-3">Axel Edwin Moncillo</h3>
@@ -676,13 +731,13 @@
 
         // Smooth scrolling for navigation links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
+            anchor.addEventListener('click', function(e) {
                 e.preventDefault();
                 const target = document.querySelector(this.getAttribute('href'));
                 if (target) {
                     const navbarHeight = document.querySelector('.navbar').offsetHeight;
                     const targetPosition = target.offsetTop - navbarHeight;
-                    
+
                     window.scrollTo({
                         top: targetPosition,
                         behavior: 'smooth'
@@ -695,7 +750,7 @@
         window.addEventListener('scroll', function() {
             const sections = document.querySelectorAll('section[id]');
             const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
-            
+
             let current = '';
             sections.forEach(section => {
                 const sectionTop = section.offsetTop;
@@ -770,6 +825,7 @@
         function typeWriter(element, text, speed = 100) {
             let i = 0;
             element.innerHTML = '';
+
             function type() {
                 if (i < text.length) {
                     element.innerHTML += text.charAt(i);
@@ -801,17 +857,17 @@
         // Add sound effects (optional)
         function playClickSound() {
             // Create audio context for click sounds
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const audioContext = new(window.AudioContext || window.webkitAudioContext)();
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
-            
+
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
-            
+
             oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
             gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-            
+
             oscillator.start(audioContext.currentTime);
             oscillator.stop(audioContext.currentTime + 0.1);
         }
@@ -824,7 +880,7 @@
         // Mobile menu improvements
         const navbarToggler = document.querySelector('.navbar-toggler');
         const navbarCollapse = document.querySelector('.navbar-collapse');
-        
+
         if (navbarToggler) {
             navbarToggler.addEventListener('click', function() {
                 this.classList.toggle('active');
@@ -845,7 +901,7 @@
             const scrollTop = window.pageYOffset;
             const docHeight = document.body.scrollHeight - window.innerHeight;
             const scrollPercent = (scrollTop / docHeight) * 100;
-            
+
             let progressBar = document.getElementById('progress-bar');
             if (!progressBar) {
                 progressBar = document.createElement('div');
@@ -882,7 +938,7 @@
             if (konamiCode.length > konamiSequence.length) {
                 konamiCode.shift();
             }
-            
+
             if (JSON.stringify(konamiCode) === JSON.stringify(konamiSequence)) {
                 // Easter egg activated!
                 document.body.style.animation = 'rainbow 2s infinite';
@@ -906,10 +962,10 @@
 
         // Performance optimization: Throttle scroll events
         let ticking = false;
-        
+
         function updateOnScroll() {
             updateProgress();
-            
+
             // Update navbar
             const navbar = document.getElementById('mainNavbar');
             if (window.scrollY > 100) {
@@ -917,7 +973,7 @@
             } else {
                 navbar.classList.remove('scrolled');
             }
-            
+
             ticking = false;
         }
 
@@ -929,9 +985,7 @@
         }
 
         window.addEventListener('scroll', requestTick);
-
-        console.log('🚀 LuzViMinDrop About Page Loaded Successfully!');
-        console.log('💡 Try the Konami code for a surprise!');
     </script>
 </body>
+
 </html>
