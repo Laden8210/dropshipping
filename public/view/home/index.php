@@ -275,7 +275,7 @@
     <nav class="navbar navbar-expand-lg" id="mainNavbar">
         <div class="container">
             <a class="navbar-brand" href="#home">
-                <img src="https://via.placeholder.com/120x40/3498db/ffffff?text=LuzViMinDrop" alt="LuzViMinDrop" class="img-fluid">
+                <img src="assets/img/logo.png" alt="LuzViMinDrop" class="img-fluid">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>

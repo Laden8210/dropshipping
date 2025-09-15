@@ -60,8 +60,8 @@ switch ($request) {
             case 'create-order':
                 require_once 'create-order.php';
                 break;
-            case 'update-order':
-                require_once 'update-order.php';
+            case 'update-order-status':
+                require_once 'update-order-status.php';
                 break;
 
             case 'print-invoice':

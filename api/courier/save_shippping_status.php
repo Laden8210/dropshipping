@@ -92,6 +92,15 @@ try {
 
 
     if ($result) {
+
+        // Notify user about status update
+        $order = $orderModel->getByTrackingNumber($trackingNumber);
+        if ($order) {
+            $userId = $order['user_id'];
+            $notificationMessage = "Your order with tracking number {$trackingNumber} status updated to '{$status}'.";
+            $notificationModel->create($userId, $notificationMessage);
+        }
+
         http_response_code(201);
         echo json_encode(['status' => 'success', 'message' => 'Shipping status saved']);
     } else {

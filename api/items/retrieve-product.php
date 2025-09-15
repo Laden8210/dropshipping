@@ -23,8 +23,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     exit;
 }
 
-$data = $productModel->get_all_products();
+$input = json_decode(file_get_contents('php://input'), true);
 
+$storeId = isset($input['store_id']) ? htmlspecialchars(strip_tags($input['store_id'])) : null;
+
+if ($storeId === null) {
+
+$data = $productModel->get_all_products();
+} else {
+    $data = $productModel->get_products_by_store($storeId);
+}
 
 foreach ($data as $key => $product) {
     if (empty($product['current_stock']) || $product['current_stock'] <= 0) {

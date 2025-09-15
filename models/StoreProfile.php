@@ -20,6 +20,19 @@ class StoreProfile
         return $stmt->execute();
     }
 
+    public function getAllStores()
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM store_profile ORDER BY created_at DESC");
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $stores = [];
+        while ($row = $result->fetch_assoc()) {
+            $stores[] = $row;
+        }
+        return $stores;
+    }
+
     public function getStoresByUser($user_id)
     {
         $stmt = $this->conn->prepare("SELECT * FROM store_profile WHERE user_id = ? ORDER BY created_at DESC");

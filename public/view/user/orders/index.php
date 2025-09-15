@@ -67,10 +67,9 @@
                     <label for="order-status" class="form-label">Order Status</label>
                     <select class="form-select" id="order-status">
                         <option value="">All Statuses</option>
-                        <option value="pending">Pending</option>
+          
                         <option value="processing">Processing</option>
-                        <option value="shipped">Shipped</option>
-                        <option value="delivered">Delivered</option>
+                      
                         <option value="cancelled">Cancelled</option>
                     </select>
                 </div>
@@ -272,8 +271,7 @@
                         <select class="form-select" id="order-status-select" required name="status">
                             <option value="" disabled selected>Select status</option>
                             <option value="processing">Processing</option>
-                            <option value="shipped">Shipped</option>
-                            <option value="delivered">Delivered</option>
+                 
                             <option value="cancelled">Cancelled</option>
                         </select>
                     </div>

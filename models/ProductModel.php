@@ -184,6 +184,55 @@ class ProductModel
         return $products;
     }
 
+
+       public function get_products_by_store($store_id)
+    {
+        $stmt = $this->conn->prepare("
+               SELECT 
+            products.product_id,
+            products.product_name,
+            products.product_sku,    
+            products.product_weight,
+            products.status,
+            ip.profit_margin,
+            ip.store_id,
+            pc.category_name,
+            ph.price, 
+            ph.currency,
+            ph.change_date,
+            pi.image_url AS primary_image,
+            w.warehouse_name,
+            w.warehouse_address,
+            i.quantity AS current_stock
+        FROM imported_product ip
+        INNER JOIN products ON ip.product_id = products.product_id
+        JOIN product_categories pc ON products.product_category = pc.category_id
+        LEFT JOIN (
+            SELECT p1.*
+            FROM product_price_history p1
+            INNER JOIN (
+                SELECT product_id, MAX(change_date) AS max_date
+                FROM product_price_history
+                GROUP BY product_id
+            ) p2 ON p1.product_id = p2.product_id AND p1.change_date = p2.max_date
+        ) ph ON products.product_id = ph.product_id
+        LEFT JOIN product_images pi ON products.product_id = pi.product_id AND pi.is_primary = 1
+        LEFT JOIN warehouse w ON products.user_id = w.user_id
+        LEFT JOIN inventory i ON products.product_id = i.product_id
+        WHERE ip.store_id = ?
+        ORDER BY ip.created_at DESC
+        ");
+        $stmt->bind_param("i", $store_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $products = [];
+        while ($row = $result->fetch_assoc()) {
+            $products[] = $row;
+        }
+        return $products;
+    }
+
+
     public function get_imported_products($user_id, $store_id)
     {
         $sql = "

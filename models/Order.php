@@ -282,4 +282,14 @@ class Order
         ];
     }
 
+    public function getByTrackingNumber($tracking_number)
+    {
+        $sql = "SELECT * FROM orders WHERE tracking_number = ? LIMIT 1";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("s", $tracking_number);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->fetch_assoc();
+    }
+
 }
