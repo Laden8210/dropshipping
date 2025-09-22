@@ -71,17 +71,18 @@ class UIDGenerator
         return $trackingNumber;
     }
 
-    public static function generateTransactionId()
+    public static function generateTicketId()
     {
-        $dateTimePart = date('Ymd-His');
-        $randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        $randomPart = substr(str_shuffle($randomChars), 0, 4);
-        $transactionId = 'TXN-' . $dateTimePart . '-' . $randomPart;
 
-        if (!preg_match('/^TXN-\d{8}-\d{6}-[A-Z0-9]{4}$/', $transactionId)) {
-            return self::generateTransactionId();
-        }
+        // 20 characters long
+        $ticketId = 'TKT-' . substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 16);
+        return $ticketId;
+    }
 
-        return $transactionId;
+    public static function generateMessageId()
+    {
+        $messageId = 'MSG-' . substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 16);
+
+        return $messageId;
     }
 }

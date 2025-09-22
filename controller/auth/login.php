@@ -53,6 +53,14 @@ if ($user['password'] !==  $password) {
     exit;
 }
 
+if($user['role'] === 'user') {
+    $store_profile = $storeProfileModel->getStoresByUser($user['user_id']);
+    if(count($store_profile) != 0) {
+        $_SESSION['auth']['store_id'] = $store_profile[0]['store_id'];
+    }
+    
+}
+
 $_SESSION['auth'] = [
     'user_id' => $user['user_id'],
     'role' => $user['role'],
