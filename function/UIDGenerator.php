@@ -85,4 +85,9 @@ class UIDGenerator
 
         return $messageId;
     }
+
+    public static function generateTransactionId(){
+        $transactionId = 'TRX-' . substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 16);
+        return $transactionId;
+    }
 }
