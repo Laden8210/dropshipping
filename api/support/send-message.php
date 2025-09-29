@@ -249,7 +249,7 @@ try {
                             attachment_url, 
                             is_read, 
                             created_at
-                        ) VALUES (?, ?, ?, 'ai_agent', ?, 'text', NULL, FALSE, NOW())";
+                        ) VALUES (?, ?, ?, 'system', ?, 'text', NULL, FALSE, NOW())";
 
                     $ai_stmt = $conn->prepare($insert_ai_message);
                     $ai_stmt->bind_param("ssss", $ai_message_id, $ticket_id, $user_id, $ai_message_text);
@@ -257,7 +257,7 @@ try {
 
                     $ai_response = [
                         'message_id' => $ai_message_id,
-                        'sender_type' => 'ai_agent',
+                        'sender_type' => 'system',
                         'message' => $ai_message_text,
                         'message_type' => 'text',
                         'is_read' => false,

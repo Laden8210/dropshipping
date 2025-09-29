@@ -94,8 +94,8 @@ class GeminiService
         
         $context .= "CONVERSATION HISTORY:\n";
         if (isset($ticketData['messages']) && is_array($ticketData['messages']) && count($ticketData['messages']) > 0) {
-            // Limit to last 10 messages to avoid token limits
-            $recentMessages = array_slice($ticketData['messages'], -10);
+            // Limit to last 5 messages to reduce token usage
+            $recentMessages = array_slice($ticketData['messages'], -5);
             foreach ($recentMessages as $msg) {
                 $sender = ($msg['sender_type'] ?? 'system') === 'user' ? 'Customer' : 
                          (($msg['sender_type'] ?? 'system') === 'support' ? 'Support Agent' : 'System');
@@ -114,38 +114,18 @@ class GeminiService
      */
     private function buildPrompt($context, $customerMessage)
     {
-        $systemPrompt = "You are an AI customer support assistant for a dropshipping e-commerce platform. Your role is to provide helpful, empathetic, and accurate responses to customer inquiries.
+        $systemPrompt = "You are a customer support AI. Respond professionally and helpfully in 2-3 sentences.
 
-IMPORTANT GUIDELINES:
-1. Always be polite, professional, and empathetic
-2. Only provide accurate information based on the context provided
-3. If you don't have specific information, acknowledge it and suggest next steps
-4. For order-related questions, focus on the actual order status and tracking information
-5. For product questions, provide general guidance but recommend contacting supplier for specifics
-6. Keep responses concise but comprehensive (2-4 sentences typically)
-7. Use a friendly, conversational tone
-8. Don't make promises about specific delivery times unless clearly stated in order data
-
-AVOID:
-- Making promises you can't keep
-- Providing incorrect order or tracking information
-- Giving technical support for products beyond basic usage
-- Suggesting refunds/returns without proper processes
-- Sharing internal business information
-
-RESPONSE STYLE:
-- Professional but friendly tone
-- Clear and helpful information
-- Empathetic understanding of customer concerns
-- Actionable next steps when possible
-
----
+GUIDELINES:
+- Be polite and empathetic
+- Only use information from the context
+- If info is missing, acknowledge it and suggest next steps
+- Don't make promises about delivery times
+- Keep response concise
 
 {$context}
 
----
-
-Respond to the customer's message professionally and helpfully. Keep your response concise (2-4 sentences). Only use information from the context provided above.";
+Respond to the customer's message:";
 
         return $systemPrompt;
     }
@@ -167,7 +147,7 @@ Respond to the customer's message professionally and helpfully. Keep your respon
             ],
             'generationConfig' => [
                 'temperature' => 0.7,
-                'maxOutputTokens' => 500,
+                'maxOutputTokens' => 1024,  // Increased from 500
                 'topP' => 0.8,
                 'topK' => 10
             ],
@@ -228,17 +208,50 @@ Respond to the customer's message professionally and helpfully. Keep your respon
      */
     private function parseResponse($response)
     {
-        if (!isset($response['candidates'][0]['content']['parts'][0]['text'])) {
-            // Check if content was blocked
-            if (isset($response['candidates'][0]['finishReason']) && 
-                $response['candidates'][0]['finishReason'] === 'SAFETY') {
-                return "I apologize, but I cannot generate a response for this query. Please rephrase your question or contact our support team directly.";
-            }
-            
-            throw new Exception("Invalid response format from Gemini API: " . json_encode($response));
+        // Check for various error conditions first
+        if (!isset($response['candidates']) || empty($response['candidates'])) {
+            throw new Exception("No candidates in Gemini API response");
         }
 
-        $text = $response['candidates'][0]['content']['parts'][0]['text'];
+        $candidate = $response['candidates'][0];
+        
+        // Check finish reason
+        $finishReason = $candidate['finishReason'] ?? 'UNKNOWN';
+        
+        // Handle different finish reasons
+        switch ($finishReason) {
+            case 'SAFETY':
+                return "I apologize, but I cannot generate a response for this query. Please rephrase your question or contact our support team directly.";
+                
+            case 'MAX_TOKENS':
+                // Try to extract partial response if available
+                if (isset($candidate['content']['parts'][0]['text'])) {
+                    $text = trim($candidate['content']['parts'][0]['text']);
+                    if (!empty($text)) {
+                        // Return the partial response with an ellipsis
+                        return $text . "... Please contact our support team for complete assistance.";
+                    }
+                }
+                // If no partial text, return a helpful message
+                return "I apologize for the incomplete response. Your query requires more detailed information than I can provide in this format. Please contact our support team directly for comprehensive assistance.";
+                
+            case 'RECITATION':
+                return "I apologize, but I cannot provide this specific response. Please contact our support team for assistance.";
+                
+            case 'STOP':
+                // Normal completion
+                break;
+                
+            default:
+                error_log("Unexpected finish reason: " . $finishReason);
+        }
+        
+        // Extract the text content
+        if (!isset($candidate['content']['parts'][0]['text'])) {
+            throw new Exception("No text content in Gemini API response. Response: " . json_encode($response));
+        }
+
+        $text = $candidate['content']['parts'][0]['text'];
         
         // Clean up the response
         $text = trim($text);
