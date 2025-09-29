@@ -101,6 +101,46 @@ try {
             $notificationModel->create($userId, $notificationMessage);
         }
 
+
+        $sql = "SELECT * FROM orders WHERE tracking_number = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("s", $trackingNumber);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $order = $result->fetch_assoc();
+        $stmt->close();
+        $userId = $order['user_id'] ?? null;
+
+        $sql = "SELECT * FROM users WHERE user_id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("s", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+        $stmt->close();
+        $customerName = $user['first_name'] . ' ' . $user['last_name'];
+
+        if ($userId) {
+            $notificationService = new NotificationService();
+            if ($user['phone_number']) {
+                $results['sms'] = $notificationService->sendSMS(
+                    $user['phone_number'],
+                    'Your order with tracking number {$trackingNumber} has been updated to {$status}.'
+                );
+            }
+
+            if ($user['email']) {
+                $results['email'] = $notificationService->sendEmail(
+                    $user['email'],
+                    'Order Status Update - ' . $trackingNumber,
+                    "Hello,\n\nYour order with tracking number {$trackingNumber} has been updated to {$status}.\n\nThank you for choosing our service!\n\nBest regards,\nDropshipping Support Team",
+                    $customerName
+                );
+            }
+        }
+
+
+
         http_response_code(201);
         echo json_encode(['status' => 'success', 'message' => 'Shipping status saved']);
     } else {

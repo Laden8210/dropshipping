@@ -418,6 +418,73 @@ class GetAllRequest {
 }
 
 window.GetAllRequest = GetAllRequest;
+class PostRequest {
+  constructor({ postUrl, params = {}, callback, showLoading = true, showSuccess = true }) {
+    this.postUrl = postUrl;
+    this.params = params;
+    this.callback = typeof callback === "function" ? callback : () => {};
+    this.showLoading = showLoading;
+    this.showSuccess = showSuccess;
+  }
+  
+  send = () => {
+    this._executePost();
+  };
+  
+  _executePost = () => {
+    if (this.showLoading) {
+      Swal.fire({
+        title: "Processing...",
+        html: "Please wait while the request is being processed.",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+        showConfirmButton: false,
+      });
+    }
+    axios
+      .post(this.postUrl, this.params)
+      .then((response) => {
+        const data = response.data;
+        Swal.close();
+        if (data.status === "error" || data.http_code !== 200) {
+          Swal.fire({
+            title: "Error!",
+            text: data.message || "Failed to process request. Please try again later.",
+            icon: "error",
+          });
+          this.callback(data.message || "Unknown error", null);
+        } else {
+          if (this.showSuccess) {
+            Swal.fire({
+              title: "Success!",
+              text: data.message || "Request processed successfully!",
+              icon: "success",
+            });
+          }
+          this.callback(null, data.data);
+        }
+      })
+      .catch((error) => {
+        const errorMsg =
+          (error.response &&
+            error.response.data &&
+            error.response.data.message) ||
+          error.message ||
+          "Failed to process request. Please try again later.";
+        Swal.fire({
+          title: "Error!",
+          text: errorMsg,
+          icon: "error",
+        });
+        this.callback(errorMsg, null);
+      })
+      .finally(() => {});
+  };
+}
+window.PostRequest = PostRequest;
+
 class CreateExamRequest {
   constructor({
     formSelector,

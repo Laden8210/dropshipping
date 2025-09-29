@@ -117,6 +117,44 @@ if ($userId) {
     $notificationModel->create($userId, $notificationMessage);
 }
 
+$sql = "SELECT * FROM orders WHERE order_number = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $order_number);
+$stmt->execute();
+$result = $stmt->get_result();
+$order = $result->fetch_assoc();
+$stmt->close();
+$userId = $order['user_id'] ?? null;
+
+$sql = "SELECT * FROM users WHERE user_id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $userId);
+$stmt->execute();
+$result = $stmt->get_result();
+$user = $result->fetch_assoc();
+$stmt->close();
+$customerName = $user['first_name'] . ' ' . $user['last_name'];
+
+if ($userId) {
+    $notificationService = new NotificationService();
+    if ($user['phone_number']) {
+        $results['sms'] = $notificationService->sendSMS(
+            $user['phone_number'],
+            'Your order with order number ' . $order_number . ' has been updated to ' . $status . '.'
+        );
+    }
+
+    if ($user['email']) {
+        $results['email'] = $notificationService->sendEmail(
+            $user['email'],
+            'Order Status Update - ' . $order_number,
+            "Hello,\n\nYour order with order number " . $order_number . " has been updated to " . $status . ".\n\nThank you for choosing our service!\n\nBest regards,\nDropshipping Support Team",
+            $customerName
+        );
+    }
+}
+
+
 
 
 echo json_encode([

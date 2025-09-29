@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode([
         'status' => 'error',
@@ -52,7 +52,14 @@ try {
 
 try {
     // Get ticket_id from query parameters
-    $ticket_id = $_GET['ticket_id'] ?? '';
+    $request_body = json_decode(file_get_contents('php://input'), true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Invalid JSON data']);
+        exit;
+    }
+
+    $ticket_id =  $request_body['ticket_id'] ?? '';
     
     if (empty($ticket_id)) {
         http_response_code(400);

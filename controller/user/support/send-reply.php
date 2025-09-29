@@ -29,9 +29,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+$request_body = json_decode(file_get_contents('php://input'), true);
+
 try {
-    $ticket_id = $_POST['ticket_id'] ?? '';
-    $message = $_POST['message'] ?? '';
+    $ticket_id = $request_body['ticket_id'] ?? '';
+    $message = $request_body['message'] ?? '';
     
     if (empty($ticket_id) || empty($message)) {
         http_response_code(400);

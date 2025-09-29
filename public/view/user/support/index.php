@@ -15,12 +15,12 @@
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="tickets-tab" data-bs-toggle="tab" data-bs-target="#tickets" type="button" role="tab" aria-controls="tickets" aria-selected="false">
                     <i class="fas fa-ticket-alt me-2"></i>Manage Tickets
-                </button>
+                            </button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="analytics-tab" data-bs-toggle="tab" data-bs-target="#analytics" type="button" role="tab" aria-controls="analytics" aria-selected="false">
                     <i class="fas fa-chart-line me-2"></i>Performance Metrics
-                </button>
+                            </button>
             </li>
         </ul>
 
@@ -37,7 +37,7 @@
                                 <p class="text-muted">Total Tickets</p>
                             </div>
                         </div>
-                    </div>
+                                </div>
                     <div class="col-md-3">
                         <div class="card text-center">
                             <div class="card-body">
@@ -45,7 +45,7 @@
                                 <p class="text-muted">Open Tickets</p>
                             </div>
                         </div>
-                    </div>
+                                </div>
                     <div class="col-md-3">
                         <div class="card text-center">
                             <div class="card-body">
@@ -53,7 +53,7 @@
                                 <p class="text-muted">In Progress</p>
                             </div>
                         </div>
-                    </div>
+                                </div>
                     <div class="col-md-3">
                         <div class="card text-center">
                             <div class="card-body">
@@ -67,10 +67,10 @@
                 <!-- Quick Actions -->
                 <div class="row mb-4">
                     <div class="col-md-6">
-                        <div class="card">
+                <div class="card">
                             <div class="card-header">
                                 <h5 class="mb-0"><i class="fas fa-ticket-alt"></i> Recent Tickets</h5>
-                            </div>
+                        </div>
                             <div class="card-body">
                                 <div id="recentTickets">
                                     <div class="text-center">
@@ -151,8 +151,8 @@
                                 <input type="text" class="form-control" id="searchTickets" placeholder="Search tickets..." onkeyup="searchTickets()">
                             </div>
                         </div>
-                    </div>
-                </div>
+                        </div>
+                        </div>
 
                 <!-- Tickets Table -->
                 <div class="card">
@@ -182,7 +182,7 @@
                                         <td colspan="8" class="text-center">
                                             <div class="spinner-border text-primary" role="status">
                                                 <span class="visually-hidden">Loading...</span>
-                                            </div>
+                        </div>
                                             <p class="mt-2">Loading tickets...</p>
                                         </td>
                                     </tr>
@@ -220,7 +220,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                                </div>
 
                 <!-- Analytics Summary Cards -->
                 <div class="row mb-4">
@@ -231,7 +231,7 @@
                                 <p class="text-muted">Total Tickets</p>
                             </div>
                         </div>
-                    </div>
+                                </div>
                     <div class="col-md-3">
                         <div class="card text-center">
                             <div class="card-body">
@@ -239,7 +239,7 @@
                                 <p class="text-muted">Resolved Tickets</p>
                             </div>
                         </div>
-                    </div>
+                                </div>
                     <div class="col-md-3">
                         <div class="card text-center">
                             <div class="card-body">
@@ -247,7 +247,7 @@
                                 <p class="text-muted">Avg. Response Time</p>
                             </div>
                         </div>
-                    </div>
+                                </div>
                     <div class="col-md-3">
                         <div class="card text-center">
                             <div class="card-body">
@@ -256,7 +256,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                                </div>
 
                 <!-- Charts Section -->
                 <div class="row">
@@ -267,7 +267,7 @@
                                 <canvas id="statusChart"></canvas>
                             </div>
                         </div>
-                    </div>
+                                </div>
                     <div class="col-md-6">
                         <div class="card mb-4">
                             <div class="card-header">Ticket Priority Distribution</div>
@@ -276,7 +276,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                                </div>
 
                 <div class="row">
                     <div class="col-md-12">
@@ -291,7 +291,7 @@
             </div>
         </div>
     </div>
-</div>
+                            </div>
 
 <!-- Ticket Details Modal -->
 <div class="modal fade" id="ticketDetailsModal" tabindex="-1" aria-labelledby="ticketDetailsModalLabel" aria-hidden="true">
@@ -325,7 +325,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                                </div>
                     <div class="col-md-8">
                         <div class="card chat-card">
                             <div class="card-header chat-header">Conversation</div>
@@ -440,8 +440,8 @@ function displayRecentTickets(tickets) {
                 </div>
                 <div>
                     <span class="badge ${statusClass}">${ticket.status.replace('_', ' ').toUpperCase()}</span>
-                </div>
-            </div>
+                        </div>
+                    </div>
         `;
     });
     
@@ -587,8 +587,8 @@ function displayMessages(messages, customerUserId) {
                     <div class="message-text">${msg.message}</div>
                     ${msg.attachment_url ? `<div class="message-attachment"><a href="${msg.attachment_url}" target="_blank"><i class="fas fa-paperclip"></i> Attachment</a></div>` : ''}
                     <div class="message-time">${new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                </div>
-            </div>
+                            </div>
+                        </div>
         `;
         chatMessagesDiv.innerHTML += messageHtml;
     });
