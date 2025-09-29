@@ -1,5 +1,9 @@
 <?php
 require '../../vendor/autoload.php';
+require_once '../../core/config.php';
+require_once '../../models/index.php';
+require_once '../../function/UIDGenerator.php';
+require_once '../../vendor/autoload.php';
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
@@ -34,12 +38,24 @@ try {
         throw new Exception("Invalid token payload");
     }
 
+    $sql = "SELECT * FROM users WHERE user_id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+    $stmt->close();
+
+
     echo json_encode([
         'status' => 'success',
         'message' => 'Access granted',
-        'user' => [
+        'data' => [
             'user_id' => $user_id,
-            'role' => $role
+            'role' => $role,
+            'full_name' => $user['first_name'] . ' ' . $user['last_name'],
+            'email' => $user['email'],
+            
         ]
     ]);
 } catch (Exception $e) {
