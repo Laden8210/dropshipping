@@ -32,7 +32,6 @@ class NotificationService
                 throw new Exception('SMS credentials not configured');
             }
 
-            $phoneNumber = $this->formatPhoneNumber($phoneNumber);
             
             if (!$phoneNumber) {
                 throw new Exception('Invalid phone number format');
