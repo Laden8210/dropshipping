@@ -290,43 +290,17 @@ function renderUsersTable() {
 }
 
 function renderPagination() {
-    const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
-    const pagination = document.getElementById('users-pagination');
-    
-    if (totalPages <= 1) {
-        pagination.innerHTML = '';
-        return;
-    }
-
-    let paginationHTML = '';
-    
-    // Previous button
-    paginationHTML += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-        <a class="page-link" href="#" onclick="changePage(${currentPage - 1})">Previous</a>
-    </li>`;
-
-    // Page numbers
-    for (let i = 1; i <= totalPages; i++) {
-        if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
-            paginationHTML += `<li class="page-item ${i === currentPage ? 'active' : ''}">
-                <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
-            </li>`;
-        } else if (i === currentPage - 3 || i === currentPage + 3) {
-            paginationHTML += '<li class="page-item disabled"><span class="page-link">...</span></li>';
-        }
-    }
-
-    // Next button
-    paginationHTML += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
-        <a class="page-link" href="#" onclick="changePage(${currentPage + 1})">Next</a>
-    </li>`;
-
-    pagination.innerHTML = paginationHTML;
+    PaginationUtils.renderPagination(
+        'users-pagination', 
+        currentPage, 
+        filteredUsers.length, 
+        usersPerPage, 
+        'changePage'
+    );
 }
 
 function changePage(page) {
-    const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
-    if (page >= 1 && page <= totalPages) {
+    if (PaginationUtils.validatePageChange(page, currentPage, filteredUsers.length, usersPerPage)) {
         currentPage = page;
         renderUsersTable();
         renderPagination();

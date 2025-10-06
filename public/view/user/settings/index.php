@@ -34,54 +34,147 @@
 
         <!-- Profile Tab -->
         <div class="tab-pane fade show active" id="profile" role="tabpanel">
-            <form id="profileForm">
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="first_name" class="form-label">First Name</label>
-                        <input type="text" class="form-control" id="first_name" name="first_name" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label for="last_name" class="form-label">Last Name</label>
-                        <input type="text" class="form-control" id="last_name" name="last_name" required>
+            <!-- Profile Display -->
+            <div class="card mb-4" id="profile-display">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="ri-user-line me-2"></i>Profile Information</h5>
+                    <button class="btn btn-outline-primary" onclick="toggleProfileEdit()">
+                        <i class="ri-edit-line me-1"></i>Edit Profile
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">First Name</label>
+                            <p class="text-muted" id="display-first-name">Loading...</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Last Name</label>
+                            <p class="text-muted" id="display-last-name">Loading...</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Email Address</label>
+                            <p class="text-muted" id="display-email">Loading...</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Phone Number</label>
+                            <p class="text-muted" id="display-phone">Loading...</p>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Birth Date</label>
+                            <p class="text-muted" id="display-birth-date">Loading...</p>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Gender</label>
+                            <p class="text-muted" id="display-gender">Loading...</p>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Account Status</label>
+                            <p class="text-muted" id="display-status">Loading...</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Email Verified</label>
+                            <p class="text-muted" id="display-email-verified">Loading...</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Member Since</label>
+                            <p class="text-muted" id="display-created-at">Loading...</p>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email" name="email" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label for="phone_number" class="form-label">Phone Number</label>
-                        <input type="text" class="form-control" id="phone_number" name="phone_number">
-                    </div>
+            <!-- Profile Edit Form -->
+            <div class="card mb-4" id="profile-edit" style="display: none;">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="ri-edit-line me-2"></i>Edit Profile</h5>
+                    <button class="btn btn-outline-secondary" onclick="toggleProfileEdit()">
+                        <i class="ri-close-line me-1"></i>Cancel
+                    </button>
                 </div>
+                <div class="card-body">
+                    <form id="profileForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="first_name" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="last_name" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" required>
+                            </div>
+                        </div>
 
-                <div class="row mb-3">
-                    <div class="col-md-4">
-                        <label for="birth_date" class="form-label">Birth Date</label>
-                        <input type="date" class="form-control" id="birth_date" name="birth_date">
-                    </div>
-                    <div class="col-md-4">
-                        <label for="gender" class="form-label">Gender</label>
-                        <select class="form-select" id="gender" name="gender">
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="avatar_url" class="form-label">Avatar URL</label>
-                        <input type="url" class="form-control" id="avatar_url" name="avatar_url">
-                    </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="phone_number" class="form-label">Phone Number</label>
+                                <input type="text" class="form-control" id="phone_number" name="phone_number">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="birth_date" class="form-label">Birth Date</label>
+                                <input type="date" class="form-control" id="birth_date" name="birth_date">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="gender" class="form-label">Gender</label>
+                                <select class="form-select" id="gender" name="gender">
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                </select>
+                            </div>
+                            <!-- <div class="col-md-4">
+                                <label for="avatar_url" class="form-label">Avatar URL</label>
+                                <input type="url" class="form-control" id="avatar_url" name="avatar_url">
+                            </div> -->
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="ri-save-line me-1"></i>Save Changes
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="toggleProfileEdit()">
+                                <i class="ri-close-line me-1"></i>Cancel
+                            </button>
+                        </div>
+                    </form>
                 </div>
+            </div>
 
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" name="password">
+            <!-- Password Change Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="ri-lock-line me-2"></i>Change Password</h5>
                 </div>
-
-                <button type="submit" class="btn btn-primary">Update Profile</button>
-            </form>
+                <div class="card-body">
+                    <form id="passwordForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="current_password" class="form-label">Current Password</label>
+                                <input type="password" class="form-control" id="current_password" name="current_password" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="new_password" class="form-label">New Password</label>
+                                <input type="password" class="form-control" id="new_password" name="new_password" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="confirm_password" class="form-label">Confirm New Password</label>
+                                <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="ri-key-line me-1"></i>Change Password
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
 
 
@@ -252,6 +345,112 @@
 
     request.send();
 
+    // Load user profile data
+    document.addEventListener('DOMContentLoaded', function() {
+        loadUserProfile();
+    });
+
+    function loadUserProfile() {
+        new GetRequest({
+            getUrl: 'controller/user/settings/get-profile.php',
+            params: {},
+            showLoading: false,
+            showSuccess: false,
+            callback: (err, data) => {
+                if (err) {
+                    console.error('Error loading profile:', err);
+                    return;
+                }
+                
+                if (data) {
+                    // Display profile information
+                    document.getElementById('display-first-name').textContent = data.first_name || 'Not provided';
+                    document.getElementById('display-last-name').textContent = data.last_name || 'Not provided';
+                    document.getElementById('display-email').textContent = data.email || 'Not provided';
+                    document.getElementById('display-phone').textContent = data.phone_number || 'Not provided';
+                    document.getElementById('display-birth-date').textContent = data.birth_date || 'Not provided';
+                    document.getElementById('display-gender').textContent = data.gender ? data.gender.charAt(0).toUpperCase() + data.gender.slice(1) : 'Not provided';
+                    document.getElementById('display-status').innerHTML = data.is_active ? 
+                        '<span class="badge bg-success">Active</span>' : 
+                        '<span class="badge bg-danger">Inactive</span>';
+                    document.getElementById('display-email-verified').innerHTML = data.is_email_verified ? 
+                        '<span class="badge bg-success">Verified</span>' : 
+                        '<span class="badge bg-warning">Unverified</span>';
+                    document.getElementById('display-created-at').textContent = data.created_at ? 
+                        new Date(data.created_at).toLocaleDateString() : 'Not available';
+
+                    // Populate edit form
+                    document.getElementById('first_name').value = data.first_name || '';
+                    document.getElementById('last_name').value = data.last_name || '';
+                    document.getElementById('email').value = data.email || '';
+                    document.getElementById('phone_number').value = data.phone_number || '';
+                    document.getElementById('birth_date').value = data.birth_date || '';
+                    document.getElementById('gender').value = data.gender || 'male';
+                 //   document.getElementById('avatar_url').value = data.avatar_url || '';
+                }
+            }
+        }).send();
+    }
+
+    function toggleProfileEdit() {
+        const displayCard = document.getElementById('profile-display');
+        const editCard = document.getElementById('profile-edit');
+        
+        if (editCard.style.display === 'none') {
+            displayCard.style.display = 'none';
+            editCard.style.display = 'block';
+        } else {
+            displayCard.style.display = 'block';
+            editCard.style.display = 'none';
+        }
+    }
+
+    // Handle profile form submission
+    document.getElementById('profileForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const params = {};
+        for (let [key, value] of formData.entries()) {
+            params[key] = value;
+        }
+        
+        new PostRequest({
+            postUrl: 'controller/user/settings/update-profile.php',
+            params: params,
+            showLoading: true,
+            showSuccess: true,
+            callback: (err, data) => {
+                if (!err) {
+                    loadUserProfile(); // Reload profile data
+                    toggleProfileEdit(); // Switch back to display mode
+                }
+            }
+        }).send();
+    });
+
+    // Handle password form submission
+    document.getElementById('passwordForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const params = {};
+        for (let [key, value] of formData.entries()) {
+            params[key] = value;
+        }
+        
+        new PostRequest({
+            postUrl: 'controller/user/settings/change-password.php',
+            params: params,
+            showLoading: true,
+            showSuccess: true,
+            callback: (err, data) => {
+                if (!err) {
+                    document.getElementById('passwordForm').reset();
+                }
+            }
+        }).send();
+    });
 
     document.getElementById('create-store-profile').addEventListener('submit', function(e) {
         e.preventDefault();

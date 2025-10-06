@@ -54,7 +54,7 @@
             'deliveries' => ['Deliveries', 'ri-truck-line'],
             'inventory' => ['Inventory', 'ri-archive-line'],
             'product' => ['Products', 'ri-product-hunt-line'],
-            'category' => ['Categories', 'ri-list-check-2-line'],
+            'category' => ['Categories', 'ri-file-list-line'],
             'orders' => ['Orders', 'ri-shopping-cart-line'],
             'reports' => ['Reports', 'ri-bar-chart-line'],
             'support' => ['Support', 'ri-customer-service-2-line'],

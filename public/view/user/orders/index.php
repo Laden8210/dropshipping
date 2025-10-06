@@ -119,19 +119,7 @@
             </div>
 
             <!-- Pagination -->
-            <nav class="mt-4">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item disabled">
-                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
-                    </li>
-                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                    <li class="page-item">
-                        <a class="page-link" href="#">Next</a>
-                    </li>
-                </ul>
-            </nav>
+
         </div>
     </div>
 
@@ -587,17 +575,25 @@
                         <p><strong>Order Date:</strong> <span class="order-info-date">${formatDateTime(data.created_at)}</span></p>
                         <p><strong>Customer:</strong> ${customerName}</p>
                         <p><strong>Email:</strong> ${data.user_email}</p>
-                        <p><strong>Phone:</strong> N/A</p>
+                        <p><strong>Phone:</strong> ${data.phone_number}</p>
                     `;
                 }
                 const infoCol2 = document.querySelectorAll('.card-body .row .col-md-6')[1];
 
                 if (infoCol2) {
+
+                    // get the latest status
+                    console.log("Latest status:", data.status);
+
+                    const latestStatus = data.status_history.sort(
+                        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+                    )[0];
+                    console.log("Latest status:", latestStatus);    
+
                     infoCol2.innerHTML = `
                         <p><strong>Payment Method:</strong> ${data.payment && data.payment.payment_method ? formatPaymentMethod(data.payment.payment_method) : '-'}</p>
                         <p><strong>Payment Status:</strong> <span class="badge bg-success">${data.payment && data.payment.status ? capitalize(data.payment.status) : '-'}</span></p>
-                        <p><strong>Order Status:</strong> <span class="status-badge status-${data.status.toLowerCase()}">${capitalize(data.status)}</span></p>
-                    
+                        <p><strong>Order Status:</strong> <span class="status-badge status-${latestStatus.status.toLowerCase()}">${capitalize(latestStatus.status)}</span></p>
                         <p><strong>Transaction Num:</strong> <span class="order-info-transaction-id">${data.payment && data.payment.transaction_id ? data.payment.transaction_id : '-'}</span></p>`;
                 }
 

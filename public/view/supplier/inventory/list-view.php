@@ -321,10 +321,10 @@
                 cardHeader.innerHTML = `<i class="fas fa-box me-2"></i>Inventory Items (${totalProducts})`;
 
                 const statBadge = document.getElementById('stat');
-                statBadge.textContent = `${data.filter(product => product.status_db === 'active').length} active items`;
+                statBadge.textContent = `${data.filter(product => product.status === 'active').length} active items`;
 
-                const totalActive = data ? data.filter(product => product.status_db === 'active').length : 0;
-                const totalInactive = data ? data.filter(product => product.status_db === 'inactive').length : 0;
+                const totalActive = data ? data.filter(product => product.status === 'active').length : 0;
+                const totalInactive = data ? data.filter(product => product.status === 'inactive').length : 0;
                 const totalLowStock = data ? data.filter(product => product.totalInventory < 10).length : 0;
 
                 const stats = document.querySelectorAll('.stat-card h3');

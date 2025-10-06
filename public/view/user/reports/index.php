@@ -23,7 +23,8 @@
                             <option value="sales">Sales Report</option>
                             <option value="products">Product Report</option>
                             <option value="orders">Orders Report</option>
-                            <option value="complete">Complete Report</option>
+                            <option value="complete">Completed Orders Report</option>
+                            <option value="revenue">Revenue Report</option>
                         </select>
                     </div>
                     <div class="col-md-4">
@@ -172,6 +173,9 @@ function displayReportData(data, reportType, dateRange) {
         case 'sales':
             displaySalesData(data, tableHeaders, tableBody);
             break;
+        case 'revenue':
+            displayRevenueData(data, tableHeaders, tableBody);
+            break;
         case 'products':
             displayProductsData(data, tableHeaders, tableBody);
             break;
@@ -319,9 +323,165 @@ function formatDateRange(dateRange) {
     }
 }
 
+function displayRevenueData(data, tableHeaders, tableBody) {
+    // Create a comprehensive revenue report display
+    let html = '';
+    
+    // Revenue Summary Section
+    if (data.summary) {
+        html += `
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">Total Revenue</h5>
+                        <h3 class="text-primary">₱${parseFloat(data.summary.total_revenue || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title text-success">Total Orders</h5>
+                        <h3 class="text-success">${parseInt(data.summary.total_orders || 0).toLocaleString()}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title text-info">Avg Order Value</h5>
+                        <h3 class="text-info">₱${parseFloat(data.summary.avg_order_value || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title text-warning">Highest Order</h5>
+                        <h3 class="text-warning">₱${parseFloat(data.summary.max_order || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    }
+    
+    // Daily Revenue Table
+    if (data.daily_revenue && data.daily_revenue.length > 0) {
+        html += `
+        <div class="mb-4">
+            <h5>Daily Revenue Breakdown</h5>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Orders</th>
+                            <th>Subtotal</th>
+                            <th>Shipping</th>
+                            <th>Tax</th>
+                            <th>Total Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+        
+        data.daily_revenue.forEach(row => {
+            html += `
+                <tr>
+                    <td>${new Date(row.date).toLocaleDateString()}</td>
+                    <td>${row.orders}</td>
+                    <td>₱${parseFloat(row.subtotal || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                    <td>₱${parseFloat(row.shipping_fee || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                    <td>₱${parseFloat(row.tax || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                    <td>₱${parseFloat(row.revenue || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                </tr>`;
+        });
+        
+        html += `</tbody></table></div></div>`;
+    }
+    
+    // Monthly Revenue Table
+    if (data.monthly_revenue && data.monthly_revenue.length > 0) {
+        html += `
+        <div class="mb-4">
+            <h5>Monthly Revenue Summary</h5>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th>Orders</th>
+                            <th>Subtotal</th>
+                            <th>Shipping</th>
+                            <th>Tax</th>
+                            <th>Total Revenue</th>
+                            <th>Avg Order Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+        
+        data.monthly_revenue.forEach(row => {
+            html += `
+                <tr>
+                    <td>${new Date(row.month + '-01').toLocaleDateString('en-US', {month: 'long', year: 'numeric'})}</td>
+                    <td>${row.orders}</td>
+                    <td>₱${parseFloat(row.subtotal || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                    <td>₱${parseFloat(row.shipping_fee || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                    <td>₱${parseFloat(row.tax || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                    <td>₱${parseFloat(row.revenue || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                    <td>₱${parseFloat(row.avg_order_value || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                </tr>`;
+        });
+        
+        html += `</tbody></table></div></div>`;
+    }
+    
+    // Payment Method Revenue Table
+    if (data.payment_revenue && data.payment_revenue.length > 0) {
+        html += `
+        <div class="mb-4">
+            <h5>Revenue by Payment Method</h5>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Payment Method</th>
+                            <th>Orders</th>
+                            <th>Revenue</th>
+                            <th>Percentage</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+        
+        const totalRevenue = data.payment_revenue.reduce((sum, row) => sum + parseFloat(row.revenue || 0), 0);
+        
+        data.payment_revenue.forEach(row => {
+            const percentage = totalRevenue > 0 ? ((parseFloat(row.revenue || 0) / totalRevenue) * 100).toFixed(1) : 0;
+            html += `
+                <tr>
+                    <td>${row.payment_method.charAt(0).toUpperCase() + row.payment_method.slice(1)}</td>
+                    <td>${row.orders}</td>
+                    <td>₱${parseFloat(row.revenue || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                    <td>${percentage}%</td>
+                </tr>`;
+        });
+        
+        html += `</tbody></table></div></div>`;
+    }
+    
+    if (html === '') {
+        tableHeaders.innerHTML = '<th>No Data Available</th>';
+        tableBody.innerHTML = '<tr><td class="text-center text-muted">No revenue data found for the selected period</td></tr>';
+    } else {
+        tableHeaders.innerHTML = '<th>Revenue Report</th>';
+        tableBody.innerHTML = `<tr><td>${html}</td></tr>`;
+    }
+}
+
 function getReportTitle(type) {
     switch (type) {
         case 'sales': return 'Sales Report';
+        case 'revenue': return 'Revenue Report';
         case 'products': return 'Product Report';
         case 'orders': return 'Orders Report';
         case 'complete': return 'Complete Report';

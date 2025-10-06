@@ -247,11 +247,11 @@
             const status = document.getElementById('inv-status').value;
 
 
-            window.viewProduct(keyword, sort_by);
+            window.viewProduct(keyword, status);
         });
     });
 
-    window.viewProduct = (keyword, sort_by) => {
+    window.viewProduct = (keyword, status) => {
         new GetRequest({
             getUrl: "controller/user/inventory?action=search-product",
             params: {
@@ -270,10 +270,10 @@
                 cardHeader.innerHTML = `<i class="fas fa-box me-2"></i>Inventory Items (${totalProducts})`;
 
                 const statBadge = document.getElementById('stat');
-                statBadge.textContent = `${data.filter(product => product.status_db === 'active').length} active items`;
+                statBadge.textContent = `${data.filter(product => product.status === 'active').length} active items`;
                 // update inventory stats
-                const totalActive = data.filter(product => product.status_db === 'active').length;
-                const totalInactive = data.filter(product => product.status_db === 'inactive').length;
+                const totalActive = data.filter(product => product.status === 'active').length;
+                const totalInactive = data.filter(product => product.status === 'inactive').length;
                 const totalLowStock = data.filter(product => product.totalInventory < 10).length;
 
                 const stats = document.querySelectorAll('.stat-card h3');

@@ -44,7 +44,7 @@ class OrderProduct
     public function getByOrderNumber($orderNumber)
     {
         $sql = "SELECT o.*, 
-                   u.first_name, u.last_name, u.email AS user_email,
+                   u.first_name, u.last_name, u.email AS user_email, u.phone_number,
                    usa.address_line, usa.region, usa.city, usa.brgy, usa.postal_code
             FROM {$this->orderTable} o
             LEFT JOIN {$this->userTable} u ON o.user_id = u.user_id

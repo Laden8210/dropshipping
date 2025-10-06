@@ -96,6 +96,86 @@ try {
             }
             break;
 
+        case 'revenue':
+            // Revenue Report
+            // Get daily revenue data
+            $dailyRevenueQuery = "SELECT DATE_FORMAT(o.created_at, '%Y-%m-%d') as date, 
+                                 COUNT(*) as orders, 
+                                 SUM(o.total_amount) as revenue,
+                                 SUM(o.subtotal) as subtotal,
+                                 SUM(o.shipping_fee) as shipping_fee,
+                                 SUM(o.tax) as tax
+                                 FROM orders o 
+                                 WHERE o.store_id = ? $dateCondition
+                                 GROUP BY DATE_FORMAT(o.created_at, '%Y-%m-%d')
+                                 ORDER BY date DESC";
+            $stmt = $conn->prepare($dailyRevenueQuery);
+            $stmt->bind_param("i", $storeId);
+            $stmt->execute();
+            $dailyResult = $stmt->get_result();
+            $reportData['daily_revenue'] = [];
+            while ($row = $dailyResult->fetch_assoc()) {
+                $reportData['daily_revenue'][] = $row;
+            }
+            
+            // Get monthly revenue data
+            $monthlyRevenueQuery = "SELECT DATE_FORMAT(o.created_at, '%Y-%m') as month, 
+                                   COUNT(*) as orders, 
+                                   SUM(o.total_amount) as revenue,
+                                   SUM(o.subtotal) as subtotal,
+                                   SUM(o.shipping_fee) as shipping_fee,
+                                   SUM(o.tax) as tax,
+                                   AVG(o.total_amount) as avg_order_value
+                                   FROM orders o 
+                                   WHERE o.store_id = ? $dateCondition
+                                   GROUP BY DATE_FORMAT(o.created_at, '%Y-%m')
+                                   ORDER BY month DESC";
+            $stmt = $conn->prepare($monthlyRevenueQuery);
+            $stmt->bind_param("i", $storeId);
+            $stmt->execute();
+            $monthlyResult = $stmt->get_result();
+            $reportData['monthly_revenue'] = [];
+            while ($row = $monthlyResult->fetch_assoc()) {
+                $reportData['monthly_revenue'][] = $row;
+            }
+            
+            // Get revenue by payment method
+            $paymentRevenueQuery = "SELECT op.payment_method, 
+                                   COUNT(*) as orders, 
+                                   SUM(op.amount) as revenue
+                                   FROM order_payments op
+                                   JOIN orders o ON op.order_id = o.order_id
+                                   WHERE o.store_id = ? $dateCondition
+                                   GROUP BY op.payment_method
+                                   ORDER BY revenue DESC";
+            $stmt = $conn->prepare($paymentRevenueQuery);
+            $stmt->bind_param("i", $storeId);
+            $stmt->execute();
+            $paymentResult = $stmt->get_result();
+            $reportData['payment_revenue'] = [];
+            while ($row = $paymentResult->fetch_assoc()) {
+                $reportData['payment_revenue'][] = $row;
+            }
+            
+            // Get total revenue summary
+            $totalRevenueQuery = "SELECT 
+                                 COUNT(*) as total_orders,
+                                 SUM(o.total_amount) as total_revenue,
+                                 SUM(o.subtotal) as total_subtotal,
+                                 SUM(o.shipping_fee) as total_shipping,
+                                 SUM(o.tax) as total_tax,
+                                 AVG(o.total_amount) as avg_order_value,
+                                 MIN(o.total_amount) as min_order,
+                                 MAX(o.total_amount) as max_order
+                                 FROM orders o 
+                                 WHERE o.store_id = ? $dateCondition";
+            $stmt = $conn->prepare($totalRevenueQuery);
+            $stmt->bind_param("i", $storeId);
+            $stmt->execute();
+            $totalResult = $stmt->get_result();
+            $reportData['summary'] = $totalResult->fetch_assoc();
+            break;
+
         case 'products':
             // Product Performance Report
             $productsQuery = "SELECT p.product_name, pc.category_name, 
@@ -150,14 +230,15 @@ try {
             $importedProductsResult = $stmt->get_result();
             $totalProducts = $importedProductsResult->fetch_assoc()['total_products'] ?? 0;
 
-            $revenueQuery = "SELECT SUM(total_amount) as total_revenue FROM orders WHERE store_id = ? $dateCondition";
+            $revenueQuery = "SELECT SUM(total_amount) as total_revenue FROM orders o WHERE o.store_id = ? $dateCondition";
             $stmt = $conn->prepare($revenueQuery);
             $stmt->bind_param("i", $storeId);
             $stmt->execute();
             $revenueResult = $stmt->get_result();
             $totalRevenue = $revenueResult->fetch_assoc()['total_revenue'] ?? 0;
 
-            $ordersQuery = "SELECT COUNT(*) as total_orders FROM orders WHERE store_id = ? $dateCondition";
+            $ordersQuery = "SELECT COUNT(*) as total_orders FROM orders o WHERE o.store_id = ? $dateCondition";
+
             $stmt = $conn->prepare($ordersQuery);
             $stmt->bind_param("i", $storeId);
             $stmt->execute();
@@ -180,11 +261,11 @@ try {
             ];
 
             // Add detailed data
-            $salesQuery = "SELECT DATE_FORMAT(created_at, '%Y-%m') as month, 
-                          COUNT(*) as orders, SUM(total_amount) as revenue
-                          FROM orders 
-                          WHERE store_id = ? $dateCondition
-                          GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+            $salesQuery = "SELECT DATE_FORMAT(o.created_at, '%Y-%m') as month, 
+                          COUNT(*) as orders, SUM(o.total_amount) as revenue
+                          FROM orders o 
+                          WHERE o.store_id = ? $dateCondition
+                          GROUP BY DATE_FORMAT(o.created_at, '%Y-%m')
                           ORDER BY month";
             $stmt = $conn->prepare($salesQuery);
             $stmt->bind_param("i", $storeId);
