@@ -59,13 +59,15 @@
             'reports' => ['Reports', 'ri-bar-chart-line'],
             'support' => ['Support', 'ri-customer-service-2-line'],
             'feedback' => ['Feedback', 'ri-star-line'],
+            'users' => ['User Management', 'ri-user-settings-line'],
+            'activity' => ['System Activity', 'ri-line-chart-line'],
             'settings' => ['Settings', 'ri-settings-2-line']
         ];
 
         $allowedPages = [
             'user' => ['dashboard', 'product-import', 'inventory', 'orders', 'reports', 'support', 'feedback', 'settings'],
             'supplier' => ['dashboard', 'inventory', 'product', 'category', 'orders', 'settings'],
-            'admin' => ['dashboard', 'users', 'products', 'orders', 'reports', 'support', 'settings'],
+            'admin' => ['dashboard', 'users', 'activity', 'settings'],
             'courier' => ['dashboard', 'deliveries', 'settings']
         ];
 

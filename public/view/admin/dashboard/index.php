@@ -175,7 +175,9 @@
                             </tr>
                         </thead>
                         <tbody id="top-stores-body">
-                            <tr><td colspan="4" class="text-center">Loading...</td></tr>
+                            <tr>
+                                <td colspan="4" class="text-center">Loading...</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -200,7 +202,9 @@
                             </tr>
                         </thead>
                         <tbody id="recent-orders-body">
-                            <tr><td colspan="5" class="text-center">Loading...</td></tr>
+                            <tr>
+                                <td colspan="5" class="text-center">Loading...</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -227,7 +231,9 @@
                             </tr>
                         </thead>
                         <tbody id="order-status-body">
-                            <tr><td colspan="4" class="text-center">Loading...</td></tr>
+                            <tr>
+                                <td colspan="4" class="text-center">Loading...</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -237,98 +243,114 @@
 </div>
 
 <script>
-// Dashboard data will be loaded dynamically
-let dashboardData = {
-    stats: {
-        total_revenue: 0, total_users: 0, total_orders: 0, active_stores: 0,
-        total_suppliers: 0, total_couriers: 0, total_products: 0, conversion_rate: 0
-    },
-    recent_orders: [],
-    top_stores: [],
-    monthly_revenue: [],
-    user_trends: [],
-    order_status: []
-};
+    // Dashboard data will be loaded dynamically
+    let dashboardData = {
+        stats: {
+            total_revenue: 0,
+            total_users: 0,
+            total_orders: 0,
+            active_stores: 0,
+            total_suppliers: 0,
+            total_couriers: 0,
+            total_products: 0,
+            conversion_rate: 0
+        },
+        recent_orders: [],
+        top_stores: [],
+        monthly_revenue: [],
+        user_trends: [],
+        order_status: []
+    };
 
-// Load dashboard data using GetRequest
-document.addEventListener('DOMContentLoaded', function() {
-    loadDashboardData();
-});
+    // Load dashboard data using GetRequest
+    document.addEventListener('DOMContentLoaded', function() {
+        loadDashboardData();
+    });
 
-function loadDashboardData() {
-    new GetRequest({
-        getUrl: 'controller/admin/dashboard/index.php',
-        params: {},
-        showLoading: false,
-        showSuccess: false,
-        callback: (err, data) => {
-            if (err) {
-                console.error('Error loading dashboard data:', err);
-                // Show error message but continue with default data
-                Swal.fire({
-                    title: 'Warning',
-                    text: 'Some dashboard data could not be loaded. Showing cached data.',
-                    icon: 'warning',
-                    timer: 3000,
-                    showConfirmButton: false
-                });
-            } else {
-                dashboardData = data;
-                updateDashboardUI();
+    function loadDashboardData() {
+        new GetRequest({
+            getUrl: 'controller/admin/dashboard/index.php',
+            params: {},
+            showLoading: false,
+            showSuccess: false,
+            callback: (err, data) => {
+                if (err) {
+                    console.error('Error loading dashboard data:', err);
+                    return;
+                }
+                
+                if (data && data.stats) {
+                    dashboardData = data;
+                    updateDashboardUI();
+                    initializeCharts();
+                } else {
+                    console.error('Invalid dashboard data received:', data);
+                }
             }
-            initializeCharts();
+        }).send();
+    }
+
+    function updateDashboardUI() {
+        if (!dashboardData || !dashboardData.stats) {
+            console.error('Dashboard data or stats not available');
+            return;
         }
-    }).send();
-}
 
-function updateDashboardUI() {
-    // Update stats cards
-    document.getElementById('revenue-value').textContent = '$' + dashboardData.stats.total_revenue.toLocaleString('en-US', {minimumFractionDigits: 2});
-    document.getElementById('users-value').textContent = dashboardData.stats.total_users.toLocaleString();
-    document.getElementById('orders-value').textContent = dashboardData.stats.total_orders.toLocaleString();
-    document.getElementById('stores-value').textContent = dashboardData.stats.active_stores.toLocaleString();
-    document.getElementById('suppliers-value').textContent = dashboardData.stats.total_suppliers.toLocaleString();
-    document.getElementById('couriers-value').textContent = dashboardData.stats.total_couriers.toLocaleString();
-    document.getElementById('products-value').textContent = dashboardData.stats.total_products.toLocaleString();
-    document.getElementById('conversion-value').textContent = dashboardData.stats.conversion_rate + '%';
+        // Update stats cards
+        document.getElementById('revenue-value').textContent = 'PHP ' + (dashboardData.stats.total_revenue || 0).toLocaleString();
+        document.getElementById('users-value').textContent = (dashboardData.stats.total_users || 0).toLocaleString();
+        document.getElementById('orders-value').textContent = (dashboardData.stats.total_orders || 0).toLocaleString();
+        document.getElementById('stores-value').textContent = (dashboardData.stats.active_stores || 0).toLocaleString();
+        document.getElementById('suppliers-value').textContent = (dashboardData.stats.total_suppliers || 0).toLocaleString();
+        document.getElementById('couriers-value').textContent = (dashboardData.stats.total_couriers || 0).toLocaleString();
+        document.getElementById('products-value').textContent = (dashboardData.stats.total_products || 0).toLocaleString();
+        document.getElementById('conversion-value').textContent = (dashboardData.stats.conversion_rate || 0) + '%';
 
-    // Update top stores table
-    const topStoresBody = document.getElementById('top-stores-body');
-    topStoresBody.innerHTML = '';
-    dashboardData.top_stores.forEach(store => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${store.store_name}</td>
-            <td>${store.total_orders.toLocaleString()}</td>
-            <td>$${store.total_revenue.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
-            <td><span class="badge bg-success">Active</span></td>
-        `;
-        topStoresBody.appendChild(row);
-    });
+        // Update top stores table
+        const topStoresBody = document.getElementById('top-stores-body');
+        topStoresBody.innerHTML = '';
+        if (dashboardData.top_stores && dashboardData.top_stores.length > 0) {
+            dashboardData.top_stores.forEach(store => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                <td>${store.store_name || 'Unknown'}</td>
+                <td>${(store.total_orders || 0).toLocaleString()}</td>
+                <td>$${(store.total_revenue || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                <td><span class="badge bg-success">Active</span></td>
+            `;
+                topStoresBody.appendChild(row);
+            });
+        } else {
+            topStoresBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No stores found</td></tr>';
+        }
 
-    // Update recent orders table
-    const recentOrdersBody = document.getElementById('recent-orders-body');
-    recentOrdersBody.innerHTML = '';
-    dashboardData.recent_orders.forEach(order => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${order.order_number}</td>
-            <td>${order.customer_name}</td>
-            <td>${order.store_name || 'N/A'}</td>
-            <td>${new Date(order.created_at).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})}</td>
-            <td>$${order.total_amount.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
-        `;
-        recentOrdersBody.appendChild(row);
-    });
+        // Update recent orders table
+        const recentOrdersBody = document.getElementById('recent-orders-body');
+        recentOrdersBody.innerHTML = '';
+        if (dashboardData.recent_orders && dashboardData.recent_orders.length > 0) {
+            dashboardData.recent_orders.forEach(order => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                <td>${order.order_number || 'N/A'}</td>
+                <td>${order.customer_name || 'Unknown'}</td>
+                <td>${order.store_name || 'N/A'}</td>
+                <td>${order.created_at ? new Date(order.created_at).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'}) : 'N/A'}</td>
+                <td>$${(order.total_amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+            `;
+                recentOrdersBody.appendChild(row);
+            });
+        } else {
+            recentOrdersBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No recent orders found</td></tr>';
+        }
 
-    // Update order status table
-    const orderStatusBody = document.getElementById('order-status-body');
-    orderStatusBody.innerHTML = '';
-    const totalStatusCount = dashboardData.order_status.reduce((sum, status) => sum + status.count, 0);
-    dashboardData.order_status.forEach(status => {
-        const percentage = totalStatusCount > 0 ? Math.round((status.count / totalStatusCount) * 100) : 0;
-        const row = document.createElement('tr');
-        row.innerHTML = `
+        // Update order status table
+        const orderStatusBody = document.getElementById('order-status-body');
+        orderStatusBody.innerHTML = '';
+        const totalStatusCount = dashboardData.order_status.reduce((sum, status) => sum + status.count, 0);
+        dashboardData.order_status.forEach(status => {
+            const percentage = totalStatusCount > 0 ? Math.round((status.count / totalStatusCount) * 100) : 0;
+            const row = document.createElement('tr');
+            row.innerHTML = `
             <td>${status.status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</td>
             <td>${status.count.toLocaleString()}</td>
             <td>${percentage}%</td>
@@ -338,117 +360,117 @@ function updateDashboardUI() {
                 </span>
             </td>
         `;
-        orderStatusBody.appendChild(row);
-    });
-}
+            orderStatusBody.appendChild(row);
+        });
+    }
 
-// Initialize charts
-function initializeCharts() {
-    // Revenue Trends Chart
-    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-    const revenueChart = new Chart(revenueCtx, {
-        type: 'line',
-        data: {
-            labels: dashboardData.monthly_revenue.map(item => item.month),
-            datasets: [{
-                label: 'Revenue',
-                data: dashboardData.monthly_revenue.map(item => item.revenue),
-                borderColor: '#4361ee',
-                backgroundColor: 'rgba(67, 97, 238, 0.1)',
-                tension: 0.4,
-                fill: true
-            }, {
-                label: 'Orders',
-                data: dashboardData.monthly_revenue.map(item => item.orders),
-                borderColor: '#4cc9f0',
-                backgroundColor: 'rgba(76, 201, 240, 0.1)',
-                tension: 0.4,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'top',
-                }
+    // Initialize charts
+    function initializeCharts() {
+        // Revenue Trends Chart
+        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+        const revenueChart = new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+                labels: dashboardData.monthly_revenue.map(item => item.month),
+                datasets: [{
+                    label: 'Revenue',
+                    data: dashboardData.monthly_revenue.map(item => item.revenue),
+                    borderColor: '#4361ee',
+                    backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }, {
+                    label: 'Orders',
+                    data: dashboardData.monthly_revenue.map(item => item.orders),
+                    borderColor: '#4cc9f0',
+                    backgroundColor: 'rgba(76, 201, 240, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
             },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        drawBorder: false
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
                     }
                 },
-                x: {
-                    grid: {
-                        display: false
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            drawBorder: false
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
                     }
                 }
             }
-        }
-    });
+        });
 
-    // User Growth Chart
-    const userCtx = document.getElementById('userChart').getContext('2d');
-    const userChart = new Chart(userCtx, {
-        type: 'bar',
-        data: {
-            labels: dashboardData.user_trends.map(item => item.month),
-            datasets: [{
-                label: 'New Users',
-                data: dashboardData.user_trends.map(item => item.new_users),
-                backgroundColor: 'rgba(46, 204, 113, 0.8)',
-                borderColor: '#2ecc71',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'top',
-                }
+        // User Growth Chart
+        const userCtx = document.getElementById('userChart').getContext('2d');
+        const userChart = new Chart(userCtx, {
+            type: 'bar',
+            data: {
+                labels: dashboardData.user_trends.map(item => item.month),
+                datasets: [{
+                    label: 'New Users',
+                    data: dashboardData.user_trends.map(item => item.new_users),
+                    backgroundColor: 'rgba(46, 204, 113, 0.8)',
+                    borderColor: '#2ecc71',
+                    borderWidth: 1
+                }]
             },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        drawBorder: false
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
                     }
                 },
-                x: {
-                    grid: {
-                        display: false
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            drawBorder: false
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
                     }
                 }
             }
-        }
-    });
-}
+        });
+    }
 </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-function saveDashboardAsPDF(target) {
-    const card = document.getElementById(target);
-    const button = card.querySelector('button');
-    button.style.display = 'none';
+    function saveDashboardAsPDF(target) {
+        const card = document.getElementById(target);
+        const button = card.querySelector('button');
+        button.style.display = 'none';
 
-    html2canvas(card).then(canvas => {
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new window.jspdf.jsPDF({
-            orientation: 'landscape',
-            unit: 'pt',
-            format: [canvas.width, canvas.height]
+        html2canvas(card).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new window.jspdf.jsPDF({
+                orientation: 'landscape',
+                unit: 'pt',
+                format: [canvas.width, canvas.height]
+            });
+            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+            pdf.save(target + '.pdf');
         });
-        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-        pdf.save(target + '.pdf');
-    });
 
-    button.style.display = 'block';
-}
+        button.style.display = 'block';
+    }
 </script>

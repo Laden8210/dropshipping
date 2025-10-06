@@ -45,23 +45,34 @@ if ($userRole !== 'admin') {
 }
 
 try {
-    // Get system-wide stats - Direct SQL queries
+    // Check database connection
+    if ($conn->connect_error) {
+        throw new Exception("Database connection failed: " . $conn->connect_error);
+    }
+    
+    // Get system-wide stats - Direct SQL queries using existing database structure
     // Total users
-    $totalUsersQuery = "SELECT COUNT(*) as total_users FROM users";
+    $totalUsersQuery = "SELECT COUNT(*) as total_users FROM users WHERE deleted_at IS NULL";
     $stmt = $conn->prepare($totalUsersQuery);
+    if (!$stmt) {
+        throw new Exception("Failed to prepare statement: " . $conn->error);
+    }
     $stmt->execute();
     $totalUsersResult = $stmt->get_result();
     $totalUsers = $totalUsersResult->fetch_assoc()['total_users'] ?? 0;
 
     // Total suppliers
-    $totalSuppliersQuery = "SELECT COUNT(*) as total_suppliers FROM users WHERE role = 'supplier'";
+    $totalSuppliersQuery = "SELECT COUNT(*) as total_suppliers FROM users WHERE role = 'supplier' AND deleted_at IS NULL";
     $stmt = $conn->prepare($totalSuppliersQuery);
+    if (!$stmt) {
+        throw new Exception("Failed to prepare suppliers statement: " . $conn->error);
+    }
     $stmt->execute();
     $totalSuppliersResult = $stmt->get_result();
     $totalSuppliers = $totalSuppliersResult->fetch_assoc()['total_suppliers'] ?? 0;
 
     // Total couriers
-    $totalCouriersQuery = "SELECT COUNT(*) as total_couriers FROM users WHERE role = 'courier'";
+    $totalCouriersQuery = "SELECT COUNT(*) as total_couriers FROM users WHERE role = 'courier' AND deleted_at IS NULL";
     $stmt = $conn->prepare($totalCouriersQuery);
     $stmt->execute();
     $totalCouriersResult = $stmt->get_result();
@@ -82,14 +93,14 @@ try {
     $totalOrders = $totalOrdersResult->fetch_assoc()['total_orders'] ?? 0;
 
     // Total products
-    $totalProductsQuery = "SELECT COUNT(*) as total_products FROM products";
+    $totalProductsQuery = "SELECT COUNT(*) as total_products FROM products WHERE status = 'active'";
     $stmt = $conn->prepare($totalProductsQuery);
     $stmt->execute();
     $totalProductsResult = $stmt->get_result();
     $totalProducts = $totalProductsResult->fetch_assoc()['total_products'] ?? 0;
 
     // Active stores
-    $activeStoresQuery = "SELECT COUNT(*) as active_stores FROM store_profile";
+    $activeStoresQuery = "SELECT COUNT(*) as active_stores FROM store_profile WHERE status = 'active'";
     $stmt = $conn->prepare($activeStoresQuery);
     $stmt->execute();
     $activeStoresResult = $stmt->get_result();
@@ -109,7 +120,7 @@ try {
         $recentOrders[] = $row;
     }
 
-    // Top performing stores - Fixed GROUP BY clause
+    // Top performing stores
     $topStoresQuery = "SELECT sp.store_name, COUNT(o.order_id) as total_orders, SUM(o.total_amount) as total_revenue
                        FROM store_profile sp
                        LEFT JOIN orders o ON sp.store_id = o.store_id
@@ -142,7 +153,7 @@ try {
     $userTrendsQuery = "SELECT DATE_FORMAT(created_at, '%Y-%m') as month, 
                         COUNT(*) as new_users
                         FROM users 
-                        WHERE created_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
+                        WHERE created_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH) AND deleted_at IS NULL
                         GROUP BY DATE_FORMAT(created_at, '%Y-%m')
                         ORDER BY month";
     $stmt = $conn->prepare($userTrendsQuery);
@@ -153,7 +164,7 @@ try {
         $userTrends[] = $row;
     }
 
-    // Order status distribution - Fixed GROUP BY clause
+    // Order status distribution
     $orderStatusQuery = "SELECT osh.status, COUNT(*) as count
                          FROM order_status_history osh
                          JOIN (

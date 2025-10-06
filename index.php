@@ -79,6 +79,10 @@ try {
             'courier' => [
                 'file' => 'courier/dashboard/index.php',
                 'title' => 'Courier Dashboard'
+            ],
+            'admin' => [
+                'file' => 'admin/dashboard/index.php',
+                'title' => 'Admin Dashboard'
             ]
         ],
         'inventory' => [
@@ -142,8 +146,11 @@ try {
             'courier' => [
                 'file' => 'courier/settings/index.php',
                 'title' => 'Courier Settings'
+            ],
+            'admin' => [
+                'file' => 'admin/settings/index.php',
+                'title' => 'System Settings'
             ]
-
         ],
 
         // User-only routes
@@ -216,7 +223,42 @@ try {
                 'file' => 'courier/deliveries/index.php',
                 'title' => 'Deliveries Management'
             ]
-        ]
+        ],
+
+        // Admin-only routes
+        'users' => [
+            'auth_required' => true,
+            'admin' => [
+                'file' => 'admin/users/index.php',
+                'title' => 'User Management'
+            ]
+        ],
+        'activity' => [
+            'auth_required' => true,
+            'admin' => [
+                'file' => 'admin/activity/index.php',
+                'title' => 'System Activity'
+            ]
+        ],
+        'settings' => [
+            'auth_required' => true,
+            'user' => [
+                'file' => 'user/settings/index.php',
+                'title' => 'Settings'
+            ],
+            'supplier' => [
+                'file' => 'supplier/settings/index.php',
+                'title' => 'Supplier Settings'
+            ],
+            'courier' => [
+                'file' => 'courier/settings/index.php',
+                'title' => 'Courier Settings'
+            ],
+            'admin' => [
+                'file' => 'admin/settings/index.php',
+                'title' => 'System Settings'
+            ]
+        ],
     ];
 
 
