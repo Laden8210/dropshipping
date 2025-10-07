@@ -1,5 +1,5 @@
 <!-- Sidebar -->
-<aside class="sidebar" id="sidebar">
+<aside class="sidebar  overflow-auto" id="sidebar">
 
     <div class="logo-container text-center py-3">
         <img src="assets/img/logo.png" alt="LuzViMinDrop Logo" class="logo img-fluid" style="max-height: 40px;">
@@ -24,7 +24,7 @@
             } elseif ($role == 'admin') {
                 $badgeText = 'Administrator';
                 $badgeClass .= 'bg-danger';
-            }elseif ($role == 'courier') {
+            } elseif ($role == 'courier') {
                 $badgeText = 'Courier';
                 $badgeClass .= 'bg-warning';
             } else {
@@ -78,14 +78,14 @@
             }
         }
         ?>
-    </nav>
-
-
-    <div class="logout-section px-1 mt-4">
+   
         <a href="logout" class="nav-link text-danger">
             <i class="ri-logout-box-r-line"></i> <span>Logout</span>
         </a>
-    </div>
+    </nav>
+
+
+
 
 
 </aside>

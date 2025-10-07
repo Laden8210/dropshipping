@@ -6,14 +6,14 @@
        <div class="header-section text-center">
         <h2 class="mb-3">Business Owner Dashboard</h2>
         <p class="lead">Manage your store and track performance</p>
-        <div class="dashboard-actions mt-3">
+        <!-- <div class="dashboard-actions mt-3">
             <button class="btn btn-primary me-2" onclick="generateReport()">
                 <i class="fas fa-chart-line"></i> Generate Report
             </button>
             <button class="btn btn-success" onclick="exportData()">
                 <i class="fas fa-download"></i> Export Data
             </button>
-        </div>
+        </div> -->
        </div>
 
        <div class="main-content">
