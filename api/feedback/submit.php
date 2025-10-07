@@ -58,18 +58,28 @@ try {
     $rating = $request_body['rating'] ?? '';
     $review = $request_body['review'] ?? '';
     $order_id = $request_body['order_id'] ?? '';
-    
 
-    if (empty($product_id) || empty($rating) || empty($review) || empty($order_id)) {
+    if (!isset($product_id) || $product_id === '') {
         http_response_code(400);
-        echo json_encode([
-            'status' => 'error',
-            'message' => 'Missing required fields: product_id, rating, review, order_id',
-            'data' => null
-        ]);
+        echo json_encode(['status' => 'error', 'message' => 'Product ID is required']);
         exit;
     }
-
+    if (!isset($rating) || $rating === '') {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Rating is required']);
+        exit;
+    }
+    if (!isset($order_id) || $order_id === '') {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Order ID is required']);
+        exit;
+    }
+    
+    if (!isset($review) || $review === '') {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Review is required']);
+        exit;
+    }
     $sql = "SELECT store_id FROM orders WHERE order_id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $order_id);
