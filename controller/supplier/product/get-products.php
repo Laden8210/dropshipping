@@ -3,7 +3,7 @@
 $keyword = isset($_GET['keyword']) ? trim($_GET['keyword']) : '';
 $status = isset($_GET['status']) ? trim($_GET['status']) : '';
 
-$data = $supplierProductModel->get_inventory($_SESSION['auth']['user_id']);
+$data = $supplierProductModel->get_products($_SESSION['auth']['user_id']);
 
 if (!$data) {
     http_response_code(404);

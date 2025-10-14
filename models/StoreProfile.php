@@ -87,4 +87,15 @@ class StoreProfile
         $stmt->fetch();
         return $count > 0;
     }
+
+    public function isStoreNameExists($user_id, $store_name)
+    {
+        $stmt = $this->conn->prepare("SELECT COUNT(*) FROM store_profile WHERE user_id = ? AND store_name = ?");
+        $stmt->bind_param("ss", $user_id, $store_name);
+        $stmt->execute();
+        $count = 0;
+        $stmt->bind_result($count);
+        $stmt->fetch();
+        return $count > 0;
+    }
 }

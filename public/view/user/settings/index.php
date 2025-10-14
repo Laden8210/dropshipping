@@ -474,11 +474,11 @@
                 }
             })
             .catch(error => {
-                console.error("Error creating store:", error);
+                console.error("Error creating store:", error.response.data.message);
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: 'An error occurred while creating the store.',
+                    text: error.response.data.message,
                 });
             });
     });

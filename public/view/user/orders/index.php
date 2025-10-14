@@ -336,9 +336,8 @@
                 order_number: order_number || "",
                 customer_name: customer_name || "",
                 order_status: order_status || "",
-
-
             },
+            showSuccess: false,
             callback: (err, data) => {
                 if (err) return console.error("Error fetching user data:", err);
                 console.log("User data retrieved:", data);
@@ -388,10 +387,7 @@
                                 onclick="getOrderDetails('${order.order_number}')">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            <button class="btn btn-sm btn-outline-info action-btn" onclick="editOrder('${order.order_number}')">
-                                <i class="fas fa-edit"></i>
-                                Edit
-                            </button>
+                 
 
                                       ${order.tracking_number ? `
                                 <button class="btn btn-sm btn-outline-secondary action-btn" onclick="trackOrder('${order.tracking_number}')">

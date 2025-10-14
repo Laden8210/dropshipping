@@ -66,15 +66,8 @@ class CreateRequest {
       .post(url, formData)
       .then((response) => {
         const data = response.data;
-        if (data.status === "error" || data.http_code !== 200) {
-          Swal.fire({
-            title: "Error!",
-            text:
-              data.message || "Something went wrong. Please try again later.",
-            icon: "error",
-          });
+        if (data.http_code == 200) {
           this.callback(data.message || "Unknown error", null);
-        } else {
           Swal.fire({
             title: "Success!",
             text: data.message || "Your submission was successful!",
@@ -89,6 +82,13 @@ class CreateRequest {
             }
           });
           this.callback(null, data.data);
+        } else {
+          Swal.fire({
+            title: "Error!",
+            text:
+              data.message || "Something went wrong. Please try again later.",
+            icon: "error",
+          });
         }
       })
       .catch((error) => {
@@ -293,7 +293,14 @@ class DeleteRequest {
 window.DeleteRequest = DeleteRequest;
 
 class GetRequest {
-  constructor({ getUrl, params = {}, callback, promptMessage = null, showLoading = true, showSuccess = true }) {
+  constructor({
+    getUrl,
+    params = {},
+    callback,
+    promptMessage = null,
+    showLoading = true,
+    showSuccess = false,
+  }) {
     this.getUrl = getUrl;
     this.params = params;
     this.callback = typeof callback === "function" ? callback : () => {};
@@ -305,7 +312,6 @@ class GetRequest {
     this._executeGet();
   };
   _executeGet = () => {
-
     if (this.showLoading === true) {
       Swal.fire({
         title: "Loading...",
@@ -323,15 +329,19 @@ class GetRequest {
         const data = response.data;
         Swal.close();
         if (data.status === "error" || data.http_code !== 200) {
-          Swal.fire({
-            title: "Error!",
-            text:
-              data.message ||
-              "Failed to retrieve data. Please try again later.",
-            icon: "error",
-          });
+          if (this.showSuccess === true) {
+            Swal.close();
+            Swal.fire({
+              title: "Error!",
+              text:
+                data.message ||
+                "Failed to retrieve data. Please try again later.",
+              icon: "error",
+            });
+          }
           this.callback(data.message || "Unknown error", null);
         } else {
+          Swal.close();
           if (this.showSuccess === true) {
             Swal.fire({
               title: "Success!",
@@ -349,11 +359,14 @@ class GetRequest {
             error.response.data.message) ||
           error.message ||
           "Failed to retrieve data. Please try again later.";
-        Swal.fire({
-          title: "Error!",
-          text: errorMsg,
-          icon: "error",
-        });
+        Swal.close();
+        if (this.showSuccess === true) {
+          Swal.fire({
+            title: "Error!",
+            text: errorMsg,
+            icon: "error",
+          });
+        }
         this.callback(errorMsg, null);
       })
       .finally(() => {});
@@ -419,18 +432,24 @@ class GetAllRequest {
 
 window.GetAllRequest = GetAllRequest;
 class PostRequest {
-  constructor({ postUrl, params = {}, callback, showLoading = true, showSuccess = true }) {
+  constructor({
+    postUrl,
+    params = {},
+    callback,
+    showLoading = true,
+    showSuccess = true,
+  }) {
     this.postUrl = postUrl;
     this.params = params;
     this.callback = typeof callback === "function" ? callback : () => {};
     this.showLoading = showLoading;
     this.showSuccess = showSuccess;
   }
-  
+
   send = () => {
     this._executePost();
   };
-  
+
   _executePost = () => {
     if (this.showLoading) {
       Swal.fire({
@@ -451,7 +470,9 @@ class PostRequest {
         if (data.status === "error" || data.http_code !== 200) {
           Swal.fire({
             title: "Error!",
-            text: data.message || "Failed to process request. Please try again later.",
+            text:
+              data.message ||
+              "Failed to process request. Please try again later.",
             icon: "error",
           });
           this.callback(data.message || "Unknown error", null);

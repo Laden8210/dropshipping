@@ -1,9 +1,8 @@
 <?php
 
-
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     http_response_code(405);
-    echo json_encode(['status' => 'error', 'message' => 'Method Not Allowed. Use POST to add a category.', 'http_code' => 405]);
+    echo json_encode(['status' => 'error', 'message' => 'Method Not Allowed. Use POST to update a product.', 'http_code' => 405]);
     exit;
 }
 
@@ -14,13 +13,13 @@ if (!$productId) {
     exit;
 }
 
-
 $productName = isset($_POST['product_name']) ? trim($_POST['product_name']) : '';
 if (empty($productName)) {
     http_response_code(400);
     echo json_encode(['status' => 'error', 'message' => 'Product name is required', 'http_code' => 400]);
     exit;
 }
+
 $category = isset($_POST['category']) ? trim($_POST['category']) : '';
 if (empty($category)) {
     http_response_code(400);
@@ -28,12 +27,7 @@ if (empty($category)) {
     exit;
 }
 
-$price = isset($_POST['price']) ? trim($_POST['price']) : '';
-if (empty($price) || !is_numeric($price)) {
-    http_response_code(400);
-    echo json_encode(['status' => 'error', 'message' => 'Valid price is required', 'http_code' => 400]);
-    exit;
-}
+
 $currency = isset($_POST['currency']) ? trim($_POST['currency']) : '';
 if (empty($currency)) {
     http_response_code(400);
@@ -48,21 +42,12 @@ if (empty($status)) {
     exit;
 }
 
-$product_weight = isset($_POST['product_weight']) ? trim($_POST['product_weight']) : '';
-if (empty($product_weight) || !is_numeric($product_weight)) {
-    http_response_code(400);
-    echo json_encode(['status' => 'error', 'message' => 'Valid product weight is required', 'http_code' => 400]);
-    exit;
-}
-
 $description = isset($_POST['description']) ? trim($_POST['description']) : '';
 if (empty($description)) {
     http_response_code(400);
     echo json_encode(['status' => 'error', 'message' => 'Description is required', 'http_code' => 400]);
     exit;
 }
-
-
 
 $user_id = isset($_SESSION['auth']['user_id']) ? $_SESSION['auth']['user_id'] : null;
 if (!$user_id) {
@@ -77,8 +62,7 @@ $updated = $supplierProductModel->update_product(
     $productName,
     $category,
     $description,
-    $status,
-    $product_weight
+    $status
 );
 
 if (!$updated) {
@@ -87,7 +71,59 @@ if (!$updated) {
     exit;
 }
 
+// Handle product variations (size, color, weight, price, dimensions)
+$variations = isset($_POST['variations']) ? json_decode($_POST['variations'], true) : null;
+if ($variations && is_array($variations)) {
+    // First, deactivate existing variations
+    $supplierProductModel->deleteAllVariationsForProduct($productId);
+    
+    // Then add new variations
+    foreach ($variations as $variation) {
+        $size = isset($variation['size']) ? trim($variation['size']) : null;
+        $color = isset($variation['color']) ? trim($variation['color']) : null;
+        $weight = isset($variation['weight']) ? floatval($variation['weight']) : null;
+        $length = isset($variation['length']) ? floatval($variation['length']) : null;
+        $width = isset($variation['width']) ? floatval($variation['width']) : null;
+        $height = isset($variation['height']) ? floatval($variation['height']) : null;
+        $variationPrice = isset($variation['price']) ? floatval($variation['price']) : 0;
+        $variationId = isset($variation['variation_id']) ? intval($variation['variation_id']) : null;
+        
+        // Only create variation if size or color is provided
+        if ($size || $color) {
+            // Generate SKU suffix based on size and color
+            $skuSuffix = '';
+            if ($size) $skuSuffix .= '-' . strtoupper(substr($size, 0, 1));
+            if ($color) $skuSuffix .= '-' . strtoupper(substr($color, 0, 3));
+            
+            $variationId = $supplierProductModel->updateSimpleVariation(
+                $productId,
+                $variationId,
+                $size,
+                $color,
+                $weight,
+                $length,
+                $width,
+                $height,
+                $variationPrice,
+                $currency,
+                $skuSuffix,
+                0
+            );
 
+            if (!$supplierProductModel->add_price_history($productId, $variationId, $variationPrice, $currency)) {
+                http_response_code(500);
+                echo json_encode(['status' => 'error', 'message' => 'Failed to add price history', 'http_code' => 500]);
+                exit;
+            }
+            
+            if (!$variationId) {
+                error_log("Failed to create simple variation: " . json_encode($variation));
+            }
+        }
+    }
+}
+
+// Handle image uploads
 $uploadDir = '../../../public/images/products/';
 if (!is_dir($uploadDir)) {
     mkdir($uploadDir, 0755, true);
@@ -107,7 +143,6 @@ if ($productImage && $productImage['error'] === UPLOAD_ERR_OK) {
         }
     }
 }
-
 
 $productImages = $_FILES['product_images'] ?? null;
 if ($productImages && is_array($productImages['name'])) {
@@ -133,12 +168,7 @@ if ($productImages && is_array($productImages['name'])) {
     }
 }
 
-
-if (!$supplierProductModel->add_price_history($productId, $price, $currency)) {
-    http_response_code(500);
-    echo json_encode(['status' => 'error', 'message' => 'Failed to add price history', 'http_code' => 500]);
-    exit;
-}
+// Add price history
 
 
 http_response_code(200);

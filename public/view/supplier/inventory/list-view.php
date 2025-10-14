@@ -105,12 +105,12 @@
                         <table class="table table-hover inventory-table">
                             <thead>
                                 <tr>
-                                    <th>Product</th>
-                                    <th>SKU</th>
+                                    <th>Product & Variant</th>
+                                    <th>SKU / Variant ID</th>
                                     <th>Category</th>
                                     <th>Stock</th>
                                     <th>Price</th>
-                                    <th>Forex Conversion(PHP)</th>
+                                    <th>Forex Conversion (PHP)</th>
                                     <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
@@ -175,26 +175,20 @@
                 </div>
 
 
-                <table class="table table-hover inventory-table text-center">
-                    <thead class="table-dark text-center">
+                <table class="table table-hover inventory-table">
+                    <thead>
                         <tr>
-                            <th>Movement ID</th>
-                            <th>Date</th>
-                            <th>Type</th>
+                            <th>Movement Number</th>
+                            <th>Date and Time</th>
+                            <th>Movement Type</th>
                             <th>Quantity</th>
                             <th>Price</th>
                             <th>Reason</th>
+
                         </tr>
                     </thead>
                     <tbody id="stock-movement-body">
-                        <tr>
-                            <td>SM-06222025-134512</td>
-                            <td>2023-10-01</td>
-                            <td><span class="badge bg-success">Restock</span></td>
-                            <td>50</td>
-                            <td>$500.00</td>
-                            <td>Monthly restock</td>
-                        </tr>
+                        <!-- Data will be populated here -->
                     </tbody>
                 </table>
             </div>
@@ -213,13 +207,14 @@
                 </div>
 
                 <input type="hidden" name="product_id" id="product_id" value="">
+                <input type="hidden" name="variation_id" id="variation_id" value="">
 
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="movement_type" class="form-label">Movement Type</label>
                         <select class="form-select" id="movement_type" name="movement_type" required>
                             <option value="in">Restock</option>
-                            <option value="out">Stock Out</option>
+                            <option value="out">Reduce Stocks</option>
                         </select>
                     </div>
                     <div class="mb-3">
@@ -315,78 +310,94 @@
                 if (err) return console.error("Error fetching user data:", err);
                 console.log("User data retrieved:", data);
 
+                // Count unique products and active items
+                const uniqueProductIds = [...new Set(data.map(product => product.product_id))];
+                const totalProducts = uniqueProductIds.length;
+                const totalActive = data.filter(product => product.status === 'active').length;
+                const totalInactive = data.filter(product => product.status === 'inactive').length;
+                const totalArchived = data.filter(product => product.status === 'archived').length;
+                const totalLowStock = data.filter(product => product.stock < 10).length;
 
-                const totalProducts = data.length;
+                // Update stats
                 const cardHeader = document.querySelector('.card-header h5');
-                cardHeader.innerHTML = `<i class="fas fa-box me-2"></i>Inventory Items (${totalProducts})`;
+                cardHeader.innerHTML = `<i class="fas fa-box me-2"></i>Inventory Items (${data.length} variants across ${totalProducts} products)`;
 
                 const statBadge = document.getElementById('stat');
-                statBadge.textContent = `${data.filter(product => product.status === 'active').length} active items`;
-
-                const totalActive = data ? data.filter(product => product.status === 'active').length : 0;
-                const totalInactive = data ? data.filter(product => product.status === 'inactive').length : 0;
-                const totalLowStock = data ? data.filter(product => product.totalInventory < 10).length : 0;
+                statBadge.textContent = `${totalActive} active items`;
 
                 const stats = document.querySelectorAll('.stat-card h3');
                 stats[0].textContent = totalProducts;
                 stats[1].textContent = totalActive;
-
-
                 stats[2].textContent = totalInactive;
                 stats[3].textContent = totalLowStock;
 
-
-
+                // Populate table with ALL variants
                 const tableBody = document.querySelector('.inventory-table tbody');
                 tableBody.innerHTML = '';
 
                 data.forEach(product => {
                     const row = document.createElement('tr');
 
+                    // Determine if this is a variant or base product
+                    const hasVariation = product.variation_id !== null;
+                    const variationInfo = hasVariation ?
+                        `<small class="text-muted d-block">Variant: ${product.size || ''} ${product.color || ''}</small>` :
+                        '';
 
                     row.innerHTML = `
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <img src="public/images/products/${product.primary_image}" class="img-thumbnail me-2" style="width: 40px; height: 40px; object-fit: cover;">
-                                <span>${product.product}</span>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <img src="public/images/products/${product.primary_image}" 
+                                 class="img-thumbnail me-2" 
+                                 style="width: 40px; height: 40px; object-fit: cover;"
+                                 onerror="this.src='public/images/placeholder.jpg'">
+                            <div>
+                                <div>${product.product}</div>
+                                ${variationInfo}
+                                ${hasVariation && product.variation_active === 0 
+                                    ? '<small class="badge bg-warning text-dark">Variant Inactive</small>' 
+                                    : ''}
                             </div>
-                        </td>
-                        <td>${product.sku}</td>
-                        <td><span class="badge bg-info text-dark">${product.category}</span></td>
-                        <td>${product.stock}</td>
-                        <td>${product.currency} ${product.price}</td>
-                        <td>${product.converted_currency} ${product.converted_price}</td>
-
-                        <td>
-                            ${product.status === 'active' 
-                                ? '<span class="badge bg-success">Active</span>' 
-                                : product.status === 'inactive'
-                                    ? '<span class="badge bg-warning text-dark">Inactive</span>'
-                                    : product.status === 'archived'
-                                        ? '<span class="badge bg-secondary">Archived</span>'
-                                        : `<span class="badge bg-light text-dark">${product.status}</span>`
-                            }
-                        </td>
-                        <td>
-                            <button class="btn btn-sm btn-success" onclick="retrieveProduct(${product.product_id})">
-                                <i class="fas fa-eye"></i> View
+                        </div>
+                    </td>
+                    <td>
+                        ${product.sku}
+                        ${hasVariation ? `<small class="text-muted d-block">Var ID: ${product.variation_id}</small>` : ''}
+                    </td>
+                    <td><span class="badge bg-info text-dark">${product.category}</span></td>
+                    <td>
+                        ${product.stock}
+                        ${product.stock < 10 ? '<span class="badge bg-danger ms-1">Low</span>' : ''}
+                    </td>
+                    <td>${product.currency} ${product.price}</td>
+                    <td>${product.converted_currency} ${product.converted_price}</td>
+                    <td>
+                        ${product.status === 'active' 
+                            ? '<span class="badge bg-success">Active</span>' 
+                            : product.status === 'inactive'
+                                ? '<span class="badge bg-warning text-dark">Inactive</span>'
+                                : product.status === 'archived'
+                                    ? '<span class="badge bg-secondary">Archived</span>'
+                                    : `<span class="badge bg-light text-dark">${product.status}</span>`
+                        }
+                        ${product.is_unlisted ? '<span class="badge bg-dark ms-1">Unlisted</span>' : ''}
+                    </td>
+                    <td>
+                        <div class=""
+                         >   <button class="btn btn-primary btn-sm" 
+                                onclick="retrieveStockMovement(${product.product_id}, ${product.variation_id || 'null'})">
+                                <i class="fas fa-exchange-alt"></i>
                             </button>
-                            
-                            <button class="btn btn-sm btn-primary" 
-                            onclick="retrieveStockMovement(${product.product_id})">
-                                <i class="fas fa-exchange-alt me-1"></i> Stock Movement
+                            <button class="btn btn-secondary btn-sm" 
+                                onclick="showAddStockModal(${product.product_id}, ${product.variation_id || 'null'})">
+                                <i class="fas fa-plus"></i>
                             </button>
-
-                            <button class="btn btn-sm btn-secondary" 
-                            onclick="showAddStockModal(${product.product_id})">
-                                <i class="fas fa-plus me-1"></i> Adjust Stock 
-                            </button>
-                         
-                        </td>   
-                        `;
+                      
+                        </div>
+                    </td>   
+                `;
                     tableBody.appendChild(row);
                 });
-
 
             }
         }).send();
@@ -449,9 +460,10 @@
     }
 
 
-    function showAddStockModal(productId) {
+    function showAddStockModal(productId, variationId) {
         document.getElementById('add-stock-form').reset();
         document.getElementById('product_id').value = productId;
+        document.getElementById('variation_id').value = variationId;
         const addStockModal = new bootstrap.Modal(document.getElementById('addStockModal'));
         addStockModal.show();
     }
@@ -469,10 +481,10 @@
             params: {
                 product_id
             },
-            showSuccess: false,
+            showSuccess: true,
             callback: (err, data) => {
-                if (err) return console.error("Error fetching stock movement data:", err);
-                console.log("Stock movement data retrieved:", data);
+
+
 
                 const stockMovementBody = document.getElementById('stock-movement-body');
                 stockMovementBody.innerHTML = '';
@@ -486,7 +498,7 @@
                     row.innerHTML = `
                         <td>${movement.movement_number}</td>
                         <td>${movement.created_at}</td>
-                        <td><span class="badge bg-${movement.movement_type === 'in' ? 'success' : 'danger'}">${movement.movement_type === 'in' ? 'Restock' : 'Stock Out'}</span></td>
+                        <td><span class="badge bg-${movement.movement_type === 'in' ? 'success' : 'danger'}">${movement.movement_type === 'in' ? 'Restock' : 'Reduce Stocks'}</span></td>
                         <td>${movement.quantity}</td>
                         <td>${movement.price}</td>
                         <td>${movement.reason || '-'}</td>

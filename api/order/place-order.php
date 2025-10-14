@@ -96,8 +96,11 @@ if (!isset($request_body['shipping_address_id']) || !is_numeric($request_body['s
     exit;
 }
 
+
+
 $data = $orderModel->createOrder($user_id,$request_body);
 if ($data['status'] === 'success') {
+    
     http_response_code(201);
     echo json_encode([
         'status' => 'success',

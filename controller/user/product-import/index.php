@@ -38,9 +38,9 @@ switch ($request) {
     case 'POST':
         switch ($action) {
             case 'import-product':
-                
+
                 require_once 'import-product.php';
-      
+
                 break;
 
             default:
@@ -53,8 +53,6 @@ switch ($request) {
 
     case 'GET':
 
-
-
         switch ($action) {
             case 'search-product':
                 require_once 'retrieve-product.php';
@@ -63,7 +61,6 @@ switch ($request) {
                 require_once 'single-product.php';
                 break;
             default:
-                
         }
         break;
     default:

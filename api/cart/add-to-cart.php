@@ -48,14 +48,14 @@ if (!$data || empty($data['product_id']) || empty($data['store_id']) || empty($d
 $productId = (int)$data['product_id'];
 $storeId = (int)$data['store_id'];
 $quantity = (int)$data['quantity'];
-
+$variationId = (int)$data['variation_id'];
 if ($quantity <= 0) {
     http_response_code(400);
     echo json_encode(['status' => "error", 'message' => 'Quantity must be at least 1']);
     exit;
 }
 
-if ($cartModel->addToCart($user_id, $productId, $quantity, $storeId)) {
+if ($cartModel->addToCart($user_id, $productId, $quantity, $storeId, $variationId)) {
     http_response_code(201);
     echo json_encode(['status' => "success", 'message' => 'Item added to cart successfully']);
     exit;

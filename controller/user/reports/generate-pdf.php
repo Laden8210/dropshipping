@@ -27,29 +27,15 @@ if (!$userId || !$storeId) {
 
 // Get report parameters
 $reportType = $_GET['type'] ?? 'complete';
-$dateRange = $_GET['date_range'] ?? 'all';
+$startDate = $_GET['start_date'] ?? date('Y-m-01');
+$endDate = $_GET['end_date'] ?? date('Y-m-d');
+$dateRange = $_GET['date_range'] ?? 'this_month'; // Added missing date_range variable
 
-$dateCondition = '';
-switch ($dateRange) {
-    case 'last7days':
-        $dateCondition = "AND o.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)";
-        break;
-    case 'last30days':
-        $dateCondition = "AND o.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)";
-        break;
-    case 'last3months':
-        $dateCondition = "AND o.created_at >= DATE_SUB(NOW(), INTERVAL 3 MONTH)";
-        break;
-    case 'last6months':
-        $dateCondition = "AND o.created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)";
-        break;
-    case 'lastyear':
-        $dateCondition = "AND o.created_at >= DATE_SUB(NOW(), INTERVAL 1 YEAR)";
-        break;
-    case 'all':
-    default:
-        $dateCondition = "";
-        break;
+// Validate dates
+if (!strtotime($startDate) || !strtotime($endDate)) {
+    http_response_code(400);
+    echo 'Invalid date format';
+    exit;
 }
 
 // Get store information
@@ -60,194 +46,247 @@ $stmt->execute();
 $storeResult = $stmt->get_result();
 $storeInfo = $storeResult->fetch_assoc();
 
+if (!$storeInfo) {
+    http_response_code(404);
+    echo 'Store not found';
+    exit;
+}
+
 // Get report data based on type
 $reportData = [];
 $reportTitle = '';
 
-switch ($reportType) {
-    case 'sales':
-        $reportTitle = 'Sales Report';
-        $salesQuery = "SELECT DATE_FORMAT(o.created_at, '%Y-%m-%d') as date, 
-                      COUNT(*) as orders, SUM(o.total_amount) as revenue
-                      FROM orders o 
-                      WHERE o.store_id = ? $dateCondition
-                      GROUP BY DATE_FORMAT(o.created_at, '%Y-%m-%d')
-                      ORDER BY date DESC";
-        $stmt = $conn->prepare($salesQuery);
-        $stmt->bind_param("i", $storeId);
-        $stmt->execute();
-        $salesResult = $stmt->get_result();
-        $reportData = [];
-        while ($row = $salesResult->fetch_assoc()) {
-            $reportData[] = $row;
-        }
-        break;
+try {
+    switch ($reportType) {
+        case 'sales':
+            $reportTitle = 'Sales Report';
+            $salesQuery = "SELECT DATE_FORMAT(o.created_at, '%Y-%m-%d') as date, 
+                          COUNT(*) as orders, SUM(o.total_amount) as revenue
+                          FROM orders o 
+                          WHERE o.store_id = ? AND o.created_at BETWEEN ? AND ?
+                          GROUP BY DATE_FORMAT(o.created_at, '%Y-%m-%d')
+                          ORDER BY date DESC";
+            $stmt = $conn->prepare($salesQuery);
+            $stmt->bind_param("iss", $storeId, $startDate, $endDate);
+            $stmt->execute();
+            $salesResult = $stmt->get_result();
+            $reportData = [];
+            while ($row = $salesResult->fetch_assoc()) {
+                $reportData[] = $row;
+            }
+            break;
 
-    case 'revenue':
-        $reportTitle = 'Revenue Report';
-        
-        // Get daily revenue data
-        $dailyRevenueQuery = "SELECT DATE_FORMAT(o.created_at, '%Y-%m-%d') as date, 
-                             COUNT(*) as orders, 
-                             SUM(o.total_amount) as revenue,
-                             SUM(o.subtotal) as subtotal,
-                             SUM(o.shipping_fee) as shipping_fee,
-                             SUM(o.tax) as tax
-                             FROM orders o 
-                             WHERE o.store_id = ? $dateCondition
-                             GROUP BY DATE_FORMAT(o.created_at, '%Y-%m-%d')
-                             ORDER BY date DESC";
-        $stmt = $conn->prepare($dailyRevenueQuery);
-        $stmt->bind_param("i", $storeId);
-        $stmt->execute();
-        $dailyResult = $stmt->get_result();
-        $dailyRevenue = [];
-        while ($row = $dailyResult->fetch_assoc()) {
-            $dailyRevenue[] = $row;
-        }
-        
-        // Get monthly revenue data
-        $monthlyRevenueQuery = "SELECT DATE_FORMAT(o.created_at, '%Y-%m') as month, 
-                               COUNT(*) as orders, 
-                               SUM(o.total_amount) as revenue,
-                               SUM(o.subtotal) as subtotal,
-                               SUM(o.shipping_fee) as shipping_fee,
-                               SUM(o.tax) as tax,
-                               AVG(o.total_amount) as avg_order_value
-                               FROM orders o 
-                               WHERE o.store_id = ? $dateCondition
-                               GROUP BY DATE_FORMAT(o.created_at, '%Y-%m')
-                               ORDER BY month DESC";
-        $stmt = $conn->prepare($monthlyRevenueQuery);
-        $stmt->bind_param("i", $storeId);
-        $stmt->execute();
-        $monthlyResult = $stmt->get_result();
-        $monthlyRevenue = [];
-        while ($row = $monthlyResult->fetch_assoc()) {
-            $monthlyRevenue[] = $row;
-        }
-        
-        // Get revenue by payment method
-        $paymentRevenueQuery = "SELECT op.payment_method, 
-                               COUNT(*) as orders, 
-                               SUM(op.amount) as revenue
-                               FROM order_payments op
-                               JOIN orders o ON op.order_id = o.order_id
-                               WHERE o.store_id = ? $dateCondition
-                               GROUP BY op.payment_method
-                               ORDER BY revenue DESC";
-        $stmt = $conn->prepare($paymentRevenueQuery);
-        $stmt->bind_param("i", $storeId);
-        $stmt->execute();
-        $paymentResult = $stmt->get_result();
-        $paymentRevenue = [];
-        while ($row = $paymentResult->fetch_assoc()) {
-            $paymentRevenue[] = $row;
-        }
-        
-        // Get total revenue summary
-        $totalRevenueQuery = "SELECT 
-                             COUNT(*) as total_orders,
-                             SUM(o.total_amount) as total_revenue,
-                             SUM(o.subtotal) as total_subtotal,
-                             SUM(o.shipping_fee) as total_shipping,
-                             SUM(o.tax) as total_tax,
-                             AVG(o.total_amount) as avg_order_value,
-                             MIN(o.total_amount) as min_order,
-                             MAX(o.total_amount) as max_order
-                             FROM orders o 
-                             WHERE o.store_id = ? $dateCondition";
-        $stmt = $conn->prepare($totalRevenueQuery);
-        $stmt->bind_param("i", $storeId);
-        $stmt->execute();
-        $totalResult = $stmt->get_result();
-        $totalSummary = $totalResult->fetch_assoc();
-        
-        $reportData = [
-            'daily_revenue' => $dailyRevenue,
-            'monthly_revenue' => $monthlyRevenue,
-            'payment_revenue' => $paymentRevenue,
-            'summary' => $totalSummary
-        ];
-        break;
+        case 'revenue':
+            $reportTitle = 'Revenue Report';
+            
+            // Get daily revenue data
+            $dailyRevenueQuery = "SELECT DATE_FORMAT(o.created_at, '%Y-%m-%d') as date, 
+                                 COUNT(*) as orders, 
+                                 SUM(o.total_amount) as revenue,
+                                 SUM(o.subtotal) as subtotal,
+                                 SUM(o.shipping_fee) as shipping_fee,
+                                 SUM(o.tax) as tax
+                                 FROM orders o 
+                                 WHERE o.store_id = ? AND o.created_at BETWEEN ? AND ?
+                                 GROUP BY DATE_FORMAT(o.created_at, '%Y-%m-%d')
+                                 ORDER BY date DESC";
+            $stmt = $conn->prepare($dailyRevenueQuery);
+            $stmt->bind_param("iss", $storeId, $startDate, $endDate);
+            $stmt->execute();
+            $dailyResult = $stmt->get_result();
+            $dailyRevenue = [];
+            while ($row = $dailyResult->fetch_assoc()) {
+                $dailyRevenue[] = $row;
+            }
+            
+            // Get monthly revenue data
+            $monthlyRevenueQuery = "SELECT DATE_FORMAT(o.created_at, '%Y-%m') as month, 
+                                   COUNT(*) as orders, 
+                                   SUM(o.total_amount) as revenue,
+                                   SUM(o.subtotal) as subtotal,
+                                   SUM(o.shipping_fee) as shipping_fee,
+                                   SUM(o.tax) as tax,
+                                   AVG(o.total_amount) as avg_order_value
+                                   FROM orders o 
+                                   WHERE o.store_id = ? AND o.created_at BETWEEN ? AND ?
+                                   GROUP BY DATE_FORMAT(o.created_at, '%Y-%m')
+                                   ORDER BY month DESC";
+            $stmt = $conn->prepare($monthlyRevenueQuery);
+            $stmt->bind_param("iss", $storeId, $startDate, $endDate);
+            $stmt->execute();
+            $monthlyResult = $stmt->get_result();
+            $monthlyRevenue = [];
+            while ($row = $monthlyResult->fetch_assoc()) {
+                $monthlyRevenue[] = $row;
+            }
+            
+            // Get revenue by payment method
+            $paymentRevenueQuery = "SELECT op.payment_method, 
+                                   COUNT(*) as orders, 
+                                   SUM(op.amount) as revenue
+                                   FROM order_payments op
+                                   JOIN orders o ON op.order_id = o.order_id
+                                   WHERE o.store_id = ? AND o.created_at BETWEEN ? AND ?
+                                   GROUP BY op.payment_method
+                                   ORDER BY revenue DESC";
+            $stmt = $conn->prepare($paymentRevenueQuery);
+            $stmt->bind_param("iss", $storeId, $startDate, $endDate);
+            $stmt->execute();
+            $paymentResult = $stmt->get_result();
+            $paymentRevenue = [];
+            while ($row = $paymentResult->fetch_assoc()) {
+                $paymentRevenue[] = $row;
+            }
+            
+            // Get total revenue summary
+            $totalRevenueQuery = "SELECT 
+                                 COUNT(*) as total_orders,
+                                 SUM(o.total_amount) as total_revenue,
+                                 SUM(o.subtotal) as total_subtotal,
+                                 SUM(o.shipping_fee) as total_shipping,
+                                 SUM(o.tax) as total_tax,
+                                 AVG(o.total_amount) as avg_order_value,
+                                 MIN(o.total_amount) as min_order,
+                                 MAX(o.total_amount) as max_order
+                                 FROM orders o 
+                                 WHERE o.store_id = ? AND o.created_at BETWEEN ? AND ?";
+            $stmt = $conn->prepare($totalRevenueQuery);
+            $stmt->bind_param("iss", $storeId, $startDate, $endDate);
+            $stmt->execute();
+            $totalResult = $stmt->get_result();
+            $totalSummary = $totalResult->fetch_assoc();
+            
+            $reportData = [
+                'daily_revenue' => $dailyRevenue,
+                'monthly_revenue' => $monthlyRevenue,
+                'payment_revenue' => $paymentRevenue,
+                'summary' => $totalSummary
+            ];
+            break;
 
-    case 'products':
-        $reportTitle = 'Product Performance Report';
-        $productsQuery = "SELECT p.product_name, pc.category_name, 
-                         SUM(oi.quantity) as total_sales, 
-                         SUM(oi.price * oi.quantity) as total_revenue,
-                         COUNT(DISTINCT o.order_id) as order_count
-                         FROM order_items oi
-                         JOIN products p ON oi.product_id = p.product_id
-                         JOIN product_categories pc ON p.product_category = pc.category_id
-                         JOIN orders o ON oi.order_id = o.order_id
-                         WHERE o.store_id = ? $dateCondition
-                         GROUP BY p.product_id, p.product_name, pc.category_name
-                         ORDER BY total_revenue DESC";
-        $stmt = $conn->prepare($productsQuery);
-        $stmt->bind_param("i", $storeId);
-        $stmt->execute();
-        $productsResult = $stmt->get_result();
-        $reportData = [];
-        while ($row = $productsResult->fetch_assoc()) {
-            $reportData[] = $row;
-        }
-        break;
+        case 'products':
+            $reportTitle = 'Product Performance Report';
+            $productsQuery = "SELECT p.product_name, pc.category_name, 
+                             SUM(oi.quantity) as total_sales, 
+                             SUM(oi.price * oi.quantity) as total_revenue,
+                             COUNT(DISTINCT o.order_id) as order_count
+                             FROM order_items oi
+                             JOIN products p ON oi.product_id = p.product_id
+                             JOIN product_categories pc ON p.product_category = pc.category_id
+                             JOIN orders o ON oi.order_id = o.order_id
+                             WHERE o.store_id = ? AND o.created_at BETWEEN ? AND ?
+                             GROUP BY p.product_id, p.product_name, pc.category_name
+                             ORDER BY total_revenue DESC";
+            $stmt = $conn->prepare($productsQuery);
+            $stmt->bind_param("iss", $storeId, $startDate, $endDate);
+            $stmt->execute();
+            $productsResult = $stmt->get_result();
+            $reportData = [];
+            while ($row = $productsResult->fetch_assoc()) {
+                $reportData[] = $row;
+            }
+            break;
 
-    case 'orders':
-        $reportTitle = 'Order Summary Report';
-        $ordersQuery = "SELECT o.*, CONCAT(u.first_name, ' ', u.last_name) as customer_name,
-                        COUNT(oi.order_item_id) as item_count
-                        FROM orders o 
-                        JOIN users u ON o.user_id = u.user_id
-                        LEFT JOIN order_items oi ON o.order_id = oi.order_id
-                        WHERE o.store_id = ? $dateCondition
-                        GROUP BY o.order_id
-                        ORDER BY o.created_at DESC";
-        $stmt = $conn->prepare($ordersQuery);
-        $stmt->bind_param("i", $storeId);
-        $stmt->execute();
-        $ordersResult = $stmt->get_result();
-        $reportData = [];
-        while ($row = $ordersResult->fetch_assoc()) {
-            $reportData[] = $row;
-        }
-        break;
+        case 'orders':
+            $reportTitle = 'Order Summary Report';
+            $ordersQuery = "SELECT o.*, CONCAT(u.first_name, ' ', u.last_name) as customer_name,
+                            COUNT(oi.order_item_id) as item_count
+                            FROM orders o 
+                            JOIN users u ON o.user_id = u.user_id
+                            LEFT JOIN order_items oi ON o.order_id = oi.order_id
+                            WHERE o.store_id = ? AND o.created_at BETWEEN ? AND ?
+                            GROUP BY o.order_id
+                            ORDER BY o.created_at DESC";
+            $stmt = $conn->prepare($ordersQuery);
+            $stmt->bind_param("iss", $storeId, $startDate, $endDate);
+            $stmt->execute();
+            $ordersResult = $stmt->get_result();
+            $reportData = [];
+            while ($row = $ordersResult->fetch_assoc()) {
+                $reportData[] = $row;
+            }
+            break;
 
-    case 'complete':
-    default:
-        $reportTitle = 'Complete Dashboard Report';
-        // Get summary stats
-        $importedProductsQuery = "SELECT COUNT(*) as total_products FROM imported_product WHERE user_id = ? AND store_id = ?";
-        $stmt = $conn->prepare($importedProductsQuery);
-        $stmt->bind_param("si", $userId, $storeId);
-        $stmt->execute();
-        $importedProductsResult = $stmt->get_result();
-        $totalProducts = $importedProductsResult->fetch_assoc()['total_products'] ?? 0;
+        case 'complete':
+        default:
+            $reportTitle = 'Complete Dashboard Report';
+            // Get summary stats
+            $importedProductsQuery = "SELECT COUNT(*) as total_products FROM imported_product WHERE user_id = ? AND store_id = ?";
+            $stmt = $conn->prepare($importedProductsQuery);
+            $stmt->bind_param("si", $userId, $storeId);
+            $stmt->execute();
+            $importedProductsResult = $stmt->get_result();
+            $totalProducts = $importedProductsResult->fetch_assoc()['total_products'] ?? 0;
 
-        $revenueQuery = "SELECT SUM(total_amount) as total_revenue FROM orders o WHERE o.store_id = ? $dateCondition";
-        $stmt = $conn->prepare($revenueQuery);
-        $stmt->bind_param("i", $storeId);
-        $stmt->execute();
-        $revenueResult = $stmt->get_result();
-        $totalRevenue = $revenueResult->fetch_assoc()['total_revenue'] ?? 0;
+            $revenueQuery = "SELECT SUM(total_amount) as total_revenue FROM orders o WHERE o.store_id = ? AND o.created_at BETWEEN ? AND ?";
+            $stmt = $conn->prepare($revenueQuery);
+            $stmt->bind_param("iss", $storeId, $startDate, $endDate);
+            $stmt->execute();
+            $revenueResult = $stmt->get_result();
+            $totalRevenue = $revenueResult->fetch_assoc()['total_revenue'] ?? 0;
 
-        $ordersQuery = "SELECT COUNT(*) as total_orders FROM orders o WHERE o.store_id = ? $dateCondition";
-        $stmt = $conn->prepare($ordersQuery);
-        $stmt->bind_param("i", $storeId);
-        $stmt->execute();
-        $ordersResult = $stmt->get_result();
-        $totalOrders = $ordersResult->fetch_assoc()['total_orders'] ?? 0;
+            $ordersQuery = "SELECT COUNT(*) as total_orders FROM orders o WHERE o.store_id = ? AND o.created_at BETWEEN ? AND ?";
+            $stmt = $conn->prepare($ordersQuery);
+            $stmt->bind_param("iss", $storeId, $startDate, $endDate);
+            $stmt->execute();
+            $ordersResult = $stmt->get_result();
+            $totalOrders = $ordersResult->fetch_assoc()['total_orders'] ?? 0;
 
-        $reportData = [
-            'summary' => [
-                'total_revenue' => $totalRevenue,
-                'total_orders' => $totalOrders,
-                'total_products' => $totalProducts,
-                'conversion_rate' => $totalProducts > 0 ? round(($totalOrders / $totalProducts) * 100, 1) : 0
-            ]
-        ];
-        break;
+            // Get additional complete report data
+            $monthlySalesQuery = "SELECT DATE_FORMAT(o.created_at, '%Y-%m') as month, 
+                                 COUNT(*) as orders, 
+                                 SUM(o.total_amount) as revenue
+                                 FROM orders o 
+                                 WHERE o.store_id = ? AND o.created_at BETWEEN ? AND ?
+                                 GROUP BY DATE_FORMAT(o.created_at, '%Y-%m')
+                                 ORDER BY month DESC
+                                 LIMIT 6";
+            $stmt = $conn->prepare($monthlySalesQuery);
+            $stmt->bind_param("iss", $storeId, $startDate, $endDate);
+            $stmt->execute();
+            $monthlySalesResult = $stmt->get_result();
+            $monthlySales = [];
+            while ($row = $monthlySalesResult->fetch_assoc()) {
+                $monthlySales[] = $row;
+            }
+
+            $topProductsQuery = "SELECT p.product_name, pc.category_name, 
+                                SUM(oi.quantity) as total_sales, 
+                                SUM(oi.price * oi.quantity) as total_revenue,
+                                (SELECT SUM(quantity) FROM inventory WHERE product_id = p.product_id) as stock
+                                FROM order_items oi
+                                JOIN products p ON oi.product_id = p.product_id
+                                JOIN product_categories pc ON p.product_category = pc.category_id
+                                JOIN orders o ON oi.order_id = o.order_id
+                                WHERE o.store_id = ? AND o.created_at BETWEEN ? AND ?
+                                GROUP BY p.product_id, p.product_name, pc.category_name
+                                ORDER BY total_revenue DESC
+                                LIMIT 10";
+            $stmt = $conn->prepare($topProductsQuery);
+            $stmt->bind_param("iss", $storeId, $startDate, $endDate);
+            $stmt->execute();
+            $topProductsResult = $stmt->get_result();
+            $topProducts = [];
+            while ($row = $topProductsResult->fetch_assoc()) {
+                $topProducts[] = $row;
+            }
+
+            $reportData = [
+                'summary' => [
+                    'total_revenue' => $totalRevenue,
+                    'total_orders' => $totalOrders,
+                    'total_products' => $totalProducts,
+                    'conversion_rate' => $totalProducts > 0 ? round(($totalOrders / $totalProducts) * 100, 1) : 0
+                ],
+                'monthly_sales' => $monthlySales,
+                'top_products' => $topProducts
+            ];
+            break;
+    }
+} catch (Exception $e) {
+    http_response_code(500);
+    echo 'Error generating report: ' . $e->getMessage();
+    exit;
 }
 
 // Generate PDF using dompdf
@@ -255,17 +294,17 @@ $dompdf = new \Dompdf\Dompdf();
 $dompdf->setPaper('A4', 'portrait');
 
 // Generate HTML content
-$html = generateReportHTML($reportTitle, $storeInfo, $reportData, $dateRange, $reportType);
+$html = generateReportHTML($reportTitle, $storeInfo, $reportData, $startDate, $endDate, $reportType);
 
 $dompdf->loadHtml($html);
 $dompdf->render();
 
 // Output PDF
-$filename = strtolower($reportType) . '_report_' . date('Y-m-d') . '.pdf';
+$filename = strtolower(str_replace(' ', '_', $reportTitle)) . '_' . date('Y-m-d') . '.pdf';
 $dompdf->stream($filename, ['Attachment' => 1]);
 
-function generateReportHTML($title, $storeInfo, $reportData, $dateRange, $reportType) {
-    $dateRangeText = ucfirst(str_replace('_', ' ', $dateRange));
+function generateReportHTML($title, $storeInfo, $reportData, $startDate, $endDate, $reportType) {
+    $dateRangeText = date('M j, Y', strtotime($startDate)) . ' to ' . date('M j, Y', strtotime($endDate));
     $currentDate = date('F j, Y');
     
     $html = '
@@ -275,31 +314,32 @@ function generateReportHTML($title, $storeInfo, $reportData, $dateRange, $report
         <meta charset="UTF-8">
         <title>' . $title . '</title>
         <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
-            .header h1 { color: #333; margin: 0; }
-            .header h2 { color: #666; margin: 5px 0; }
-            .report-info { margin-bottom: 30px; }
+            body { font-family: Arial, sans-serif; margin: 20px; font-size: 12px; }
+            .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 15px; }
+            .header h1 { color: #333; margin: 0; font-size: 24px; }
+            .header h2 { color: #666; margin: 5px 0; font-size: 16px; }
+            .report-info { margin-bottom: 20px; }
             .report-info table { width: 100%; border-collapse: collapse; }
-            .report-info td { padding: 5px; border: none; }
-            .report-info td:first-child { font-weight: bold; width: 150px; }
-            .summary { margin-bottom: 30px; }
-            .summary h3 { color: #333; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
-            .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 20px; }
-            .summary-card { background: #f8f9fa; padding: 15px; border-radius: 5px; text-align: center; }
-            .summary-card h4 { margin: 0 0 10px 0; color: #666; font-size: 14px; }
-            .summary-card .value { font-size: 24px; font-weight: bold; color: #333; }
-            .data-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-            .data-table th, .data-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            .report-info td { padding: 4px; border: none; }
+            .report-info td:first-child { font-weight: bold; width: 120px; }
+            .summary { margin-bottom: 20px; }
+            .summary h3 { color: #333; border-bottom: 1px solid #ccc; padding-bottom: 4px; font-size: 14px; }
+            .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 15px; }
+            .summary-card { background: #f8f9fa; padding: 12px; border-radius: 4px; text-align: center; }
+            .summary-card h4 { margin: 0 0 8px 0; color: #666; font-size: 11px; }
+            .summary-card .value { font-size: 18px; font-weight: bold; color: #333; }
+            .data-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 10px; }
+            .data-table th, .data-table td { border: 1px solid #ddd; padding: 6px; text-align: left; }
             .data-table th { background-color: #f2f2f2; font-weight: bold; }
             .data-table tr:nth-child(even) { background-color: #f9f9f9; }
-            .footer { margin-top: 50px; text-align: center; color: #666; font-size: 12px; }
+            .footer { margin-top: 30px; text-align: center; color: #666; font-size: 10px; }
+            .section-title { background: #e9ecef; padding: 8px; margin: 15px 0 10px 0; font-weight: bold; }
         </style>
     </head>
     <body>
         <div class="header">
             <h1>' . $title . '</h1>
-            <h2>' . ($storeInfo['store_name'] ?? 'Store') . '</h2>
+            <h2>' . htmlspecialchars($storeInfo['store_name'] ?? 'Store') . '</h2>
         </div>
         
         <div class="report-info">
@@ -365,6 +405,7 @@ function generateReportHTML($title, $storeInfo, $reportData, $dateRange, $report
 
     return $html;
 }
+
 
 function generateSalesTable($data) {
     $html = '<h3>Sales Data</h3><table class="data-table">

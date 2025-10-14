@@ -216,13 +216,7 @@ function loadDashboardData() {
             if (err) {
                 console.error('Error loading dashboard data:', err);
                 // Show error message but continue with default data
-                Swal.fire({
-                    title: 'Warning',
-                    text: 'Some dashboard data could not be loaded. Showing cached data.',
-                    icon: 'warning',
-                    timer: 3000,
-                    showConfirmButton: false
-                });
+        
             } else {
                 dashboardData = data;
                 updateDashboardUI();

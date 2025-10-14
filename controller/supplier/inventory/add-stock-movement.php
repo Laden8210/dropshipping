@@ -31,6 +31,14 @@ if ($product_id <= 0) {
     echo json_encode(['status' => 'error', 'message' => 'Valid product ID is required', 'http_code' => 400]);
     exit;
 }
+
+$variation_id = isset($request_body['variation_id']) ? (int)$request_body['variation_id'] : 0;
+if ($variation_id <= 0) {
+    http_response_code(400);
+    echo json_encode(['status' => 'error', 'message' => 'Valid variation ID is required', 'http_code' => 400]);
+    exit;
+}
+
 $quantity = isset($request_body['quantity']) ? (int)$request_body['quantity'] : 0;
 if ($quantity <= 0) {
     http_response_code(400);
@@ -44,7 +52,7 @@ if (empty($reason)) {
     exit;
 }
 
-if($inventoryModel->addStockMovement($product_id, $quantity, $movement_type, $reason)) {
+if($inventoryModel->addStockMovement($product_id, $variation_id, $quantity, $movement_type, $reason)) {
     http_response_code(200);
     echo json_encode(['status' => 'success', 'message' => 'Stock movement added successfully', 'http_code' => 200]);
 } else {

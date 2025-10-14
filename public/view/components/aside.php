@@ -96,7 +96,7 @@
             action="controller/user/store-profile/index.php?action=set-current-store">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Update Store</h5>
+                    <h5 class="modal-title">Switch Store </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -107,7 +107,7 @@
                     </select>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary" id="update-store-btn">Update</button>
+                    <button type="submit" class="btn btn-primary" id="update-store-btn">Switch</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>

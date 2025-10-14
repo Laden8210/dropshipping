@@ -28,16 +28,14 @@
                         </select>
                     </div>
                     <div class="col-md-4">
-                        <label for="dateRange" class="form-label">Date Range</label>
-                        <select class="form-select" id="dateRange">
-                            <option value="last7days">Last 7 Days</option>
-                            <option value="last30days">Last 30 Days</option>
-                            <option value="last3months">Last 3 Months</option>
-                            <option value="last6months">Last 6 Months</option>
-                            <option value="lastyear">Last Year</option>
-                            <option value="all">All Time</option>
-                        </select>
+                        <label for="startDate" class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="startDate">
                     </div>
+                    <div class="col-md-4">
+                        <label for="endDate" class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="endDate">
+                    </div>
+
                     <div class="col-md-4">
                         <label class="form-label">Actions</label>
                         <div class="d-flex gap-2">
@@ -87,7 +85,8 @@ let currentReportData = null;
 
 function viewReport() {
     const reportType = document.getElementById('reportType').value;
-    const dateRange = document.getElementById('dateRange').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
     
     if (!reportType) {
         Swal.fire({
@@ -111,7 +110,8 @@ function viewReport() {
     // Fetch report data
     const params = new URLSearchParams({
         type: reportType,
-        date_range: dateRange,
+        start_date: startDate,
+        end_date: endDate,
         format: 'json'
     });
     
@@ -121,7 +121,7 @@ function viewReport() {
             Swal.close();
             if (data.status === 'success') {
                 currentReportData = data.data;
-                displayReportData(data.data, reportType, dateRange);
+                displayReportData(data.data, reportType, startDate, endDate);
             } else {
                 throw new Error(data.message);
             }
@@ -138,7 +138,8 @@ function viewReport() {
 
 function downloadReport() {
     const reportType = document.getElementById('reportType').value;
-    const dateRange = document.getElementById('dateRange').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
     
     if (!reportType) {
         Swal.fire({
@@ -151,20 +152,21 @@ function downloadReport() {
     
     const params = new URLSearchParams({
         type: reportType,
-        date_range: dateRange,
+        start_date: startDate,
+        end_date: endDate,
         format: 'pdf'
     });
     
     window.open(`controller/user/reports/generate-pdf.php?${params}`, '_blank');
 }
 
-function displayReportData(data, reportType, dateRange) {
+function displayReportData(data, reportType, startDate, endDate) {
     const reportInfo = document.getElementById('reportInfo');
     const tableHeaders = document.getElementById('tableHeaders');
     const tableBody = document.getElementById('tableBody');
     
     // Update report info
-    const dateRangeText = formatDateRange(dateRange);
+    const dateRangeText = formatDateRange(startDate, endDate);
     const reportTitle = getReportTitle(reportType);
     reportInfo.textContent = `${reportTitle} - ${dateRangeText}`;
     
@@ -311,16 +313,9 @@ function displayCompleteData(data, tableHeaders, tableBody) {
     }
 }
 
-function formatDateRange(dateRange) {
-    switch (dateRange) {
-        case 'last7days': return 'Last 7 Days';
-        case 'last30days': return 'Last 30 Days';
-        case 'last3months': return 'Last 3 Months';
-        case 'last6months': return 'Last 6 Months';
-        case 'lastyear': return 'Last Year';
-        case 'all': return 'All Time';
-        default: return dateRange;
-    }
+function formatDateRange(startDate, endDate) {
+    const dateRange = `${startDate} - ${endDate}`;
+    return dateRange;
 }
 
 function displayRevenueData(data, tableHeaders, tableBody) {

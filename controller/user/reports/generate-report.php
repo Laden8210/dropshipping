@@ -47,33 +47,11 @@ if (!$userId || !$storeId) {
 
 // Get report parameters
 $reportType = $_GET['type'] ?? 'complete';
-$dateRange = $_GET['date_range'] ?? 'all';
+$startDate = $_GET['start_date'] ?? date('Y-m-01');
+$endDate = $_GET['end_date'] ?? date('Y-m-d');
 $format = $_GET['format'] ?? 'json';
 
 try {
-    // Calculate date range
-    $dateCondition = '';
-    switch ($dateRange) {
-        case 'last7days':
-            $dateCondition = "AND o.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)";
-            break;
-        case 'last30days':
-            $dateCondition = "AND o.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)";
-            break;
-        case 'last3months':
-            $dateCondition = "AND o.created_at >= DATE_SUB(NOW(), INTERVAL 3 MONTH)";
-            break;
-        case 'last6months':
-            $dateCondition = "AND o.created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)";
-            break;
-        case 'lastyear':
-            $dateCondition = "AND o.created_at >= DATE_SUB(NOW(), INTERVAL 1 YEAR)";
-            break;
-        case 'all':
-        default:
-            $dateCondition = "";
-            break;
-    }
 
     $reportData = [];
 
@@ -83,11 +61,11 @@ try {
             $salesQuery = "SELECT DATE_FORMAT(o.created_at, '%Y-%m-%d') as date, 
                           COUNT(*) as orders, SUM(o.total_amount) as revenue
                           FROM orders o 
-                          WHERE o.store_id = ? $dateCondition
+                          WHERE o.store_id = ? AND o.created_at BETWEEN ? AND ?
                           GROUP BY DATE_FORMAT(o.created_at, '%Y-%m-%d')
                           ORDER BY date DESC";
             $stmt = $conn->prepare($salesQuery);
-            $stmt->bind_param("i", $storeId);
+            $stmt->bind_param("iss", $storeId, $startDate, $endDate);
             $stmt->execute();
             $salesResult = $stmt->get_result();
             $reportData['sales_data'] = [];
@@ -106,11 +84,11 @@ try {
                                  SUM(o.shipping_fee) as shipping_fee,
                                  SUM(o.tax) as tax
                                  FROM orders o 
-                                 WHERE o.store_id = ? $dateCondition
+                                 WHERE o.store_id = ? AND o.created_at BETWEEN ? AND ?
                                  GROUP BY DATE_FORMAT(o.created_at, '%Y-%m-%d')
                                  ORDER BY date DESC";
             $stmt = $conn->prepare($dailyRevenueQuery);
-            $stmt->bind_param("i", $storeId);
+            $stmt->bind_param("iss", $storeId, $startDate, $endDate);
             $stmt->execute();
             $dailyResult = $stmt->get_result();
             $reportData['daily_revenue'] = [];
@@ -127,11 +105,11 @@ try {
                                    SUM(o.tax) as tax,
                                    AVG(o.total_amount) as avg_order_value
                                    FROM orders o 
-                                   WHERE o.store_id = ? $dateCondition
+                                   WHERE o.store_id = ? AND o.created_at BETWEEN ? AND ?
                                    GROUP BY DATE_FORMAT(o.created_at, '%Y-%m')
                                    ORDER BY month DESC";
             $stmt = $conn->prepare($monthlyRevenueQuery);
-            $stmt->bind_param("i", $storeId);
+            $stmt->bind_param("iss", $storeId, $startDate, $endDate);
             $stmt->execute();
             $monthlyResult = $stmt->get_result();
             $reportData['monthly_revenue'] = [];
@@ -145,11 +123,11 @@ try {
                                    SUM(op.amount) as revenue
                                    FROM order_payments op
                                    JOIN orders o ON op.order_id = o.order_id
-                                   WHERE o.store_id = ? $dateCondition
+                                   WHERE o.store_id = ? AND o.created_at BETWEEN ? AND ?
                                    GROUP BY op.payment_method
                                    ORDER BY revenue DESC";
             $stmt = $conn->prepare($paymentRevenueQuery);
-            $stmt->bind_param("i", $storeId);
+            $stmt->bind_param("iss", $storeId, $startDate, $endDate);
             $stmt->execute();
             $paymentResult = $stmt->get_result();
             $reportData['payment_revenue'] = [];
@@ -168,9 +146,10 @@ try {
                                  MIN(o.total_amount) as min_order,
                                  MAX(o.total_amount) as max_order
                                  FROM orders o 
-                                 WHERE o.store_id = ? $dateCondition";
+                                 WHERE o.store_id = ? AND o.created_at BETWEEN ? AND ?
+                                 ";
             $stmt = $conn->prepare($totalRevenueQuery);
-            $stmt->bind_param("i", $storeId);
+            $stmt->bind_param("iss", $storeId, $startDate, $endDate);
             $stmt->execute();
             $totalResult = $stmt->get_result();
             $reportData['summary'] = $totalResult->fetch_assoc();
@@ -186,11 +165,11 @@ try {
                              JOIN products p ON oi.product_id = p.product_id
                              JOIN product_categories pc ON p.product_category = pc.category_id
                              JOIN orders o ON oi.order_id = o.order_id
-                             WHERE o.store_id = ? $dateCondition
+                             WHERE o.store_id = ? AND o.created_at BETWEEN ? AND ?
                              GROUP BY p.product_id, p.product_name, pc.category_name
                              ORDER BY total_revenue DESC";
             $stmt = $conn->prepare($productsQuery);
-            $stmt->bind_param("i", $storeId);
+            $stmt->bind_param("iss", $storeId, $startDate, $endDate   );
             $stmt->execute();
             $productsResult = $stmt->get_result();
             $reportData['products_data'] = [];
@@ -206,11 +185,11 @@ try {
                             FROM orders o 
                             JOIN users u ON o.user_id = u.user_id
                             LEFT JOIN order_items oi ON o.order_id = oi.order_id
-                            WHERE o.store_id = ? $dateCondition
+                            WHERE o.store_id = ? AND o.created_at BETWEEN ? AND ?
                             GROUP BY o.order_id
                             ORDER BY o.created_at DESC";
             $stmt = $conn->prepare($ordersQuery);
-            $stmt->bind_param("i", $storeId);
+            $stmt->bind_param("iss", $storeId, $startDate, $endDate);
             $stmt->execute();
             $ordersResult = $stmt->get_result();
             $reportData['orders_data'] = [];
@@ -230,17 +209,18 @@ try {
             $importedProductsResult = $stmt->get_result();
             $totalProducts = $importedProductsResult->fetch_assoc()['total_products'] ?? 0;
 
-            $revenueQuery = "SELECT SUM(total_amount) as total_revenue FROM orders o WHERE o.store_id = ? $dateCondition";
+            $revenueQuery = "SELECT SUM(total_amount) as total_revenue FROM orders o WHERE o.store_id = ? AND o.created_at BETWEEN ? AND ?
+            ";
             $stmt = $conn->prepare($revenueQuery);
-            $stmt->bind_param("i", $storeId);
+            $stmt->bind_param("iss", $storeId, $startDate, $endDate);
             $stmt->execute();
             $revenueResult = $stmt->get_result();
             $totalRevenue = $revenueResult->fetch_assoc()['total_revenue'] ?? 0;
 
-            $ordersQuery = "SELECT COUNT(*) as total_orders FROM orders o WHERE o.store_id = ? $dateCondition";
+            $ordersQuery = "SELECT COUNT(*) as total_orders FROM orders o WHERE o.store_id = ? AND o.created_at BETWEEN ? AND ?";
 
             $stmt = $conn->prepare($ordersQuery);
-            $stmt->bind_param("i", $storeId);
+            $stmt->bind_param("iss", $storeId, $startDate, $endDate);
             $stmt->execute();
             $ordersResult = $stmt->get_result();
             $totalOrders = $ordersResult->fetch_assoc()['total_orders'] ?? 0;
@@ -248,7 +228,7 @@ try {
             $reportData = [
                 'report_info' => [
                     'type' => $reportType,
-                    'date_range' => $dateRange,
+                    'date_range' => $startDate . ' - ' . $endDate,
                     'generated_at' => date('Y-m-d H:i:s'),
                     'store_id' => $storeId
                 ],
@@ -264,11 +244,11 @@ try {
             $salesQuery = "SELECT DATE_FORMAT(o.created_at, '%Y-%m') as month, 
                           COUNT(*) as orders, SUM(o.total_amount) as revenue
                           FROM orders o 
-                          WHERE o.store_id = ? $dateCondition
+                          WHERE o.store_id = ? AND o.created_at BETWEEN ? AND ?
                           GROUP BY DATE_FORMAT(o.created_at, '%Y-%m')
                           ORDER BY month";
             $stmt = $conn->prepare($salesQuery);
-            $stmt->bind_param("i", $storeId);
+            $stmt->bind_param("iss", $storeId, $startDate, $endDate);
             $stmt->execute();
             $salesResult = $stmt->get_result();
             $reportData['monthly_sales'] = [];
@@ -284,11 +264,11 @@ try {
                                JOIN product_categories pc ON p.product_category = pc.category_id
                                LEFT JOIN inventory i ON p.product_id = i.product_id
                                JOIN orders o ON oi.order_id = o.order_id
-                               WHERE o.store_id = ? $dateCondition
+                               WHERE o.store_id = ? AND o.created_at BETWEEN ? AND ?
                                GROUP BY p.product_id, p.product_name, pc.category_name
                                ORDER BY total_sales DESC LIMIT 10";
             $stmt = $conn->prepare($topProductsQuery);
-            $stmt->bind_param("i", $storeId);
+            $stmt->bind_param("i", $storeId, $startDate, $endDate);
             $stmt->execute();
             $topProductsResult = $stmt->get_result();
             $reportData['top_products'] = [];

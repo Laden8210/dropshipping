@@ -1,60 +1,70 @@
-  <?php
 
-  $client = new Google\Client();
-  $client->setClientId('408096805493-cfatjhsa5q0aubs53d6862d2ccdjs76u.apps.googleusercontent.com');
-  $client->setClientSecret('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');
-  $client->setRedirectUri('http://localhost/dropshipping/redirect');
-  $client->setState('login');
-  $client->addScope('email');
-  $client->addScope('profile');
-
-  $url = $client->createAuthUrl();
-
-
-  ?>
-  <main class="main">
+<main class="main">
     <div class="title">
-      <img src="assets/img/logo.png" alt="LuzViMinDrop Logo" class="img-fluid" style="max-width: 550px;" />
-      <p class="mt-3">Your AI-powered dropshipping partner across Luzon, Visayas, and Mindanao.</p>
+        <img src="assets/img/logo.png" alt="LuzViMinDrop Logo" class="img-fluid" style="max-width: 550px;" />
+        <p class="mt-3">Your AI-powered dropshipping partner across Luzon, Visayas, and Mindanao.</p>
     </div>
 
     <section class="p-1">
+        <div class="container d-flex justify-content-center align-items-start" style="min-height: 60vh;">
+            <div class="auth-container" style="width: 100%; max-width: 500px;">
+                <div class="card-body">
+                    <h5 class="card-title text-center mb-4">Forgot Password</h5>
+                    <p class="text-center text-muted mb-4">Enter your email address and we'll send you a link to reset your password.</p>
+                    
+                    <form id="forgot-password-form" action="controller/auth/index.php?action=forgot-password" method="post">
+                        <!-- Email Field -->
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <input type="email" name="email" id="email" placeholder="Email Address" required />
+                        </div>
 
-      <div class="container d-flex justify-content-center align-align-items-start" style="min-height: 60vh;">
-        <div class="auth-container" style="width: 100%; max-width: 400px;">
-          <div class="card-body">
-            <h5 class="card-title text-center mb-4">Login</h5>
-            <form action="controller/auth/index.php?action=forgot-password" method="POST" id="auth-form">
-
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <i class="fas fa-phone"></i>
+                        <input type="submit" class="btn btn-login w-100 mb-3" value="Send Reset Link" id="submit-btn" />
+                        
+                        <div class="text-center links">
+                            <p class="mb-1">Remember your password?</p>
+                            <a href="login" class="btn btn-link p-0">Back to Login</a>
+                        </div>
+                    </form>
                 </div>
-                <input type="text" name="email" id="phoneNumber" placeholder="Phone Number or Email" required />
-              </div>
-
-              <input type="submit" class="btn btn-login w-100 mb-3" value="Recover Password" name="login" id="submit-btn" />
-         
-
-              <div class="text-center links">
-            
-                <a href="register" class="btn btn-link p-0">Back to Login</a>
-              </div>
-            </form>
-          </div>
+            </div>
         </div>
-      </div>
     </section>
+</main>
 
-  </main>
+<script>
+const forgotPasswordForm = new CreateRequest({
+    formSelector: "#forgot-password-form",
+    submitButtonSelector: "#submit-btn",
+    callback: (err, res) => {
 
-  <script>
-    const createRequest = new CreateRequest({
-      formSelector: "#auth-form",
-      submitButtonSelector: "#submit-btn",
-      callback: (err, res) => err ? console.error("Form submission error:", err) : console.log(
-        "Form submitted successfully:", res),
-      confirmationRequired: false,
+    },
+    confirmationRequired: false,
 
-    });
-  </script>
+});
+
+// Custom alert function
+function showAlert(type, message) {
+    const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+    const alertHtml = `
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+    
+    // Insert alert at the top of the form
+    const form = document.getElementById('forgot-password-form');
+    form.insertAdjacentHTML('beforebegin', alertHtml);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        const alert = document.querySelector('.alert');
+        if (alert) {
+            alert.remove();
+        }
+    }, 5000);
+}
+</script>

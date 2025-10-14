@@ -200,7 +200,7 @@ class OrderProduct
         $sqlStatusHistory = "SELECT osh.status, osh.created_at 
                              FROM order_status_history osh 
                              WHERE osh.order_id = ? 
-                             ORDER BY osh.created_at DESC";
+                             ORDER BY osh.created_at ASC";
         $stmt = $this->conn->prepare($sqlStatusHistory);
         $stmt->bind_param("i", $order['order_id']);
         $stmt->execute();

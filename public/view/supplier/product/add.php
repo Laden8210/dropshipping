@@ -23,11 +23,7 @@
                             </select>
                         </div>
 
-                        <div class="col-md-6">
-                            <label for="price" class="form-label">Price</label>
-                            <input type="number" step="0.01" class="form-control" id="price" name="price" required>
-                        </div>
-
+                   
                         <div class="col-md-6">
                             <label for="currency" class="form-label">Currency</label>
                             <select class="form-select" id="currency" name="currency">
@@ -205,14 +201,76 @@
                             </select>
                         </div>
 
+
+
+                        <!-- Unlisted Status -->
                         <div class="col-md-6">
-                            <label for="product_weight" class="form-label">Weight (grams)</label>
-                            <input type="number" class="form-control" id="product_weight" name="product_weight" required>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="is_unlisted" name="is_unlisted" value="1">
+                                <label class="form-check-label" for="is_unlisted">
+                                    Unlisted Product (Hide from business owners)
+                                </label>
+                            </div>
                         </div>
 
                         <div class="col-12">
                             <label for="description" class="form-label">Description</label>
                             <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                        </div>
+
+                        <!-- Product Variations Section -->
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0"><i class="fas fa-layer-group me-2"></i>Product Variations</h6>
+                                    <small class="text-muted">Add variations with size, color, weight, price, and dimensions</small>
+                                </div>
+                                <div class="card-body">
+                                    <div id="variations-container">
+                                        <div class="variation-group mb-3">
+                                            <div class="row g-2">
+                                                <div class="col-md-2">
+                                                    <label class="form-label">Size</label>
+                                                    <input type="text" class="form-control variation-size" name="variation_size[]" placeholder="e.g., Small, Medium, Large">
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="form-label">Color</label>
+                                                    <input type="text" class="form-control variation-color" name="variation_color[]" placeholder="e.g., Red, Blue, Black">
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="form-label">Weight (grams)</label>
+                                                    <input type="number" class="form-control variation-weight" name="variation_weight[]" placeholder="Weight">
+                                                </div>
+                                                <div class="col-md-1">
+                                                    <label class="form-label">Length (cm)</label>
+                                                    <input type="number" step="0.01" class="form-control variation-length" name="variation_length[]" placeholder="Length">
+                                                </div>
+                                                <div class="col-md-1">
+                                                    <label class="form-label">Width (cm)</label>
+                                                    <input type="number" step="0.01" class="form-control variation-width" name="variation_width[]" placeholder="Width">
+                                                </div>
+                                                <div class="col-md-1">
+                                                    <label class="form-label">Height (cm)</label>
+                                                    <input type="number" step="0.01" class="form-control variation-height" name="variation_height[]" placeholder="Height">
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="form-label">Price</label>
+                                                    <input type="number" step="0.01" class="form-control variation-price" name="variation_price[]" placeholder="Price">
+                                                </div>
+                                                <div class="col-md-1">
+                                                    <label class="form-label">&nbsp;</label>
+                                                    <button type="button" class="btn btn-outline-danger btn-sm w-100 remove-variation">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" id="add-variation">
+                                        <i class="fas fa-plus me-1"></i>Add Variation
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="col-md-6">
@@ -257,11 +315,20 @@
                 // Append text fields
                 formData.append('product_name', document.getElementById('product_name').value);
                 formData.append('category', document.getElementById('category').value);
-                formData.append('price', document.getElementById('price').value);
+
                 formData.append('currency', document.getElementById('currency').value);
                 formData.append('status', document.getElementById('status').value);
-                formData.append('product_weight', document.getElementById('product_weight').value);
                 formData.append('description', document.getElementById('description').value);
+                
+                
+                // Append unlisted status
+                formData.append('is_unlisted', document.getElementById('is_unlisted').checked ? '1' : '0');
+                
+                // Append variations
+                const variations = collectVariations();
+                if (variations.length > 0) {
+                    formData.append('variations', JSON.stringify(variations));
+                }
 
                 // Append primary image
                 const primaryImage = document.getElementById('product_image').files[0];
@@ -371,6 +438,91 @@
                     };
                     reader.readAsDataURL(file);
                 });
+            }
+
+            // Variation management
+            document.getElementById('add-variation').addEventListener('click', function() {
+                addVariationRow();
+            });
+
+            function addVariationRow() {
+                const container = document.getElementById('variations-container');
+                const newRow = document.createElement('div');
+                newRow.className = 'variation-group mb-3';
+                newRow.innerHTML = `
+                    <div class="row g-2">
+                        <div class="col-md-2">
+                            <label class="form-label">Size</label>
+                            <input type="text" class="form-control variation-size" name="variation_size[]" placeholder="e.g., Small, Medium, Large">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Color</label>
+                            <input type="text" class="form-control variation-color" name="variation_color[]" placeholder="e.g., Red, Blue, Black">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Weight (grams)</label>
+                            <input type="number" class="form-control variation-weight" name="variation_weight[]" placeholder="Weight">
+                        </div>
+                        <div class="col-md-1">
+                            <label class="form-label">Length (cm)</label>
+                            <input type="number" step="0.01" class="form-control variation-length" name="variation_length[]" placeholder="Length">
+                        </div>
+                        <div class="col-md-1">
+                            <label class="form-label">Width (cm)</label>
+                            <input type="number" step="0.01" class="form-control variation-width" name="variation_width[]" placeholder="Width">
+                        </div>
+                        <div class="col-md-1">
+                            <label class="form-label">Height (cm)</label>
+                            <input type="number" step="0.01" class="form-control variation-height" name="variation_height[]" placeholder="Height">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Price</label>
+                            <input type="number" step="0.01" class="form-control variation-price" name="variation_price[]" placeholder="Price">
+                        </div>
+                        <div class="col-md-1">
+                            <label class="form-label">&nbsp;</label>
+                            <button type="button" class="btn btn-outline-danger btn-sm w-100 remove-variation">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(newRow);
+                
+                // Add remove functionality
+                newRow.querySelector('.remove-variation').addEventListener('click', function() {
+                    newRow.remove();
+                });
+            }
+
+            function collectVariations() {
+                const variations = [];
+                const variationGroups = document.querySelectorAll('.variation-group');
+                
+                variationGroups.forEach(group => {
+                    const size = group.querySelector('.variation-size').value;
+                    const color = group.querySelector('.variation-color').value;
+                    const weight = group.querySelector('.variation-weight').value;
+                    const length = group.querySelector('.variation-length').value;
+                    const width = group.querySelector('.variation-width').value;
+                    const height = group.querySelector('.variation-height').value;
+                    const price = group.querySelector('.variation-price').value;
+                    
+                    // Only add variation if at least size or color is provided
+                    if (size || color) {
+                        variations.push({
+                            size: size || '',
+                            color: color || '',
+                            weight: weight || null,
+                            length: length || null,
+                            width: width || null,
+                            height: height || null,
+                            price: price || null
+                        });
+                    }
+                });
+                
+                return variations;
             }
         });
 

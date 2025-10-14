@@ -9,6 +9,25 @@ class Order
         $this->conn = $db;
     }
 
+    public function markComplete($order_id)
+    {
+        // status_history_id, order_id, status, created_at, updated_at
+        $sql = "INSERT INTO order_status_history (order_id, status) VALUES (?, 'completed')";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $order_id);
+        $stmt->execute();
+        return true;
+    }
+
+    public function initiateReturn($order_id)
+    {
+        $sql = "INSERT INTO order_status_history (order_id, status) VALUES (?, 'return')";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $order_id);
+        $stmt->execute();
+        return true;
+    }
+
     public function createOrder($user_id, $orderData)
     {
         $this->conn->begin_transaction();
@@ -68,19 +87,40 @@ class Order
                 // Insert order items for this store
                 foreach ($products as $product) {
                     $stmt = $this->conn->prepare("
-                    INSERT INTO order_items (order_id, product_id, quantity, price)
-                    VALUES (?, ?, ?, ?)
+                    INSERT INTO order_items (order_id, product_id, quantity, price, variation_id)
+                    VALUES (?, ?, ?, ?, ?)
                 ");
                     $stmt->bind_param(
-                        "iiid",
+                        "iiidi",
                         $order_id,
                         $product['pid'],
                         $product['quantity'],
-                        $product['price']
+                        $product['price'],
+                        $product['variation_id']
                     );
 
                     if (!$stmt->execute()) {
                         throw new Exception("Failed to insert item for store $store_id: " . $stmt->error);
+                    }
+
+                    // check if order is exist in cart and if exist delete the cart
+                    $cartId = null;
+                    $checkCart = $this->conn->prepare("SELECT cart_id FROM cart WHERE product_id = ? AND variation_id = ? AND user_id = ? AND store_id = ? ");
+                    $checkCart->bind_param("iiii", $product['pid'], $product['variation_id'], $user_id, $store_id);
+                    $checkCart->execute();
+                    $result = $checkCart->get_result();
+ 
+                    if ($result->num_rows > 0) {
+                        $cartId = $result->fetch_assoc()['cart_id'];
+                        $deleteCart = $this->conn->prepare("DELETE FROM cart WHERE cart_id = ?");
+                        $deleteCart->bind_param("i", $cartId);
+                        $deleteCart->execute();
+                    }
+
+                    if ($cartId) {
+                        $deleteCart = $this->conn->prepare("DELETE FROM cart WHERE cart_id = ?");
+                        $deleteCart->bind_param("i", $cartId);
+                        $deleteCart->execute();
                     }
                 }
 

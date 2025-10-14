@@ -66,94 +66,65 @@
 
 <!-- Button to trigger modal -->
 
-
-
-<!-- Modal -->
 <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="productModalLabel"></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-
             <div class="modal-body">
-                <!-- Main Product Info -->
-                <div class="row mb-4">
+                <!-- Product Info -->
+                <div class="row">
                     <div class="col-md-8">
                         <h4 id="productNameEn"></h4>
-                        <p class="mb-1"><strong>Description:</strong></p>
+                        <p><strong>Description:</strong></p>
                         <div id="productDescription" class="mb-3"></div>
 
                         <div class="row">
                             <div class="col-md-6">
                                 <p><strong>SKU:</strong> <span id="productSku"></span></p>
                                 <p><strong>Category:</strong> <span id="productCategory"></span></p>
-                                <p><strong>Material:</strong> <span id="productMaterial"></span></p>
-                                <p><strong>Product Type:</strong> <span id="productType"></span></p>
-                                <p><strong>Supplier:</strong> <span id="supplierName"></span></p>
+                                <p><strong>Status:</strong> <span id="status"></span></p>
+      
                             </div>
                             <div class="col-md-6">
-                                <p><strong>Weight:</strong> <span id="productWeight"></span>g</p>
-                                <p><strong>Packing Weight:</strong> <span id="packingWeight"></span>g</p>
-                                <p><strong>Price:</strong> $<span id="sellPrice"></span></p>
-                                <p><strong>Suggested Price:</strong> $<span id="suggestSellPrice"></span></p>
-                                <p><strong>Status:</strong> <span id="status"></span></p>
+                                <p><strong>Total Variations:</strong> <span id="variationCount"></span></p>
+                                <p><strong>Price Range:</strong> <span id="priceRange"></span></p>
+                                <p><strong>Total Stock:</strong> <span id="totalStock"></span></p>
+                                <p><strong>Last Updated:</strong> <span id="lastUpdated"></span></p>
+                            </div>
+                        </div>
+
+                        <!-- Variations Table -->
+                        <div class="mt-4">
+                            <h6>Product Variations</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Size</th>
+                                            <th>Color</th>
+                                            <th>Price</th>
+                                            <th>Stock</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="variationsTable">
+                                        <!-- Variations will be populated here -->
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
+
                     <div class="col-md-4 text-center">
                         <img id="primaryImage" src="" class="img-fluid rounded mb-3" style="max-height: 300px;">
-                        <p class="text-muted"><small>Primary Variant Image</small></p>
-                    </div>
-                </div>
-
-                <!-- Product Images Gallery -->
-                <div class="mb-4">
-                    <h5>Product Images</h5>
-                    <div class="d-flex flex-wrap gap-2" id="productImages">
-                        <!-- Images will be injected here -->
-                    </div>
-                </div>
-
-                <!-- Variants Table -->
-                <div class="mb-4">
-                    <h5>Available Variants</h5>
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-hover">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Variant Key</th>
-                                    <th>Image</th>
-                                    <th>SKU</th>
-                                    <th>Dimensions</th>
-                                    <th>Weight</th>
-                                    <th>Price</th>
-                                    <th>Suggested Price</th>
-                                </tr>
-                            </thead>
-                            <tbody id="variantTableBody">
-                                <!-- Variants will be injected here -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Additional Details -->
-                <div class="mb-4">
-                    <h5>Additional Details</h5>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <p><strong>Materials:</strong> <span id="materialDetails"></span></p>
-                            <p><strong>Packing:</strong> <span id="packingDetails"></span></p>
-                        </div>
-                        <div class="col-md-4">
-                            <p><strong>Product Properties:</strong> <span id="productProperties"></span></p>
-                            <p><strong>Created Time:</strong> <span id="createrTime"></span></p>
-                        </div>
-                        <div class="col-md-4">
-                            <p><strong>Listed Count:</strong> <span id="listedNum"></span></p>
-                            <p><strong>Supplier ID:</strong> <span id="supplierId"></span></p>
+                        <p class="text-muted"><small>Primary Image</small></p>
+                        
+                        <!-- Additional Images -->
+                        <div id="additionalImages" class="mt-3">
+                            <!-- Additional images will be populated here -->
                         </div>
                     </div>
                 </div>
@@ -165,6 +136,7 @@
         </div>
     </div>
 </div>
+
 
 <script>
     function cardBuildProduct(data) {
@@ -212,9 +184,7 @@
                             </div>
 
                             <div class="mt-3">
-                                <span class="badge bg-light text-dark me-1">
-                                    <i class="fas fa-weight me-1"></i> ${product.product_weight}g
-                                </span>
+               
                                 <span class="badge bg-light text-dark">
                                     <i class="fas fa-warehouse me-1"></i> ${product.warehouse_name}
                                 </span>
@@ -243,96 +213,111 @@
 
     function retrieveProduct(pid) {
         new GetRequest({
-            getUrl: "controller/product-import?action=single-product",
+            getUrl: "controller/user/product-import?action=single-product",
             params: {
                 pid
             },
             callback: (err, data) => {
-
                 if (err) return console.error("Error fetching product data:", err);
-                console.log("Product data retrieved:", data);
 
                 const modal = new bootstrap.Modal(document.getElementById('productModal'));
 
-                // Set modal title
-                document.getElementById('productModalLabel').textContent = data.productNameEn;
+                // Basic product info
+                document.getElementById('productModalLabel').textContent = data.product_name || 'No Name';
+                document.getElementById('productNameEn').textContent = data.product_name || '—';
+                document.getElementById('productDescription').textContent = data.description || '—';
+                document.getElementById('productSku').textContent = data.product_sku || '—';
+                document.getElementById('productCategory').textContent = data.category_name || '—';
+                document.getElementById('status').textContent = data.status || '—';
 
-                // Set primary product info
-                document.getElementById('productNameEn').textContent = data.productNameEn;
-                document.getElementById('productDescription').innerHTML = data.description;
-                document.getElementById('productSku').textContent = data.productSku;
-                document.getElementById('productCategory').textContent = data.categoryName;
-                document.getElementById('productType').textContent = data.productType;
-                document.getElementById('supplierName').textContent = data.supplierName;
-                document.getElementById('productWeight').textContent = data.productWeight;
-                document.getElementById('packingWeight').textContent = data.packingWeight;
-                document.getElementById('sellPrice').textContent = data.sellPrice;
-                document.getElementById('suggestSellPrice').textContent = data.suggestSellPrice;
-                document.getElementById('status').textContent = data.status;
-                document.getElementById('listedNum').textContent = data.listedNum;
-                document.getElementById('supplierId').textContent = data.supplierId;
+                // Handle variations
+                const variations = data.variations || [];
+                document.getElementById('variationCount').textContent = variations.length;
 
-                // Set material info
-                document.getElementById('productMaterial').textContent =
-                    data.materialNameEnSet.join(', ');
+                // Calculate price range and total stock
+                if (variations.length > 0) {
+                    const prices = variations.map(v => parseFloat(v.price)).filter(p => !isNaN(p));
+                    const minPrice = Math.min(...prices);
+                    const maxPrice = Math.max(...prices);
+                    const totalStock = variations.reduce((sum, v) => sum + (parseInt(v.stock_quantity) || 0), 0);
 
-                // Set additional details
-                document.getElementById('materialDetails').textContent =
-                    `${data.materialNameSet.join(', ')} (${data.materialNameEnSet.join(', ')})`;
+                    document.getElementById('priceRange').textContent =
+                        minPrice === maxPrice ?
+                        `${minPrice} ${variations[0].currency}` :
+                        `${minPrice} - ${maxPrice} ${variations[0].currency}`;
 
-                document.getElementById('packingDetails').textContent =
-                    `${data.packingNameSet.join(', ')} (${data.packingNameEnSet.join(', ')})`;
+                    document.getElementById('totalStock').textContent = totalStock;
 
-                document.getElementById('productProperties').textContent =
-                    `${data.productProSet.join(', ')} (${data.productProEnSet.join(', ')})`;
+                    // Find latest update date
+                    const latestUpdate = variations.reduce((latest, v) => {
+                        const updateDate = new Date(v.updated_at);
+                        return updateDate > latest ? updateDate : latest;
+                    }, new Date(0));
 
-                // Format and set created time
-                const createrTime = new Date(data.createrTime);
-                document.getElementById('createrTime').textContent =
-                    createrTime.toLocaleString();
+                    document.getElementById('lastUpdated').textContent =
+                        latestUpdate > new Date(0) ? latestUpdate.toLocaleDateString() : '—';
 
-                // Set primary image (first image in the list)
-                if (data.productImageSet.length > 0) {
-                    document.getElementById('primaryImage').src = data.productImageSet[0];
+                    // Populate variations table
+                    populateVariationsTable(variations);
+                } else {
+                    document.getElementById('priceRange').textContent = '—';
+                    document.getElementById('totalStock').textContent = '0';
+                    document.getElementById('lastUpdated').textContent = '—';
+                    document.getElementById('variationsTable').innerHTML = '<tr><td colspan="5" class="text-center">No variations found</td></tr>';
                 }
 
-                // Display product images
-                const imagesContainer = document.getElementById('productImages');
-                imagesContainer.innerHTML = '';
-                data.productImageSet.forEach(imgUrl => {
-                    const imgWrapper = document.createElement('div');
-                    imgWrapper.className = 'position-relative';
-                    imgWrapper.style.width = '120px';
-                    imgWrapper.style.height = '120px';
-                    imgWrapper.innerHTML = `
-                    <img src="${imgUrl}" 
-                         class="img-thumbnail h-100 w-100" 
-                         style="object-fit: cover; cursor: pointer"
-                         onclick="this.classList.toggle('img-enlarged')">
-                `;
-                    imagesContainer.appendChild(imgWrapper);
-                });
-
-                // Display variants table
-                const variantTableBody = document.getElementById('variantTableBody');
-                variantTableBody.innerHTML = '';
-                data.variants.forEach(variant => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                    <td>${variant.variantKey || 'N/A'}</td>
-                    <td><img src="${variant.variantImage}" style="height:50px"></td>
-                    <td>${variant.variantSku}</td>
-                    <td>${variant.variantLength}×${variant.variantWidth}×${variant.variantHeight}mm</td>
-                    <td>${variant.variantWeight}g</td>
-                    <td>$${variant.variantSellPrice}</td>
-                    <td>$${variant.variantSugSellPrice}</td>
-                `;
-                    variantTableBody.appendChild(row);
-                });
+                // Handle images
+                const imagePath = `public/images/products/${data.primary_image}`;
+                document.getElementById('primaryImage').src = imagePath;
+                populateAdditionalImages(data.images || []);
 
                 modal.show();
             }
         }).send();
+    }
+
+    function populateVariationsTable(variations) {
+        const tbody = document.getElementById('variationsTable');
+        tbody.innerHTML = '';
+
+        variations.forEach(variation => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+            <td>${variation.size || '—'}</td>
+            <td>${variation.color || '—'}</td>
+            <td>${variation.price} ${variation.currency}</td>
+            <td>${variation.stock_quantity || 0}</td>
+            <td>
+                <span class="badge ${variation.is_active == 0 ? 'bg-success' : 'bg-secondary'}">
+                    ${variation.is_active ==0 ? 'Active' : 'Inactive'}
+                </span>
+            </td>
+        `;
+            tbody.appendChild(row);
+        });
+    }
+
+    function populateAdditionalImages(images) {
+        const container = document.getElementById('additionalImages');
+        container.innerHTML = '';
+
+        if (images.length <= 1) return;
+
+        const title = document.createElement('p');
+        title.className = 'text-muted mb-2';
+        title.innerHTML = '<small>Additional Images</small>';
+        container.appendChild(title);
+
+        images.forEach((image, index) => {
+            if (index === 0) return; // Skip primary image
+
+            const img = document.createElement('img');
+            img.src = `public/images/products/${image}`;
+            img.className = 'img-thumbnail me-2 mb-2';
+            img.style = 'width: 80px; height: 80px; object-fit: cover;';
+            img.alt = `Product image ${index + 1}`;
+            container.appendChild(img);
+        });
     }
 
     function importProduct(pid) {

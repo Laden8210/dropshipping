@@ -21,12 +21,7 @@ if (empty($category)) {
     exit;
 }
 
-$price = isset($_POST['price']) ? trim($_POST['price']) : '';
-if (empty($price) || !is_numeric($price)) {
-    http_response_code(400);
-    echo json_encode(['status' => 'error', 'message' => 'Valid price is required', 'http_code' => 400]);
-    exit;
-}
+
 $currency = isset($_POST['currency']) ? trim($_POST['currency']) : '';
 if (empty($currency)) {
     http_response_code(400);
@@ -41,12 +36,9 @@ if (empty($status)) {
     exit;
 }
 
-$product_weight = isset($_POST['product_weight']) ? trim($_POST['product_weight']) : '';
-if (empty($product_weight) || !is_numeric($product_weight)) {
-    http_response_code(400);
-    echo json_encode(['status' => 'error', 'message' => 'Valid product weight is required', 'http_code' => 400]);
-    exit;
-}
+
+// Unlisted status
+$is_unlisted = isset($_POST['is_unlisted']) ? (bool)$_POST['is_unlisted'] : false;
 
 $description = isset($_POST['description']) ? trim($_POST['description']) : '';
 if (empty($description)) {
@@ -93,7 +85,7 @@ $data = $supplierProductModel->create_product(
     $category,
     $description,
     $status,
-    $product_weight
+    $is_unlisted
 );
 
 if (!$data) {
@@ -117,7 +109,7 @@ if (!move_uploaded_file($productImage['tmp_name'], $productImagePath)) {
 }
 
 
-if($supplierProductModel->add_product_image($data['pid'], $newFileName, true)) {
+if ($supplierProductModel->add_product_image($data['pid'], $newFileName, true)) {
     $data['product_image'] = $newFileName;
 } else {
     http_response_code(500);
@@ -159,14 +151,55 @@ if ($productImages && is_array($productImages['name'])) {
 }
 
 
-// price 
-if (!$supplierProductModel->add_price_history($data['pid'], $price, $currency)) {
-    http_response_code(500);
-    echo json_encode(['status' => 'error', 'message' => 'Failed to add price history', 'http_code' => 500]);
-    exit;
+// Handle product variations (size, color, weight, price, dimensions)
+$variations = isset($_POST['variations']) ? json_decode($_POST['variations'], true) : null;
+if ($variations && is_array($variations)) {
+    foreach ($variations as $variation) {
+        $size = isset($variation['size']) ? trim($variation['size']) : null;
+        $color = isset($variation['color']) ? trim($variation['color']) : null;
+        $weight = isset($variation['weight']) ? floatval($variation['weight']) : null;
+        $length = isset($variation['length']) ? floatval($variation['length']) : null;
+        $width = isset($variation['width']) ? floatval($variation['width']) : null;
+        $height = isset($variation['height']) ? floatval($variation['height']) : null;
+        $variationPrice = isset($variation['price']) ? floatval($variation['price']) : 0;
+
+        // Only create variation if size or color is provided
+        if ($size || $color) {
+            // Generate SKU suffix based on size and color
+            $skuSuffix = '';
+            if ($size) $skuSuffix .= '-' . strtoupper(substr($size, 0, 1));
+            if ($color) $skuSuffix .= '-' . strtoupper(substr($color, 0, 3));
+
+            $variationId = $supplierProductModel->createSimpleVariation(
+                $data['pid'],
+                $size,
+                $color,
+                $weight,
+                $length,
+                $width,
+                $height,
+                $variationPrice,
+                $currency,
+                $skuSuffix,
+                0
+            );
+
+            if (!$supplierProductModel->add_price_history($data['pid'], $variationId, $variationPrice, $currency)) {
+                http_response_code(500);
+                echo json_encode(['status' => 'error', 'message' => 'Failed to add price history', 'http_code' => 500]);
+                exit;
+            }
+
+
+            if (!$variationId) {
+                error_log("Failed to create simple variation: " . json_encode($variation));
+            }
+        }
+    }
 }
 
 
+// price 
 
 http_response_code(200);
 echo json_encode([

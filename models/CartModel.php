@@ -10,7 +10,7 @@ class CartModel
     }
 
 
-    public function addToCart($userId, $productId, $quantity, $storeId)
+    public function addToCart($userId, $productId, $quantity, $storeId, $variationId)
     {
 
         $check = $this->db->prepare("SELECT cart_id, quantity FROM cart WHERE user_id = ? AND product_id = ?");
@@ -28,12 +28,11 @@ class CartModel
             return $update->execute();
         } else {
 
-            $stmt = $this->db->prepare("INSERT INTO cart (user_id, product_id, quantity, store_id) VALUES (?, ?, ?, ?)");
-            $stmt->bind_param("siii", $userId, $productId, $quantity, $storeId);
+            $stmt = $this->db->prepare("INSERT INTO cart (user_id, product_id, quantity, store_id, variation_id) VALUES (?, ?, ?, ?, ?)");
+            $stmt->bind_param("siiii", $userId, $productId, $quantity, $storeId, $variationId);
             return $stmt->execute();
         }
     }
-
     public function getCartItems($userId)
     {
         $stmt = $this->db->prepare("
@@ -49,10 +48,17 @@ class CartModel
             pi.image_url AS product_image,
             sp.store_id,   
             sp.store_name,
-            ROUND(pph.price * (1 + ip.profit_margin / 100), 2) AS selling_price,
-            pph.currency,
             ip.profit_margin,
-            pph.price AS base_price
+            c.variation_id,
+            pvs.size,
+            pvs.color,
+            pvs.weight,
+            pvs.length,
+            pvs.width,
+            pvs.height,
+            pvs.price AS base_price,
+            pvs.currency,
+            ROUND(pvs.price * (1 + ip.profit_margin / 100), 2) AS selling_price
         FROM cart c
         JOIN imported_product ip 
             ON c.product_id = ip.product_id 
@@ -61,27 +67,21 @@ class CartModel
             ON ip.product_id = p.product_id
         JOIN store_profile sp 
             ON c.store_id = sp.store_id
-        JOIN (
-            SELECT 
-                product_id, 
-                price, 
-                currency,
-                ROW_NUMBER() OVER (PARTITION BY product_id ORDER BY change_date DESC) as rn
-            FROM product_price_history
-        ) pph ON p.product_id = pph.product_id AND pph.rn = 1
+        JOIN product_variations_simple pvs 
+            ON c.variation_id = pvs.variation_id
         LEFT JOIN product_images pi 
             ON p.product_id = pi.product_id 
             AND pi.is_primary = 1
         WHERE c.user_id = ?
-    ");
+        ");
         $stmt->bind_param("s", $userId);
         $stmt->execute();
         $result = $stmt->get_result();
-
+    
         $groupedItems = [];
         while ($row = $result->fetch_assoc()) {
             $storeId = $row['store_id'];
-
+    
             if (!isset($groupedItems[$storeId])) {
                 $groupedItems[$storeId] = [
                     'store_id' => $storeId,
@@ -89,12 +89,12 @@ class CartModel
                     'items' => []
                 ];
             }
-
+    
             $item = $row;
             unset($item['store_id'], $item['store_name']);
             $groupedItems[$storeId]['items'][] = $item;
         }
-
+    
         return array_values($groupedItems);
     }
 

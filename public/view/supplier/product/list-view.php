@@ -156,7 +156,7 @@
                 </table>
 
                 <div class="mt-4">
-    
+
                     <canvas id="priceChart" height="100"></canvas>
                 </div>
             </div>
@@ -225,15 +225,34 @@
                                 <p><strong>SKU:</strong> <span id="productSku"></span></p>
                                 <p><strong>Category:</strong> <span id="productCategory"></span></p>
                                 <p><strong>Status:</strong> <span id="status"></span></p>
-                                <p><strong>Warehouse:</strong> <span id="warehouseName"></span></p>
-                                <p><strong>Warehouse Address:</strong> <span id="warehouseAddress"></span></p>
+      
                             </div>
                             <div class="col-md-6">
-                                <p><strong>Price:</strong> <span id="price"></span></p>
-                                <p><strong>Currency:</strong> <span id="currency"></span></p>
-                                <p><strong>Weight:</strong> <span id="productWeight"></span>g</p>
-                                <p><strong>Stock:</strong> <span id="currentStock"></span></p>
-                                <p><strong>Change Date:</strong> <span id="changeDate"></span></p>
+                                <p><strong>Total Variations:</strong> <span id="variationCount"></span></p>
+                                <p><strong>Price Range:</strong> <span id="priceRange"></span></p>
+                                <p><strong>Total Stock:</strong> <span id="totalStock"></span></p>
+                                <p><strong>Last Updated:</strong> <span id="lastUpdated"></span></p>
+                            </div>
+                        </div>
+
+                        <!-- Variations Table -->
+                        <div class="mt-4">
+                            <h6>Product Variations</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Size</th>
+                                            <th>Color</th>
+                                            <th>Price</th>
+                                            <th>Stock</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="variationsTable">
+                                        <!-- Variations will be populated here -->
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -241,6 +260,11 @@
                     <div class="col-md-4 text-center">
                         <img id="primaryImage" src="" class="img-fluid rounded mb-3" style="max-height: 300px;">
                         <p class="text-muted"><small>Primary Image</small></p>
+                        
+                        <!-- Additional Images -->
+                        <div id="additionalImages" class="mt-3">
+                            <!-- Additional images will be populated here -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -380,36 +404,102 @@
 
                 const modal = new bootstrap.Modal(document.getElementById('productModal'));
 
+                // Basic product info
                 document.getElementById('productModalLabel').textContent = data.product_name || 'No Name';
                 document.getElementById('productNameEn').textContent = data.product_name || '—';
-
                 document.getElementById('productDescription').textContent = data.description || '—';
                 document.getElementById('productSku').textContent = data.product_sku || '—';
-
-
                 document.getElementById('productCategory').textContent = data.category_name || '—';
                 document.getElementById('status').textContent = data.status || '—';
 
+                // Handle variations
+                const variations = data.variations || [];
+                document.getElementById('variationCount').textContent = variations.length;
 
-                document.getElementById('warehouseName').textContent = data.warehouse_name || '—';
-                document.getElementById('warehouseAddress').textContent = data.warehouse_address || '—';
+                // Calculate price range and total stock
+                if (variations.length > 0) {
+                    const prices = variations.map(v => parseFloat(v.price)).filter(p => !isNaN(p));
+                    const minPrice = Math.min(...prices);
+                    const maxPrice = Math.max(...prices);
+                    const totalStock = variations.reduce((sum, v) => sum + (parseInt(v.stock_quantity) || 0), 0);
 
+                    document.getElementById('priceRange').textContent =
+                        minPrice === maxPrice ?
+                        `${minPrice} ${variations[0].currency}` :
+                        `${minPrice} - ${maxPrice} ${variations[0].currency}`;
 
-                document.getElementById('price').textContent = data.price || '0.00';
-                document.getElementById('currency').textContent = data.currency || '—';
-                document.getElementById('productWeight').textContent = data.product_weight || '—';
+                    document.getElementById('totalStock').textContent = totalStock;
 
+                    // Find latest update date
+                    const latestUpdate = variations.reduce((latest, v) => {
+                        const updateDate = new Date(v.updated_at);
+                        return updateDate > latest ? updateDate : latest;
+                    }, new Date(0));
 
-                document.getElementById('currentStock').textContent = data.current_stock ?? 'N/A';
-                document.getElementById('changeDate').textContent = data.change_date || '—';
+                    document.getElementById('lastUpdated').textContent =
+                        latestUpdate > new Date(0) ? latestUpdate.toLocaleDateString() : '—';
 
+                    // Populate variations table
+                    populateVariationsTable(variations);
+                } else {
+                    document.getElementById('priceRange').textContent = '—';
+                    document.getElementById('totalStock').textContent = '0';
+                    document.getElementById('lastUpdated').textContent = '—';
+                    document.getElementById('variationsTable').innerHTML = '<tr><td colspan="5" class="text-center">No variations found</td></tr>';
+                }
 
+                // Handle images
                 const imagePath = `public/images/products/${data.primary_image}`;
                 document.getElementById('primaryImage').src = imagePath;
+                populateAdditionalImages(data.images || []);
 
                 modal.show();
             }
         }).send();
+    }
+
+    function populateVariationsTable(variations) {
+        const tbody = document.getElementById('variationsTable');
+        tbody.innerHTML = '';
+
+        variations.forEach(variation => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+            <td>${variation.size || '—'}</td>
+            <td>${variation.color || '—'}</td>
+            <td>${variation.price} ${variation.currency}</td>
+            <td>${variation.stock_quantity || 0}</td>
+            <td>
+                <span class="badge ${variation.is_active == 0 ? 'bg-success' : 'bg-secondary'}">
+                    ${variation.is_active ==0 ? 'Active' : 'Inactive'}
+                </span>
+            </td>
+        `;
+            tbody.appendChild(row);
+        });
+    }
+
+    function populateAdditionalImages(images) {
+        const container = document.getElementById('additionalImages');
+        container.innerHTML = '';
+
+        if (images.length <= 1) return;
+
+        const title = document.createElement('p');
+        title.className = 'text-muted mb-2';
+        title.innerHTML = '<small>Additional Images</small>';
+        container.appendChild(title);
+
+        images.forEach((image, index) => {
+            if (index === 0) return; // Skip primary image
+
+            const img = document.createElement('img');
+            img.src = `public/images/products/${image}`;
+            img.className = 'img-thumbnail me-2 mb-2';
+            img.style = 'width: 80px; height: 80px; object-fit: cover;';
+            img.alt = `Product image ${index + 1}`;
+            container.appendChild(img);
+        });
     }
 
     async function viewProductHistory(productId) {
@@ -448,7 +538,7 @@
                     tbody.appendChild(row);
                 });
 
-   
+
                 const today = new Date();
                 const startDate = new Date(today);
                 startDate.setDate(today.getDate() - 10);
@@ -457,7 +547,7 @@
                 const start = formatDate(startDate);
                 const end = formatDate(today);
 
-                const fastForexApiKey = 'c76481541c-ec31d17071-t04ftg'; 
+                const fastForexApiKey = 'c76481541c-ec31d17071-t04ftg';
                 const url = `https://api.fastforex.io/time-series?from=${currency}&to=PHP&start=${start}&end=${end}&api_key=${fastForexApiKey}`;
 
                 let labels = [];
@@ -481,7 +571,7 @@
                     console.error("Failed to fetch time-series data from FastForex:", e);
                 }
 
-        
+
                 const chartCanvas = document.getElementById('priceChart');
                 if (chartCanvas) {
                     const ctx = chartCanvas.getContext('2d');

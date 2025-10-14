@@ -16,7 +16,7 @@
     $currentRoute = $_GET['request'] ?? 'home';
 
 
-    $hideTopBarRoutes = ['login', 'register', 'forgot-password', 'confirm-otp', 'reset-password', 'home', '', 'shop', 'about'];
+    $hideTopBarRoutes = ['login', 'register', 'forgot-password', 'confirm-otp', 'reset-password', 'home', '', 'shop', 'about', 'verify-email'];
     if (!in_array($currentRoute, $hideTopBarRoutes)) {
         include 'public/view/components/header.php';
         include 'public/view/components/aside.php';

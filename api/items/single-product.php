@@ -50,7 +50,6 @@ if (empty($store_id)) {
     exit;
 }
 
-
 $product = $productModel->get_single_product_by_id_by_store($pid, $store_id);
 
 if (!$product || !isset($product['product_id'])) {
@@ -63,8 +62,98 @@ if (!$product || !isset($product['product_id'])) {
     exit;
 }
 
+// Get variations for the product with inventory data
+$variations = $productModel->get_product_variations_with_inventory($pid);
 
-if (empty($product['current_stock']) || $product['current_stock'] <= 0) {
+// Get all images for the product
+$images = $productModel->get_product_images($pid);
+
+// Prepare the response data
+$responseData = [
+    'product_id' => $product['product_id'],
+    'user_id' => $product['user_id'],
+    'product_name' => $product['product_name'],
+    'product_sku' => $product['product_sku'],
+    'product_category' => $product['category_id'],
+    'description' => $product['description'],
+    'created_at' => $product['created_at'],
+    'status' => $product['status'],
+    'updated_at' => $product['updated_at'],
+    'is_unlisted' => $product['is_unlisted'],
+    'category_name' => $product['category_name'],
+    'profit_margin' => $product['profit_margin'],
+    'image_urls' => implode(', ', $images),
+    'primary_image_url' => $product['primary_image'],
+    'variations' => [],
+    'images' => $images,
+    'primary_image' => $product['primary_image']
+];
+
+// Process variations with currency conversion
+$targetCurrency = 'PHP';
+$margin = floatval($product['profit_margin'] ?? 0);
+
+foreach ($variations as $variation) {
+    $sourceCurrency = strtoupper($variation['currency']);
+    
+    if ($sourceCurrency !== $targetCurrency) {
+        $apiUrl = "https://open.er-api.com/v6/latest/USD";
+        $response = @file_get_contents($apiUrl);
+        
+        if ($response) {
+            $exchangeData = json_decode($response, true);
+            $rates = $exchangeData['rates'] ?? [];
+            
+            if (isset($rates[$targetCurrency], $rates[$sourceCurrency])) {
+                $conversionRate = $rates[$targetCurrency] / $rates[$sourceCurrency];
+                $convertedPrice = round($variation['price'] * $conversionRate, 2);
+            } else {
+                $convertedPrice = $variation['price'];
+            }
+        } else {
+            $convertedPrice = $variation['price'];
+        }
+    } else {
+        $convertedPrice = $variation['price'];
+    }
+    
+    $sellingPrice = round($convertedPrice + ($convertedPrice * $margin / 100), 2);
+    $unconvertedSellingPrice = round($variation['price'] + ($variation['price'] * $margin / 100), 2);
+    
+    $responseData['variations'][] = [
+        'variation_id' => $variation['variation_id'],
+        'product_id' => $variation['product_id'],
+        'size' => $variation['size'],
+        'color' => $variation['color'],
+        'weight' => $variation['weight'],
+        'length' => $variation['length'],
+        'width' => $variation['width'],
+        'height' => $variation['height'],
+        'price' => $variation['price'],
+        'currency' => $variation['currency'],
+        'sku_suffix' => $variation['sku_suffix'],
+        'stock_quantity' => $variation['quantity'], // From inventory table
+        'is_active' => $variation['is_active'],
+        'created_at' => $variation['created_at'],
+        'updated_at' => $variation['updated_at'],
+        'change_date' => $variation['change_date'],
+        'converted_price' => $convertedPrice,
+        'converted_currency' => $targetCurrency,
+        'selling_price' => $sellingPrice,
+        'unconverted_selling_price' => $unconvertedSellingPrice
+    ];
+}
+
+// Check if any variation has stock
+$hasStock = false;
+foreach ($responseData['variations'] as $variation) {
+    if ($variation['stock_quantity'] > 0) {
+        $hasStock = true;
+        break;
+    }
+}
+
+if (!$hasStock) {
     http_response_code(404);
     echo json_encode([
         'status' => 'error',
@@ -74,59 +163,8 @@ if (empty($product['current_stock']) || $product['current_stock'] <= 0) {
     exit;
 }
 
-
-$targetCurrency = 'PHP';
-$sourceCurrency = strtoupper($product['currency']);
-
-if ($sourceCurrency !== $targetCurrency) {
-    $apiUrl = "https://open.er-api.com/v6/latest/USD";
-    $response = @file_get_contents($apiUrl);
-
-    if (!$response) {
-        http_response_code(500);
-        echo json_encode([
-            'status' => 'error',
-            'message' => 'Failed to fetch exchange rates.',
-            'http_code' => 500
-        ]);
-        exit;
-    }
-
-    $exchangeData = json_decode($response, true);
-    $rates = $exchangeData['rates'] ?? [];
-
-    if (!isset($rates[$targetCurrency], $rates[$sourceCurrency])) {
-        http_response_code(500);
-        echo json_encode([
-            'status' => 'error',
-            'message' => 'Missing exchange rate data.',
-            'http_code' => 500
-        ]);
-        exit;
-    }
-
-    $conversionRate = $rates[$targetCurrency] / $rates[$sourceCurrency];
-    $convertedPrice = round($product['price'] * $conversionRate, 2);
-} else {
-    $convertedPrice = $product['price'];
-}
-
-
-$product['converted_currency'] = $targetCurrency;
-$product['converted_price'] = $convertedPrice;
-
-
-$margin = floatval($product['profit_margin'] ?? 0);
-if (is_numeric($convertedPrice)) {
-    $product['selling_price'] = round($convertedPrice + ($convertedPrice * $margin / 100), 2);
-} else {
-    $product['selling_price'] = null;
-}
-
-
 echo json_encode([
     'status' => 'success',
-    'message' => 'Product retrieved successfully.',
-    'data' => $product,
+    'data' => $responseData,
     'http_code' => 200
 ]);

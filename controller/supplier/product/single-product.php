@@ -1,15 +1,17 @@
 <?php
 
 
+header('Content-Type: application/json; charset=utf-8');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST, GET, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, Origin, Accept');
+
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     http_response_code(405);
     echo json_encode(['status' => 'error', 'message' => 'Method Not Allowed. Use GET to retrieve product data.', 'http_code' => 405]);
     exit;
 }
-
-
-
 
 $pid = isset($_GET['pid']) ? trim($_GET['pid']) : '';
 if (empty($pid)) {
@@ -18,7 +20,14 @@ if (empty($pid)) {
     exit;
 }
 
-$data = $productModel->get_single_product_by_id($pid);
+$user_id = isset($_SESSION['auth']['user_id']) ? $_SESSION['auth']['user_id'] : null;
+if (!$user_id) {
+    http_response_code(401);
+    echo json_encode(['status' => 'error', 'message' => 'Unauthorized. Please log in.', 'http_code' => 401]);
+    exit;
+}
+
+$data = $supplierProductModel->get_single_product_by_supplier($pid, $user_id);
 if (!$data) {
     http_response_code(404);
     echo json_encode(['status' => 'error', 'message' => 'Product not found.', 'http_code' => 404]);

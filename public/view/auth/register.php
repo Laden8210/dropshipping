@@ -22,9 +22,9 @@
     <section class="p-1">
 
       <div class="container d-flex justify-content-center align-align-items-start" style="min-height: 60vh;">
-        <div class="auth-container" style="width: 100%; max-width: 400px;">
+        <div class="auth-container" style="width: 100%; max-width: 500px;">
           <div class="card-body">
-            <h5 class="card-title text-center mb-4">Login</h5>
+            <h5 class="card-title text-center mb-4">Register</h5>
             <form action="controller/auth/index.php?action=register" method="POST" id="auth-form">
 
               <!-- First Name Field -->
@@ -57,6 +57,7 @@
                   <i class="fas fa-phone"></i>
                 </div>
                 <input type="text" name="phone_number" id="phoneNumber" placeholder="Phone Number" required />
+                
               </div>
 
               <!-- User type -->
@@ -65,7 +66,7 @@
 
                 <select name="role" id="role" required class="form-select">
                   <option value="" disabled selected>Select User Type</option>
-                  <option value="user">User</option>
+                  <option value="user">Business Owner</option>
                   <option value="supplier">Supplier</option>
 
                   <option value="courier">Courier</option>
@@ -87,6 +88,12 @@
 
 
               <input type="submit" class="btn btn-login w-100 mb-3" value="Register" name="Register" id="submit-btn" />
+              
+              <div class="alert alert-info mt-3" role="alert">
+                <i class="fas fa-info-circle me-2"></i>
+                <small>After registration, you'll receive an email to verify your account.</small>
+              </div>
+              
               <div class="text-center mb-3">
                 <p class="or">or</p>
               </div>

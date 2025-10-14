@@ -63,6 +63,12 @@ if ($store_logo_url && $store_logo_url['error'] === UPLOAD_ERR_OK) {
     exit;
 }
 
+if($storeProfileModel->isStoreNameExists($_SESSION['auth']['user_id'], $store_name)) {
+    http_response_code(400);
+    echo json_encode(['status' => 'error', 'message' => 'Store name already exists.', 'http_code' => 400]);
+    exit;
+}
+
 $uploadDir = '../../../public/images/store/';
 if (!is_dir($uploadDir)) {
     mkdir($uploadDir, 0755, true);

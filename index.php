@@ -64,6 +64,16 @@ try {
             'file' => 'google/redirect.php',
             'title' => 'Redirect'
         ],
+        'reset-password' => [   
+            'auth_required' => false,
+            'file' => 'auth/reset-password.php',
+            'title' => 'Reset Password'
+        ],
+        'verify-email' => [
+            'auth_required' => false,
+            'file' => 'auth/verify-email.php',
+            'title' => 'Verify Email'
+        ],
 
 
         'dashboard' => [

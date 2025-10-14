@@ -59,14 +59,14 @@ class Inventory
         return $updateStmt->execute();
     }
 
-    public function addStockMovement($product_id, $quantity, $movement_type, $reason = null)
+    public function addStockMovement($product_id, $variation_id, $quantity, $movement_type, $reason = null)
     {
         $this->db->begin_transaction();
 
         try {
 
-            $stmt = $this->db->prepare("SELECT inventory_id, quantity FROM inventory WHERE product_id = ?");
-            $stmt->bind_param("i", $product_id);
+            $stmt = $this->db->prepare("SELECT inventory_id, quantity FROM inventory WHERE product_id = ? AND variation_id = ?");
+            $stmt->bind_param("ii", $product_id, $variation_id);
             $stmt->execute();
             $result = $stmt->get_result();
             $inventory = $result->fetch_assoc();
@@ -75,8 +75,8 @@ class Inventory
 
                 $new_quantity = ($movement_type === 'in') ? $quantity : 0;
 
-                $stmt = $this->db->prepare("INSERT INTO inventory (product_id, quantity) VALUES (?, ?)");
-                $stmt->bind_param("ii", $product_id, $new_quantity);
+                $stmt = $this->db->prepare("INSERT INTO inventory (product_id, variation_id, quantity) VALUES (?, ?, ?)");
+                $stmt->bind_param("iii", $product_id, $variation_id, $new_quantity);
                 $stmt->execute();
 
                 $inventory_id = $this->db->insert_id;

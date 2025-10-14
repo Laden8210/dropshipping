@@ -11,6 +11,9 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, GET, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, Origin, Accept');
 
+require_once '../../core/config.php';
+require_once '../../models/index.php';
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(['status' => 'error', 'message' => 'Request method must be POST', 'http_code' => 405]);
@@ -47,7 +50,20 @@ if (!$user) {
     exit;
 }
 
-if ($user['password'] !==  $password) {
+// Check if email is verified (only for non-Google auth users)
+if (!$user['is_google_auth'] && !$user['is_email_verified']) {
+    http_response_code(403);
+    echo json_encode([
+        'status' => 'error', 
+        'message' => 'Please verify your email before logging in. Check your inbox for a verification link.',
+        'http_code' => 403,
+        'email_verification_required' => true
+    ]);
+    exit;
+}
+
+// Verify password
+if (!password_verify($password, $user['password'])) {
     http_response_code(401);
     echo json_encode(['status' => 'error', 'message' => 'Invalid password', 'http_code' => 401]);
     exit;
