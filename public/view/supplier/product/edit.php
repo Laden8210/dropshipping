@@ -441,7 +441,9 @@
                 const variationGroups = document.querySelectorAll('.variation-group');
 
                 variationGroups.forEach(group => {
-                    const variationId = group.querySelector('.variation-id').value || 0;
+                    const variationIdElement = group.querySelector('.variation-id');
+                    const variationId = variationIdElement ? variationIdElement.value : 0;
+
                     console.log('variationId', variationId);
                     const size = group.querySelector('.variation-size').value;
                     const color = group.querySelector('.variation-color').value;
@@ -521,7 +523,9 @@
             const variationGroups = document.querySelectorAll('.variation-group');
 
             variationGroups.forEach(group => {
-                const variationId = group.querySelector('.variation-id').value || 0;
+                const variationIdElement = group.querySelector('.variation-id');
+                const variationId = variationIdElement ? variationIdElement.value : 0;
+
                 const size = group.querySelector('.variation-size').value;
                 const color = group.querySelector('.variation-color').value;
                 const weight = group.querySelector('.variation-weight').value;
