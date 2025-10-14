@@ -441,7 +441,7 @@
                 const variationGroups = document.querySelectorAll('.variation-group');
 
                 variationGroups.forEach(group => {
-                    const variationId = group.querySelector('.variation-id').value;
+                    const variationId = group.querySelector('.variation-id').value || 0;
                     console.log('variationId', variationId);
                     const size = group.querySelector('.variation-size').value;
                     const color = group.querySelector('.variation-color').value;
