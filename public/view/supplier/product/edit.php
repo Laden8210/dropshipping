@@ -267,15 +267,26 @@
                             </div>
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <label for="product_image" class="form-label">Primary Image</label>
                             <input class="form-control" type="file" id="product_image" name="product_image" accept="image/*">
                         </div>
 
                         <div class="col-12">
+                            <label class="form-label d-block">Preview Primary Images</label>
+                            <div class="preview-area" id="image-preview-primary">
+                                <p class="text-muted text-center my-4">No images selected</p>
+                            </div>
+                        </div>
+
+
+                        <div class="col-12">
                             <label for="product_images" class="form-label">Product Images (You can select multiple)</label>
                             <input class="form-control" type="file" id="product_images" name="product_images[]" accept="image/*" multiple>
                         </div>
+
+
+
 
                         <div class="col-12">
                             <label class="form-label d-block">Preview Selected Images</label>
@@ -372,6 +383,40 @@
                 const files = Array.from(event.target.files);
                 selectedFiles = selectedFiles.concat(files);
                 renderPreviews();
+            });
+
+            document.getElementById('product_image').addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                const previewPrimary = document.getElementById('image-preview-primary');
+                previewPrimary.innerHTML = '';
+
+                if (!file) {
+                    previewPrimary.innerHTML = '<p class="text-muted text-center my-4">No images selected</p>';
+                    return;
+                }
+
+                const wrapper = document.createElement('div');
+                wrapper.classList.add('preview-container');
+                wrapper.style.display = 'inline-block';
+                wrapper.style.margin = '8px';
+                wrapper.style.position = 'relative';
+
+                const img = document.createElement('img');
+                img.classList.add('preview-img');
+                img.style.maxWidth = '120px';
+                img.style.maxHeight = '120px';
+                img.style.objectFit = 'cover';
+                img.style.border = '1px solid #ddd';
+                img.style.borderRadius = '6px';
+                img.style.display = 'block';
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    img.src = e.target.result;
+                    wrapper.appendChild(img);
+                    previewPrimary.appendChild(wrapper);
+                };
+                reader.readAsDataURL(file);
             });
 
             function renderPreviews() {
@@ -572,6 +617,57 @@
                     document.getElementById('status').value = product.status;
                     document.getElementById('description').value = product.description || '';
                     document.getElementById('is_unlisted').checked = product.is_unlisted == 1;
+                    const image_urls = product.image_urls;
+                    document.getElementById('image-preview').innerHTML = '';
+
+                    if (image_urls && image_urls.length > 0) {
+                        // Split into an array and remove extra spaces
+                        const imageList = image_urls.split(',').map(url => url.trim());
+
+                        imageList.forEach(image => {
+                            const wrapper = document.createElement('div');
+                            wrapper.classList.add('preview-container');
+                            wrapper.style.display = 'inline-block';
+                            wrapper.style.margin = '8px';
+
+                            const img = document.createElement('img');
+                            img.classList.add('preview-img');
+                            img.style.maxWidth = '120px';
+                            img.style.maxHeight = '120px';
+                            img.style.objectFit = 'cover';
+                            img.style.border = '1px solid #ddd';
+                            img.style.borderRadius = '6px';
+                            img.style.display = 'block';
+
+                            img.src = "public/images/products/" + image;
+
+                            wrapper.appendChild(img);
+
+                            document.getElementById('image-preview').appendChild(wrapper);
+                        });
+                    }
+
+
+
+                    const primary_image_url = product.primary_image_url;
+                    if (primary_image_url) {
+                        const wrapper = document.createElement('div');
+                        wrapper.classList.add('image-preview-primary');
+                        wrapper.style.display = 'inline-block';
+                        wrapper.style.margin = '8px';
+                        const img = document.createElement('img');
+                        img.classList.add('preview-img');
+                        img.style.maxWidth = '120px';
+                        img.style.maxHeight = '120px';
+                        img.style.objectFit = 'cover';
+                        img.style.border = '1px solid #ddd';
+                        img.style.borderRadius = '6px';
+                        img.style.display = 'block';
+                        img.src = "public/images/products/" + primary_image_url;
+                        wrapper.appendChild(img);
+                        document.getElementById('image-preview-primary').innerHTML = '';
+                        document.getElementById('image-preview-primary').appendChild(wrapper);
+                    }
 
                     // Load variations
                     if (product.variations && product.variations.length > 0) {

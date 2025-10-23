@@ -54,7 +54,7 @@ if (!$user) {
 if (!$user['is_google_auth'] && !$user['is_email_verified']) {
     http_response_code(403);
     echo json_encode([
-        'status' => 'error', 
+        'status' => 'error',
         'message' => 'Please verify your email before logging in. Check your inbox for a verification link.',
         'http_code' => 403,
         'email_verification_required' => true
@@ -69,13 +69,7 @@ if (!password_verify($password, $user['password'])) {
     exit;
 }
 
-if($user['role'] === 'user') {
-    $store_profile = $storeProfileModel->getStoresByUser($user['user_id']);
-    if(count($store_profile) != 0) {
-        $_SESSION['auth']['store_id'] = $store_profile[0]['store_id'];
-    }
-    
-}
+
 
 $_SESSION['auth'] = [
     'user_id' => $user['user_id'],
@@ -83,6 +77,13 @@ $_SESSION['auth'] = [
     'ip_address' => $_SERVER['REMOTE_ADDR'],
     'user_agent' => $_SERVER['HTTP_USER_AGENT']
 ];
+
+if ($user['role'] === 'user') {
+    $store_profile = $storeProfileModel->getFirstStoreByUser($user['user_id']);
+
+    $_SESSION['auth']['store_id'] = $store_profile['store_id'];
+  
+}
 
 http_response_code(200);
 

@@ -27,6 +27,7 @@ try {
         exit;
     }
 
+
     $routes = [
 
         '' => [
@@ -64,7 +65,7 @@ try {
             'file' => 'google/redirect.php',
             'title' => 'Redirect'
         ],
-        'reset-password' => [   
+        'reset-password' => [
             'auth_required' => false,
             'file' => 'auth/reset-password.php',
             'title' => 'Reset Password'
@@ -113,7 +114,7 @@ try {
                 'title' => 'Order Management'
             ],
             'supplier' => [
-            'file' => 'supplier/orders/index.php',
+                'file' => 'supplier/orders/index.php',
                 'title' => 'Supplier Orders'
             ]
         ],
@@ -163,6 +164,8 @@ try {
             ]
         ],
 
+
+
         // User-only routes
         'product-import' => [
             'auth_required' => true,
@@ -204,7 +207,7 @@ try {
         => [
             'auth_required' => true,
             'user' => [
-                'file' => 'user/store/create.php',
+                'file' => 'user/store/index.php',
                 'title' => 'Create Store'
             ]
         ],
@@ -308,6 +311,23 @@ try {
         $user = $userModel->getCurrentUser();
         $role = $user['role'];
         $name = $user['first_name'] . ' ' . $user['last_name'];
+
+        if ($role === 'user') {
+
+            $sql = "SELECT COUNT(*) as store_count FROM store_profile WHERE user_id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('s', $_SESSION['auth']['user_id']);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $row = $result->fetch_assoc();
+            $storeCount = isset($row['store_count']) ? (int) $row['store_count'] : 0;
+            $requestName = isset($request) ? (string) $request : '';
+   
+            if ($storeCount === 0) {
+                header('Location: create-store');
+                exit;
+            }
+        }
 
         // Role-based view selection
         if (!isset($route[$role])) {

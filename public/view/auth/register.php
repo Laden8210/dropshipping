@@ -97,11 +97,7 @@
               <div class="text-center mb-3">
                 <p class="or">or</p>
               </div>
-              <div class="text-center mb-3">
-                <a href="<?php echo $url ?>" class="btn btn-outline-danger w-100">
-                  <i class="fab fa-google me-2"></i>Register with Google
-                </a>
-              </div>
+        
               <div class="text-center links">
                 <p class="mb-1">Already have an account?</p>
                 <a href="login" class="btn btn-link p-0">Log In</a>

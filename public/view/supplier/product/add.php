@@ -1,7 +1,12 @@
     <div class="main-container" id="main-container">
         <div class="card mb-4">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 text-white"><i class="fas fa-plus me-2"></i>Add New Product</h5>
+                <h5 class="mb-0 "><i class="fas fa-plus me-2"></i>Add New Product</h5>
+
+
+                <button class="btn btn-outline-secondary btn-sm" onclick="window.history.back();">
+                    <i class="fas fa-arrow-left me-1"></i>Back
+                </button>
             </div>
             <div class="card-body">
                 <form id="add-product-form" enctype="multipart/form-data">
@@ -23,7 +28,7 @@
                             </select>
                         </div>
 
-                   
+
                         <div class="col-md-6">
                             <label for="currency" class="form-label">Currency</label>
                             <select class="form-select" id="currency" name="currency">
@@ -273,10 +278,18 @@
                             </div>
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <label for="product_image" class="form-label">Primary Image</label>
                             <input class="form-control" type="file" id="product_image" name="product_image" accept="image/*" required>
                         </div>
+
+                        <div class="col-12">
+                            <label class="form-label d-block">Preview Primary Images</label>
+                            <div class="preview-area" id="image-preview-primary">
+                                <p class="text-muted text-center my-4">No images selected</p>
+                            </div>
+                        </div>
+
 
                         <div class="col-12">
                             <label for="product_images" class="form-label">Product Images (You can select multiple)</label>
@@ -291,6 +304,7 @@
                         </div>
 
                         <div class="col-12 text-end mt-4">
+
                             <button type="submit" class="btn btn-success">
                                 <i class="fas fa-save me-2"></i>Save Product
                             </button>
@@ -319,11 +333,11 @@
                 formData.append('currency', document.getElementById('currency').value);
                 formData.append('status', document.getElementById('status').value);
                 formData.append('description', document.getElementById('description').value);
-                
-                
+
+
                 // Append unlisted status
                 formData.append('is_unlisted', document.getElementById('is_unlisted').checked ? '1' : '0');
-                
+
                 // Append variations
                 const variations = collectVariations();
                 if (variations.length > 0) {
@@ -381,6 +395,40 @@
                 const files = Array.from(event.target.files);
                 selectedFiles = selectedFiles.concat(files);
                 renderPreviews();
+            });
+
+            document.getElementById('product_image').addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                const previewPrimary = document.getElementById('image-preview-primary');
+                previewPrimary.innerHTML = '';
+
+                if (!file) {
+                    previewPrimary.innerHTML = '<p class="text-muted text-center my-4">No images selected</p>';
+                    return;
+                }
+
+                const wrapper = document.createElement('div');
+                wrapper.classList.add('preview-container');
+                wrapper.style.display = 'inline-block';
+                wrapper.style.margin = '8px';
+                wrapper.style.position = 'relative';
+
+                const img = document.createElement('img');
+                img.classList.add('preview-img');
+                img.style.maxWidth = '120px';
+                img.style.maxHeight = '120px';
+                img.style.objectFit = 'cover';
+                img.style.border = '1px solid #ddd';
+                img.style.borderRadius = '6px';
+                img.style.display = 'block';
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    img.src = e.target.result;
+                    wrapper.appendChild(img);
+                    previewPrimary.appendChild(wrapper);
+                };
+                reader.readAsDataURL(file);
             });
 
             function renderPreviews() {
@@ -488,7 +536,7 @@
                     </div>
                 `;
                 container.appendChild(newRow);
-                
+
                 // Add remove functionality
                 newRow.querySelector('.remove-variation').addEventListener('click', function() {
                     newRow.remove();
@@ -498,7 +546,7 @@
             function collectVariations() {
                 const variations = [];
                 const variationGroups = document.querySelectorAll('.variation-group');
-                
+
                 variationGroups.forEach(group => {
                     const size = group.querySelector('.variation-size').value;
                     const color = group.querySelector('.variation-color').value;
@@ -507,7 +555,7 @@
                     const width = group.querySelector('.variation-width').value;
                     const height = group.querySelector('.variation-height').value;
                     const price = group.querySelector('.variation-price').value;
-                    
+
                     // Only add variation if at least size or color is provided
                     if (size || color) {
                         variations.push({
@@ -521,7 +569,7 @@
                         });
                     }
                 });
-                
+
                 return variations;
             }
         });

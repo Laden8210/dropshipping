@@ -47,6 +47,22 @@ class StoreProfile
         return $stores;
     }
 
+    public function getFirstStoreByUser($user_id)
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM store_profile WHERE user_id = ? ORDER BY created_at ASC LIMIT 1");
+        $stmt->bind_param("s", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->fetch_assoc();
+    }
+
+    public function updateStoreStatus($store_id, $store_status)
+    {
+        $stmt = $this->conn->prepare("UPDATE store_profile SET status = ? WHERE store_id = ?");
+        $stmt->bind_param("si", $store_status, $store_id);
+        return $stmt->execute();
+    }
+
 
     public function getStoreById($store_id)
     {

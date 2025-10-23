@@ -194,6 +194,7 @@
                                 <th>Email</th>
                                 <th>Phone</th>
                                 <th>Status</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -302,13 +303,38 @@
 
 </div>
 
+// modal for updating store status
+<div class="modal fade" id="updateStatusModal" tabindex="-1" aria-labelledby="updateStatusModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateStatusModalLabel">Update Store Status</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="update-status-form" action="controller/user/store-profile/index.php?action=update-store-status" method="POST">
+                    <input type="hidden" id="store_id" name="store_id">
+                    <div class="mb-3">
+                        <label for="store_status" class="form-label">Status</label>
+                        <select class="form-select" id="store_status" name="store_status">
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="update-btn">Update Status</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     const request = new GetRequest({
         getUrl: "controller/user/store-profile/index.php?action=get-stores",
         params: {},
         showLoading: false,
         showSuccess: false,
-    
+
         callback: (err, res) => {
             if (err) {
                 console.error("Error fetching store details:", err);
@@ -318,7 +344,7 @@
             const stores = res || [];
 
 
-  
+
             const tbody = document.querySelector('#warehouse .table tbody');
             tbody.innerHTML = '';
 
@@ -337,6 +363,12 @@
                         ${store.status === 'active' ? 'Active' : 'Inactive'}
                     </span>
                 </td>
+                <td>
+               
+                    <button class="btn btn-sm btn-outline-primary" onclick="updateStatus(${store.store_id})">
+                        Update Status
+                    </button>
+                </td>
             `;
                 tbody.appendChild(row);
             });
@@ -350,6 +382,23 @@
         loadUserProfile();
     });
 
+    function updateStatus(storeId) {
+        console.log("Updating status for store ID:", storeId);
+        const updateStatusModal = new bootstrap.Modal(document.getElementById('updateStatusModal'));
+        document.getElementById('store_id').value = storeId;
+        
+        updateStatusModal.show();
+    }
+
+    const createRequest = new CreateRequest({
+        formSelector: "#update-status-form",
+        submitButtonSelector: "#update-btn",
+        callback: (err, res) => err ? console.error("Form submission error:", err) : console.log(
+            "Form submitted successfully:", res),
+        confirmationRequired: true,
+        confirmationMessage: "Are you sure you want to update the store status?",
+    });
+
     function loadUserProfile() {
         new GetRequest({
             getUrl: 'controller/user/settings/get-profile.php',
@@ -361,7 +410,7 @@
                     console.error('Error loading profile:', err);
                     return;
                 }
-                
+
                 if (data) {
                     // Display profile information
                     document.getElementById('display-first-name').textContent = data.first_name || 'Not provided';
@@ -370,13 +419,13 @@
                     document.getElementById('display-phone').textContent = data.phone_number || 'Not provided';
                     document.getElementById('display-birth-date').textContent = data.birth_date || 'Not provided';
                     document.getElementById('display-gender').textContent = data.gender ? data.gender.charAt(0).toUpperCase() + data.gender.slice(1) : 'Not provided';
-                    document.getElementById('display-status').innerHTML = data.is_active ? 
-                        '<span class="badge bg-success">Active</span>' : 
+                    document.getElementById('display-status').innerHTML = data.is_active ?
+                        '<span class="badge bg-success">Active</span>' :
                         '<span class="badge bg-danger">Inactive</span>';
-                    document.getElementById('display-email-verified').innerHTML = data.is_email_verified ? 
-                        '<span class="badge bg-success">Verified</span>' : 
+                    document.getElementById('display-email-verified').innerHTML = data.is_email_verified ?
+                        '<span class="badge bg-success">Verified</span>' :
                         '<span class="badge bg-warning">Unverified</span>';
-                    document.getElementById('display-created-at').textContent = data.created_at ? 
+                    document.getElementById('display-created-at').textContent = data.created_at ?
                         new Date(data.created_at).toLocaleDateString() : 'Not available';
 
                     // Populate edit form
@@ -386,7 +435,7 @@
                     document.getElementById('phone_number').value = data.phone_number || '';
                     document.getElementById('birth_date').value = data.birth_date || '';
                     document.getElementById('gender').value = data.gender || 'male';
-                 //   document.getElementById('avatar_url').value = data.avatar_url || '';
+                    //   document.getElementById('avatar_url').value = data.avatar_url || '';
                 }
             }
         }).send();
@@ -395,7 +444,7 @@
     function toggleProfileEdit() {
         const displayCard = document.getElementById('profile-display');
         const editCard = document.getElementById('profile-edit');
-        
+
         if (editCard.style.display === 'none') {
             displayCard.style.display = 'none';
             editCard.style.display = 'block';
@@ -408,13 +457,13 @@
     // Handle profile form submission
     document.getElementById('profileForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        
+
         const formData = new FormData(this);
         const params = {};
         for (let [key, value] of formData.entries()) {
             params[key] = value;
         }
-        
+
         new PostRequest({
             postUrl: 'controller/user/settings/update-profile.php',
             params: params,
@@ -432,13 +481,13 @@
     // Handle password form submission
     document.getElementById('passwordForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        
+
         const formData = new FormData(this);
         const params = {};
         for (let [key, value] of formData.entries()) {
             params[key] = value;
         }
-        
+
         new PostRequest({
             postUrl: 'controller/user/settings/change-password.php',
             params: params,

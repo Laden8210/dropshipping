@@ -30,6 +30,8 @@ switch ($request) {
             include_once 'reset-password.php';
         } elseif (isset($_GET['action']) && $_GET['action'] === 'verify-email') {
             include_once 'verify-email.php';
+        } elseif (isset($_GET['action']) && $_GET['action'] === 'setup-store') {
+            include_once 'setup-store.php';
         } else {
             http_response_code(400);
             echo json_encode(['error' => 'Invalid action',]);

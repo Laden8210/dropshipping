@@ -1,17 +1,4 @@
-  <?php
 
-  $client = new Google\Client();
-  $client->setClientId('408096805493-cfatjhsa5q0aubs53d6862d2ccdjs76u.apps.googleusercontent.com');
-  $client->setClientSecret('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');
-  $client->setRedirectUri('http://localhost/dropshipping/redirect');
-  $client->setState('login');
-  $client->addScope('email');
-  $client->addScope('profile');
-
-  $url = $client->createAuthUrl();
-
-
-  ?>
   <main class="main">
     <div class="title">
       <img src="assets/img/logo.png" alt="LuzViMinDrop Logo" class="img-fluid" style="max-width: 550px;" />
@@ -46,11 +33,7 @@
               <div class="text-center mb-3">
                 <p class="or">or</p>
               </div>
-              <div class="text-center mb-3">
-                <a href="<?php echo $url ?>" class="btn btn-outline-danger w-100">
-                  <i class="fab fa-google me-2"></i>Login with Google
-                </a>
-              </div>
+        
               <div class="text-center links">
                 <p class="mb-1">Don't have an account yet?</p>
                 <a href="register" class="btn btn-link p-0">Register</a>

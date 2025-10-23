@@ -51,10 +51,13 @@ switch ($request) {
             case 'set-current-store':
                 require_once 'set-current-store.php';
                 break;
+            case 'update-store-status':
+                require_once 'update-store-status.php';
+                break;
 
             default:
                 http_response_code(404);
-                echo json_encode(['error' => 'Invalid post action']);
+                echo json_encode(['error' => 'Invalid post action', 'action' => $action]);
         }
         break;
     case 'GET':
