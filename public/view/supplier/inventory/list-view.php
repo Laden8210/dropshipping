@@ -158,11 +158,31 @@
                     <div class="col-md-4">
                         <div class="card shadow-sm border-start border-primary border-3">
                             <div class="card-body py-2 px-3">
-                                <div class="text-muted small">Total Ingoing</div>
+                                <div class="text-muted small">Total Incoming</div>
                                 <div class="text-primary fw-semibold fs-5" id="total-ingoing">0</div>
                             </div>
                         </div>
                     </div>
+
+                    <div class="col-md-4">
+                        <div class="card shadow-sm border-start border-primary border-3">
+                            <div class="card-body py-2 px-3">
+                                <div class="text-muted small">Sales</div>
+                                <div class="text-primary fw-semibold fs-5" id="total-sales">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                      <div class="col-md-4">
+                        <div class="card shadow-sm border-start border-primary border-3">
+                            <div class="card-body py-2 px-3">
+                                <div class="text-muted small">Adjustments </div>
+                                <div class="text-primary fw-semibold fs-5" id="total-adjustments">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+
 
                     <div class="col-md-4">
                         <div class="card shadow-sm border-start border-danger border-3">
@@ -475,57 +495,77 @@
         redirectUrl: 'inventory',
     });
 
-    function retrieveStockMovement(product_id) {
-        new GetRequest({
-            getUrl: "controller/supplier/inventory?action=get-stock-movement",
-            params: {
-                product_id
-            },
-            showSuccess: true,
-            callback: (err, data) => {
-
-
-
-                const stockMovementBody = document.getElementById('stock-movement-body');
-                stockMovementBody.innerHTML = '';
-
-                let currentStock = 0;
-                let totalIngoing = 0;
-                let totalOutgoing = 0;
-
-                data.forEach(movement => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${movement.movement_number}</td>
-                        <td>${movement.created_at}</td>
-                        <td><span class="badge bg-${movement.movement_type === 'in' ? 'success' : 'danger'}">${movement.movement_type === 'in' ? 'Restock' : 'Reduce Stocks'}</span></td>
-                        <td>${movement.quantity}</td>
-                        <td>${movement.price}</td>
-                        <td>${movement.reason || '-'}</td>
-                    `;
-                    stockMovementBody.appendChild(row);
-
-                    // Update totals
-                    if (movement.movement_type === 'in') {
-                        currentStock += movement.quantity;
-                        totalIngoing += movement.quantity;
-                    } else {
-                        currentStock -= movement.quantity;
-                        totalOutgoing += movement.quantity;
-                    }
-                });
-
-                // Update summary stats
-                document.getElementById('current-stock').textContent = currentStock;
-                document.getElementById('total-ingoing').textContent = totalIngoing;
-                document.getElementById('total-outgoing').textContent = totalOutgoing;
-
-                // Show the modal
-                const stockMovementModal = new bootstrap.Modal(document.getElementById('stockMovementModal'));
-                stockMovementModal.show();
+   function retrieveStockMovement(product_id, variation_id) {
+    new GetRequest({
+        getUrl: "controller/supplier/inventory?action=get-stock-movement",
+        params: {
+            product_id,
+            variation_id
+        },
+        showSuccess: true,
+        callback: (err, data) => {
+            if (err) {
+                console.error('Error fetching stock movements:', err);
+                return;
             }
-        }).send();
-    }
+
+            const stockMovementBody = document.getElementById('stock-movement-body');
+            stockMovementBody.innerHTML = '';
+
+
+            const summary = data.summary;
+            const movements = data.movements;
+
+            movements.forEach(movement => {
+                const row = document.createElement('tr');
+
+                let badgeType = '';
+                let movementLabel = '';
+                
+                if (movement.movement_type === 'in') {
+                    badgeType = 'success';
+                    movementLabel = 'Restock';
+                } else {
+                    if (movement.reason.includes('Order ID:')) {
+                        badgeType = 'primary';
+                        movementLabel = 'Sale';
+                    } else {
+                        badgeType = 'warning';
+                        movementLabel = 'Adjustment';
+                    }
+                }
+                
+                row.innerHTML = `
+                    <td>${movement.movement_number}</td>
+                    <td>${movement.created_at}</td>
+                    <td><span class="badge bg-${badgeType}">${movementLabel}</span></td>
+                    <td>${movement.quantity}</td>
+                    <td>${movement.price} ${movement.currency}</td>
+                    <td>${movement.reason || '-'}</td>
+                `;
+                stockMovementBody.appendChild(row);
+            });
+
+            // Update summary stats using backend calculations
+            document.getElementById('current-stock').textContent = summary.current_stock;
+            document.getElementById('total-ingoing').textContent = summary.total_incoming;
+            document.getElementById('total-outgoing').textContent = summary.total_outgoing;
+            
+            // Add additional summary elements if needed
+            // You can add these elements to your HTML to show sales and adjustments
+            if (document.getElementById('total-sales')) {
+                document.getElementById('total-sales').textContent = summary.total_sales;
+            }
+            if (document.getElementById('total-adjustments')) {
+                document.getElementById('total-adjustments').textContent = summary.total_adjustments;
+            }
+
+            // Show the modal
+            const stockMovementModal = new bootstrap.Modal(document.getElementById('stockMovementModal'));
+            stockMovementModal.show();
+        }
+    }).send();
+}
 
 
     onload = () => {

@@ -69,7 +69,7 @@
                         <option value="">All Statuses</option>
                         <option value="pending">Pending</option>
                         <option value="processing">Processing</option>
-                        <option value="shipped">Shipped</option>
+                        <option value="shipped">In Transit</option>
                         <option value="delivered">Delivered</option>
                         <option value="cancelled">Cancelled</option>
                     </select>
@@ -258,7 +258,7 @@
                         <select class="form-select" id="order-status-select" required name="status">
                             <option value="" disabled selected>Select status</option>
                             <option value="processing">Processing</option>
-                            <option value="shipped">Shipped</option>
+                            <option value="shipped">In Transit</option>
                             <option value="delivered">Delivered</option>
                             <option value="cancelled">Cancelled</option>
                         </select>
@@ -383,7 +383,7 @@
                         <td>${order.created_at}</td>
                         <td>${order.items_count} items</td>
                         <td>${order.total_amount}</td>
-                        <td><span class="status-badge status-${order.status.toLowerCase()}">${order.status}</span></td>
+                        <td><span class="status-badge status-${order.status.toLowerCase()}">${order.status === 'shipped' ? 'In Transit' : order.status}</span></td>
                         <td>${order.tracking_number || '-'}</td>
                         <td class="d-flex gap-1 align-content-center">
                             <button class="btn btn-sm btn-outline-primary action-btn"
@@ -540,7 +540,7 @@
             ],
             'processing': [{
                     value: 'shipped',
-                    label: 'Shipped'
+                    label: 'In Transit'
                 },
                 {
                     value: 'cancelled',
@@ -649,7 +649,7 @@
                     infoCol2.innerHTML = `
                         <p><strong>Payment Method:</strong> ${data.payment && data.payment.payment_method ? formatPaymentMethod(data.payment.payment_method) : '-'}</p>
                         <p><strong>Payment Status:</strong> <span class="badge bg-success">${data.payment && data.payment.status ? capitalize(data.payment.status) : '-'}</span></p>
-                        <p><strong>Order Status:</strong> <span class="status-badge status-${latestStatus.status.toLowerCase()}">${capitalize(latestStatus.status)}</span></p>
+                        <p><strong>Order Status:</strong> <span class="status-badge status-${latestStatus.status.toLowerCase()}">${capitalize(latestStatus.status == 'shipped' ? 'In Transit' : latestStatus.status)}</span></p>
                     
                         <p><strong>Transaction Num:</strong> <span class="order-info-transaction-id">${data.payment && data.payment.transaction_id ? data.payment.transaction_id : '-'}</span></p>`;
                 }

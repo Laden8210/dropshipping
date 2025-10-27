@@ -48,10 +48,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+
     // Fetch exchange rates only if we have currencies to convert
     if (!empty($uniqueCurrencies)) {
         $apiUrl = "https://open.er-api.com/v6/latest/USD";
         $response = file_get_contents($apiUrl);
+
 
         if ($response) {
             $exchangeData = json_decode($response, true);
@@ -91,6 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
              
                     }
+                    
                 }
                 unset($product); // Unset reference
             }

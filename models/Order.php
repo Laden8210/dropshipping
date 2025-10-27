@@ -215,7 +215,8 @@ class Order
         SELECT 
             oi.product_id,
             oi.quantity,
-            oi.price
+            oi.price,
+            oi.variation_id
         FROM order_items oi
         JOIN imported_product ip ON oi.product_id = ip.product_id
         WHERE oi.order_id = ?

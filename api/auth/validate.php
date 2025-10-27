@@ -55,6 +55,7 @@ try {
             'role' => $role,
             'full_name' => $user['first_name'] . ' ' . $user['last_name'],
             'email' => $user['email'],
+            'avatar_url' => $user['avatar_url']
             
         ]
     ]);

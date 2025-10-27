@@ -33,6 +33,7 @@ if ($product_id <= 0) {
 }
 
 $variation_id = isset($request_body['variation_id']) ? (int)$request_body['variation_id'] : 0;
+
 if ($variation_id <= 0) {
     http_response_code(400);
     echo json_encode(['status' => 'error', 'message' => 'Valid variation ID is required', 'http_code' => 400]);

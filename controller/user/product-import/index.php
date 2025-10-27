@@ -43,6 +43,7 @@ switch ($request) {
 
                 break;
 
+
             default:
                 http_response_code(404);
                 echo json_encode(['error' => 'Invalid action']);
@@ -59,6 +60,10 @@ switch ($request) {
                 break;
             case 'single-product':
                 require_once 'single-product.php';
+                break;
+
+            case 'get-categories':
+                require_once 'get-category.php';
                 break;
             default:
         }

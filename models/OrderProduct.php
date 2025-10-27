@@ -317,7 +317,7 @@ class OrderProduct
         $sql = "SELECT 
                 o.*, 
                 u.first_name, u.last_name, u.email AS user_email,
-                oi.order_item_id, oi.product_id, oi.quantity, oi.price,
+                oi.order_item_id, oi.product_id, oi.quantity, oi.price, oi.variation_id,
                 osh.status AS latest_status
             FROM {$this->orderTable} o
             LEFT JOIN {$this->userTable} u ON o.user_id = u.user_id
@@ -368,6 +368,7 @@ class OrderProduct
                     'product_id' => $row['product_id'],
                     'quantity' => $row['quantity'],
                     'price' => $row['price'],
+                    'variation_id' => $row['variation_id'],
                 ];
             }
         }

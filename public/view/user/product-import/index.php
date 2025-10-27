@@ -19,13 +19,16 @@
                             <!-- Keyword input -->
                             <div class="col-md-4">
                                 <label for="keyword" class="form-label">Product Name or Keyword</label>
-                                <input type="text" class="form-control" id="keyword" name="keyword" placeholder="Enter product name, SKU, or keyword" required>
+                                <input type="text" class="form-control" id="keyword" name="keyword" placeholder="Enter product name, SKU, or keyword">
                             </div>
 
-                            <!-- Total Product input -->
+                            <!-- Category input -->
                             <div class="col-md-4">
-                                <label for="totalProduct" class="form-label">Total Product</label>
-                                <input type="number" class="form-control" id="totalProduct" name="totalProduct" placeholder="Enter total products to display" required>
+                                <label for="category" class="form-label">Category</label>
+                                <select class="form-select" id="category" name="category">
+                                    <option value="" selected>All Categories</option>
+                                    
+                                </select>
                             </div>
 
                             <!-- Buttons -->
@@ -139,6 +142,29 @@
 
 
 <script>
+
+    function getCategoryOptions() {
+        new GetRequest({
+            getUrl: "controller/user/product-import?action=get-categories",
+            callback: (err, data) => {
+                if (err) {
+                    console.error("Error fetching categories:", err);
+                    return;
+                }
+                console.log("Categories fetched successfully:", data);
+                const categorySelect = document.getElementById('category');
+                data.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category.category_name;
+                    option.textContent = category.category_name;
+                    categorySelect.appendChild(option);
+                });
+            }
+        }).send();
+    }
+
+    getCategoryOptions();
+
     function cardBuildProduct(data) {
         const container = document.getElementById('product-results');
         container.innerHTML = '';
@@ -412,12 +438,12 @@
 }
 </style>
 `);
-    window.viewProduct = (keyword, totalProduct) => {
+    window.viewProduct = (keyword, category) => {
         new GetRequest({
             getUrl: "controller/user/product-import?action=search-product",
             params: {
                 keyword,
-                totalProduct
+                category
             },
             callback: (err, data) => {
                 if (err) {
@@ -433,7 +459,9 @@
                 console.log(data);
                 // Update the counter badge
                 const counter = document.getElementById('counter');
-                counter.textContent = `${data.length} products found`;
+                // counter.textContent = `${data.length} products found`;
+
+                
 
                 cardBuildProduct(data);
 
@@ -453,14 +481,14 @@
         importForm.addEventListener('submit', function(e) {
             e.preventDefault();
             const keyword = document.getElementById('keyword').value;
-            const totalProduct = document.getElementById('totalProduct').value;
+            const category = document.getElementById('category').value;
 
 
             const submitBtn = document.querySelector('button[type="submit"]');
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Searching...';
             submitBtn.disabled = true;
 
-            window.viewProduct(keyword, totalProduct);
+            window.viewProduct(keyword, category);
 
         });
     });
@@ -468,7 +496,7 @@
     onload = () => {
 
         const keyword = document.getElementById('keyword').value || '';
-        const totalProduct = document.getElementById('totalProduct').value || 10;
-        window.viewProduct(keyword, totalProduct);
+        const category = document.getElementById('category').value || '';
+        window.viewProduct(keyword, category);
     };
 </script>

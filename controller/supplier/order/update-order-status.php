@@ -37,6 +37,17 @@ if (empty($status)) {
 
 $statusHistory = $orderModel->getOrderHistoryStatus($order_number);
 
+if($status === 'processing'){
+    foreach ($data['data']['products'] as $item) {
+        $quantity = $inventoryModel->getCurrentStockVariant($item['product_id'], $item['variation_id'] ?? null);
+        if ($quantity < $item['quantity']) {
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => 'Insufficient stock for product ID ' . $item['product_id'], 'http_code' => 400]);
+            exit;
+        }
+    }
+}
+
 if (!is_array($statusHistory)) {
     http_response_code(500);
     echo json_encode(['status' => 'error', 'message' => 'Failed to fetch status history', 'http_code' => 500]);
@@ -68,8 +79,8 @@ if ($status === 'processing') {
     foreach ($items as $item) {
         $product_id = $item['product_id'];
         $quantity = $item['quantity'];
-
-        $inventoryModel->addStockMovement($product_id, $quantity, 'out', 'Order ID: ' . $order_number);
+        $variation_id = $item['variation_id'] ?? null;
+        $inventoryModel->addStockMovement($product_id, $variation_id, $quantity, 'order', 'Order ID: ' . $order_number);
     }
 }
 
