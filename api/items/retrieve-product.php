@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
     if ($storeId === null) {
-        $data = $productModel->get_all_products();
+        $data = $productModel->get_all_products_api();
     } else {
         $data = $productModel->get_products_by_store($storeId);
 

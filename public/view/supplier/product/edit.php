@@ -296,6 +296,10 @@
                         </div>
 
                         <div class="col-12 text-end mt-4">
+                            <button type="button" class="btn btn-secondary me-2" onclick="window.location.href='product';">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </button>
+
                             <button type="submit" class="btn btn-success">
                                 <i class="fas fa-save me-2"></i>Update Product
                             </button>

@@ -33,6 +33,19 @@ class StoreProfile
         return $stores;
     }
 
+    public function getAllActiveStores()
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM store_profile WHERE status = 'active' ORDER BY created_at DESC");
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $stores = [];
+        while ($row = $result->fetch_assoc()) {
+            $stores[] = $row;
+        }
+        return $stores;
+    }
+
     public function getStoresByUser($user_id)
     {
         $stmt = $this->conn->prepare("SELECT * FROM store_profile WHERE user_id = ? ORDER BY created_at DESC");
@@ -93,7 +106,7 @@ class StoreProfile
         return $stmt->execute();
     }
 
-    public function exists($user_id ,$store_id)
+    public function exists($user_id, $store_id)
     {
         $stmt = $this->conn->prepare("SELECT COUNT(*) FROM store_profile WHERE user_id = ? AND store_id = ?");
         $stmt->bind_param("si", $user_id, $store_id);

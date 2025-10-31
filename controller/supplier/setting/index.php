@@ -45,6 +45,10 @@ switch ($request) {
             case 'get-settings':
                 require_once 'get-settings.php';
                 break;
+
+            case 'profile':
+                require_once 'get-profile.php';
+                break;
             default:
                 http_response_code(404);
                 echo json_encode(['error' => 'Invalid get action']);
@@ -65,6 +69,9 @@ switch ($request) {
                 break;
             case 'update-settings':
                 require_once 'update-settings.php';
+                break;
+            case 'update-profile':
+                require_once 'update-profile.php';
                 break;
             default:
                 http_response_code(404);

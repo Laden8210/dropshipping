@@ -69,16 +69,10 @@
                             <option value="female">Female</option>
                         </select>
                     </div>
-                    <div class="col-md-4">
-                        <label for="avatar_url" class="form-label">Avatar URL</label>
-                        <input type="url" class="form-control" id="avatar_url" name="avatar_url">
-                    </div>
+           
                 </div>
 
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" name="password">
-                </div>
+      
 
                 <button type="submit" class="btn btn-primary">Update Profile</button>
             </form>
@@ -169,9 +163,62 @@
         }
     }).send();
 
+    function loadUserProfile() {
+        new GetRequest({
+            getUrl: 'controller/supplier/setting?action=profile',
+            params: {},
+            showLoading: false,
+            showSuccess: false,
+            callback: (err, data) => {
+                if (err) {
+                    console.error('Error loading profile:', err);
+                    return;
+                }
+                document.getElementById('first_name').value = data.first_name || '';
+                document.getElementById('last_name').value = data.last_name || '';
+                document.getElementById('email').value = data.email || '';
+                document.getElementById('phone_number').value = data.phone_number || '';
+                // format date to YYYY-MM-DD
+                if (data.birth_date) {
+                    const birthDate = new Date(data.birth_date);
+                    const year = birthDate.getFullYear();
+                    const month = String(birthDate.getMonth() + 1).padStart(2, '0');
+                    const day = String(birthDate.getDate()).padStart(2, '0');
+                    document.getElementById('birth_date').value = `${year}-${month}-${day}`;
+                } else {
+                    document.getElementById('birth_date').value = '';
+                }
+                document.getElementById('gender').value = data.gender || '';
+
+            }
+        }).send();
+    }
+    loadUserProfile();
+
+    document.getElementById('profileForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const params = {};
+        for (let [key, value] of formData.entries()) {
+            params[key] = value;
+        }
+
+        new PostRequest({
+            postUrl: 'controller/supplier/setting/update-profile.php',
+            params: params,
+            callback: (err, data) => {
+                if (!err) {
+                    loadUserProfile(); 
+                }
+            }
+        }).send();
+    });
+
+
     const createExamRequest = new CreateRequest({
         formSelector: '#create-warehouse',
-        submitButtonSelector: '#create-warehouse-btn',  
+        submitButtonSelector: '#create-warehouse-btn',
         callback: (err, res) => err ? console.error("Form submission error:", err) : console.log("Form submitted successfully:", res),
         redirectUrl: 'category',
     });

@@ -268,7 +268,7 @@ try {
                                GROUP BY p.product_id, p.product_name, pc.category_name
                                ORDER BY total_sales DESC LIMIT 10";
             $stmt = $conn->prepare($topProductsQuery);
-            $stmt->bind_param("i", $storeId, $startDate, $endDate);
+            $stmt->bind_param("iss", $storeId, $startDate, $endDate);
             $stmt->execute();
             $topProductsResult = $stmt->get_result();
             $reportData['top_products'] = [];

@@ -162,7 +162,7 @@ class ProductModel
         $result = $stmt->get_result();
         return $result->fetch_assoc();
     }
-    
+
     public function get_product_variations_with_inventory($product_id)
     {
         $stmt = $this->conn->prepare("
@@ -207,7 +207,7 @@ class ProductModel
         }
         return $variations;
     }
-    
+
     public function get_product_images($product_id)
     {
         $stmt = $this->conn->prepare("
@@ -274,6 +274,67 @@ class ProductModel
             GROUP BY product_id
         ) img_data ON p.product_id = img_data.product_id
         WHERE p.status = 'active'
+        ORDER BY p.created_at DESC, total_stock DESC
+        ";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $products = [];
+        while ($row = $result->fetch_assoc()) {
+            $products[] = $row;
+        }
+        return $products;
+    }
+
+    public function get_all_products_api()
+    {
+        $sql = "
+        SELECT 
+            p.product_id,
+            p.product_name,
+            p.product_sku,    
+            pc.category_name,
+            ip.profit_margin,
+            p.status,
+            price_data.min_price,
+            price_data.max_price,
+            price_data.currency,
+            ip.store_id,
+            -- Get total stock from inventory table (sum of all variation quantities)
+            COALESCE((
+                SELECT SUM(COALESCE(i.quantity, 0)) 
+                FROM product_variations_simple pvs 
+                LEFT JOIN inventory i ON pvs.variation_id = i.variation_id
+                WHERE pvs.product_id = p.product_id
+            ), 0) as total_stock,
+            img_data.primary_image,
+            w.warehouse_name,
+            w.warehouse_address,
+            p.created_at
+        FROM products p
+        JOIN product_categories pc ON p.product_category = pc.category_id
+        JOIN imported_product ip ON p.product_id = ip.product_id
+        JOIN store_profile sp ON ip.store_id = sp.store_id
+        LEFT JOIN warehouse w ON p.user_id = w.user_id
+        LEFT JOIN (
+            SELECT 
+                product_id,
+                MIN(price) as min_price,
+                MAX(price) as max_price,
+                (SELECT currency FROM product_variations_simple pvs2 WHERE pvs2.product_id = pvs1.product_id LIMIT 1) as currency
+            FROM product_variations_simple pvs1
+            GROUP BY product_id
+        ) price_data ON p.product_id = price_data.product_id
+        LEFT JOIN (
+            SELECT 
+                product_id,
+                MAX(image_url) as primary_image  -- Use aggregate function
+            FROM product_images
+            WHERE is_primary = 1
+            GROUP BY product_id
+        ) img_data ON p.product_id = img_data.product_id
+        WHERE p.status = 'active' and sp.status = 'active'
         ORDER BY p.created_at DESC, total_stock DESC
         ";
 

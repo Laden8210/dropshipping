@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $input = json_decode(file_get_contents('php://input'), true);
 
 
-$storeList = $storeProfileModel->getAllStores();
+$storeList = $storeProfileModel->getAllActiveStores();
 if ($storeList !== false) {
     http_response_code(200);
     echo json_encode(['status' => 'success', 'data' => $storeList]);

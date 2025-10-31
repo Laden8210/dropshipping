@@ -6,7 +6,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-$data = $categoryModel->getByUser($_SESSION['auth']['user_id']);
+$data = $categoryModel->getByCategoryOption();
 
 if (empty($data)) {
     http_response_code(404);

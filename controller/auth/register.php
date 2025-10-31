@@ -72,6 +72,17 @@ if (!isset($request_body['password']) || empty(trim($request_body['password'])))
     exit;
 }
 
+// alphanumeric combination, at least 8 characters, one letter and one number and special character
+
+$pwd = $request_body['password'];
+$pwd_length = strlen($pwd);
+if ($pwd_length < 8 || !preg_match('/[A-Za-z]/', $pwd) || !preg_match('/[0-9]/', $pwd) || !preg_match('/[\W]/', $pwd)) {
+    http_response_code(400);
+    echo json_encode(['status' => 'error', 'message' => 'Password must be at least 8 characters long and include at least one letter, one number, and one special character.', 'http_code' => 400]);
+    exit;
+}
+
+
 if (!isset($request_body['confirm_password']) || empty(trim($request_body['confirm_password']))) {
     http_response_code(400);
     echo json_encode(['status' => 'error', 'message' => 'Confirm password is required', 'http_code' => 400]);

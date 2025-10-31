@@ -312,7 +312,7 @@ try {
         $role = $user['role'];
         $name = $user['first_name'] . ' ' . $user['last_name'];
 
-        if ($role === 'user') {
+        if ($role === 'user' && $request !== 'create-store') {
 
             $sql = "SELECT COUNT(*) as store_count FROM store_profile WHERE user_id = ?";
             $stmt = $conn->prepare($sql);
@@ -327,7 +327,11 @@ try {
                 header('Location: create-store');
                 exit;
             }
+            
         }
+
+
+        
 
         // Role-based view selection
         if (!isset($route[$role])) {

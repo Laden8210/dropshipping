@@ -20,7 +20,7 @@ class Category
         if ($stmt->execute()) {
             return $this->conn->insert_id;
         } else {
-            return -1; 
+            return -1;
         }
     }
 
@@ -46,6 +46,20 @@ class Category
         }
         return $categories;
     }
+
+    public function getByCategoryOption()
+    {
+        $sql = "SELECT * FROM {$this->table} WHERE is_deleted = 0 ORDER BY created_at DESC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $categories = [];
+        while ($row = $result->fetch_assoc()) {
+            $categories[] = $row;
+        }
+        return $categories;
+    }
+   
 
     public function delete($category_id, $user_id)
     {

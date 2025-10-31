@@ -81,8 +81,9 @@ $_SESSION['auth'] = [
 if ($user['role'] === 'user') {
     $store_profile = $storeProfileModel->getFirstStoreByUser($user['user_id']);
 
-    $_SESSION['auth']['store_id'] = $store_profile['store_id'];
-  
+    if ($store_profile) {
+        $_SESSION['auth']['store_id'] = $store_profile['store_id'];
+    }
 }
 
 http_response_code(200);
