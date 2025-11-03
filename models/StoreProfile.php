@@ -33,6 +33,15 @@ class StoreProfile
         return $stores;
     }
 
+    public function get_store_by_id($store_id)
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM store_profile WHERE store_id = ?");
+        $stmt->bind_param("i", $store_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->fetch_assoc();
+    }
+
     public function getAllActiveStores()
     {
         $stmt = $this->conn->prepare("SELECT * FROM store_profile WHERE status = 'active' ORDER BY created_at DESC");

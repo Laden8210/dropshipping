@@ -699,29 +699,51 @@ class OrderProduct
     public function printAWB($tracking_number)
     {
         try {
-
+            // Enhanced order query with additional fields
             $orderQuery = "
-                SELECT 
-                    o.order_id,
-                    o.order_number,
-                    o.tracking_number,
-                    o.created_at,
-                    sp.store_name,
-                    sp.store_address,
-                    sp.store_phone,
-                    usa.address_line,
-                    usa.region,
-                    usa.city,
-                    usa.brgy,
-                    usa.postal_code,
-                    u.first_name,
-                    u.last_name
-                FROM orders o
-                JOIN store_profile sp ON o.store_id = sp.store_id
-                JOIN user_shipping_address usa ON o.shipping_address_id = usa.address_id
-                JOIN users u ON o.user_id = u.user_id
-                WHERE o.tracking_number = ?
-            ";
+            SELECT 
+                o.order_id,
+                o.order_number,
+                o.tracking_number,
+                o.created_at,
+                o.subtotal,
+                o.shipping_fee,
+                o.tax,
+                o.total_amount,
+                sp.store_id,
+                sp.store_name,
+                sp.store_address,
+                sp.store_phone,
+                sp.store_email,
+                usa.address_line,
+                usa.region,
+                usa.city,
+                usa.brgy,
+                usa.postal_code,
+                u.first_name,
+                u.last_name,
+                u.phone_number,
+                u.email as customer_email,
+                pm.payment_method,
+                pm.amount as payment_amount,
+                pm.status as payment_status,
+                oss.status as current_status
+            FROM orders o
+            JOIN store_profile sp ON o.store_id = sp.store_id
+            JOIN user_shipping_address usa ON o.shipping_address_id = usa.address_id
+            JOIN users u ON o.user_id = u.user_id
+            LEFT JOIN order_payments pm ON o.order_id = pm.order_id
+            LEFT JOIN (
+                SELECT osh1.order_id, osh1.status
+                FROM order_status_history osh1
+                INNER JOIN (
+                    SELECT order_id, MAX(status_history_id) as max_id
+                    FROM order_status_history
+                    GROUP BY order_id
+                ) osh2 ON osh1.order_id = osh2.order_id AND osh1.status_history_id = osh2.max_id
+            ) oss ON o.order_id = oss.order_id
+            WHERE o.tracking_number = ?
+        ";
 
             $stmt = $this->conn->prepare($orderQuery);
             $stmt->bind_param("s", $tracking_number);
@@ -734,17 +756,27 @@ class OrderProduct
                 throw new Exception("Order not found");
             }
 
-
+            // FIXED: Corrected items query with proper joins
             $itemsQuery = "
-                        SELECT 
-                            p.product_name,
-                            oi.quantity
-                        FROM order_items oi
-                        JOIN imported_product ip ON oi.product_id = ip.imported_product_id
-                        JOIN products p ON ip.product_id = p.product_id
-                        WHERE oi.order_id = ?
-                    ";
-
+            SELECT 
+                p.product_name,
+                p.product_sku,
+                oi.quantity,
+                oi.price,
+                oi.variation_id,
+                pvs.size,
+                pvs.color,
+                pvs.weight,
+                pvs.length,
+                pvs.width,
+                pvs.height,
+                ip.profit_margin
+            FROM order_items oi
+            JOIN imported_product ip ON oi.product_id = ip.imported_product_id  -- This is the correct join
+            JOIN products p ON ip.product_id = p.product_id  -- Then join to products table
+            LEFT JOIN product_variations_simple pvs ON oi.variation_id = pvs.variation_id
+            WHERE oi.order_id = ?
+        ";
 
             $stmt = $this->conn->prepare($itemsQuery);
             $stmt->bind_param("i", $orderData['order_id']);
@@ -752,35 +784,179 @@ class OrderProduct
             $itemsResult = $stmt->get_result();
 
             $orderItems = [];
+            $totalWeight = 0;
+            $totalItems = 0;
+
             while ($row = $itemsResult->fetch_assoc()) {
                 $orderItems[] = $row;
+                $totalItems += $row['quantity'];
+
+                // Calculate weight if available
+                if ($row['weight']) {
+                    $totalWeight += ($row['weight'] * $row['quantity']);
+                } else {
+                    // Default weight if not specified
+                    $totalWeight += (100 * $row['quantity']); // 100g default per item
+                }
             }
             $stmt->close();
 
+            // Debug: Check if items were found
+            if (empty($orderItems)) {
+                // Let's check what order_items actually exist for this order
+                $debugQuery = "SELECT * FROM order_items WHERE order_id = ?";
+                $stmt = $this->conn->prepare($debugQuery);
+                $stmt->bind_param("i", $orderData['order_id']);
+                $stmt->execute();
+                $debugResult = $stmt->get_result();
+                $debugItems = [];
+                while ($row = $debugResult->fetch_assoc()) {
+                    $debugItems[] = $row;
+                }
+                $stmt->close();
+
+                // If debug items exist but our main query didn't work, there might be a data issue
+                if (!empty($debugItems)) {
+                    error_log("Debug: Found " . count($debugItems) . " order_items but main query returned empty. Order ID: " . $orderData['order_id']);
+
+                    // Alternative query as fallback
+                    $fallbackQuery = "
+                SELECT 
+                    oi.order_item_id,
+                    oi.quantity,
+                    oi.price,
+                    oi.variation_id,
+                    pvs.size,
+                    pvs.color,
+                    p.product_name,
+                    p.product_sku,
+                    oi.product_id
+                FROM order_items as oi
+                LEFT JOIN imported_product ip ON oi.product_id = ip.imported_product_id
+                LEFT JOIN products p ON oi.product_id = p.product_id
+                LEFT JOIN product_variations_simple pvs ON oi.variation_id = pvs.variation_id
+                WHERE oi.order_id  = ?
+                ";
+
+                    $stmt = $this->conn->prepare($fallbackQuery);
+                    $stmt->bind_param("i", $orderData['order_id']);
+                    $stmt->execute();
+                    $fallbackResult = $stmt->get_result();
+
+                    while ($row = $fallbackResult->fetch_assoc()) {
+                        $orderItems[] = $row;
+                        
+                        $totalItems += $row['quantity'];
+                        $totalWeight += (100 * $row['quantity']); // Default weight
+                    }
+                    $stmt->close();
+                }
+            }
+
+            // Get package dimensions (use largest item or calculate)
+            $packageDimensions = $this->calculatePackageDimensions($orderItems);
 
             $order = [
                 'order_number' => $orderData['order_number'],
                 'tracking_number' => $orderData['tracking_number'],
+                'order_date' => $orderData['created_at'],
+                'current_status' => $orderData['current_status'] ?? 'pending',
+                'financial_info' => [
+                    'subtotal' => $orderData['subtotal'],
+                    'shipping_fee' => $orderData['shipping_fee'],
+                    'tax' => $orderData['tax'],
+                    'total_amount' => $orderData['total_amount']
+                ],
+                'payment_info' => [
+                    'method' => $orderData['payment_method'] ?? 'Not specified',
+                    'amount' => $orderData['payment_amount'] ?? 0,
+                    'status' => $orderData['payment_status'] ?? 'unknown'
+                ],
                 'shipping_address' => [
                     'first_name' => $orderData['first_name'],
                     'last_name' => $orderData['last_name'],
+                    'phone_number' => $orderData['phone_number'],
+                    'email' => $orderData['customer_email'],
                     'address_line' => $orderData['address_line'],
                     'brgy' => $orderData['brgy'],
                     'city' => $orderData['city'],
                     'region' => $orderData['region'],
-                    'postal_code' => $orderData['postal_code']
+                    'postal_code' => $orderData['postal_code'],
+                    'full_address' => $this->formatFullAddress($orderData)
                 ],
                 'store_profile' => [
+                    'store_id' => $orderData['store_id'],
                     'store_name' => $orderData['store_name'],
                     'store_address' => $orderData['store_address'],
-                    'store_phone' => $orderData['store_phone']
+                    'store_phone' => $orderData['store_phone'],
+                    'store_email' => $orderData['store_email']
                 ],
                 'items' => $orderItems,
+                'package_info' => [
+                    'total_items' => $totalItems,
+                    'total_weight' => $totalWeight > 0 ? round($totalWeight / 1000, 2) : 0.5, // Convert to kg, default 0.5kg
+                    'dimensions' => $packageDimensions,
+                    'package_count' => 1
+                ],
                 'service_type' => 'Standard Delivery'
             ];
+
             return $order;
         } catch (Exception $e) {
-            die("Error: " . $e->getMessage());
+            throw new Exception("Error generating AWB: " . $e->getMessage());
         }
+    }
+
+    // Helper function to format full address
+    private function formatFullAddress($orderData)
+    {
+        $addressParts = [
+            $orderData['address_line'],
+            $orderData['brgy'],
+            $orderData['city'],
+            $orderData['region'],
+            $orderData['postal_code']
+        ];
+
+        return implode(', ', array_filter($addressParts));
+    }
+
+    // Helper function to calculate package dimensions
+    private function calculatePackageDimensions($items)
+    {
+        if (empty($items)) {
+            return [
+                'length' => 15,
+                'width' => 10,
+                'height' => 5,
+                'unit' => 'cm'
+            ];
+        }
+
+        $maxLength = 0;
+        $maxWidth = 0;
+        $totalHeight = 0;
+
+        foreach ($items as $item) {
+            $itemLength = $item['length'] ?? 10;
+            $itemWidth = $item['width'] ?? 8;
+            $itemHeight = $item['height'] ?? 3;
+
+            if ($itemLength > $maxLength) $maxLength = $itemLength;
+            if ($itemWidth > $maxWidth) $maxWidth = $itemWidth;
+            $totalHeight += ($itemHeight * $item['quantity']);
+        }
+
+        // Add some buffer for packaging
+        $maxLength += 2;
+        $maxWidth += 2;
+        $totalHeight += 5;
+
+        return [
+            'length' => round($maxLength, 1),
+            'width' => round($maxWidth, 1),
+            'height' => round($totalHeight, 1),
+            'unit' => 'cm'
+        ];
     }
 }

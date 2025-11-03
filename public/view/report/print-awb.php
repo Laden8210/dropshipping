@@ -3,15 +3,11 @@ require_once 'vendor/autoload.php';
 
 use Dompdf\Dompdf;
 use Dompdf\Options;
-use Endroid\QrCode\Color\Color;
+use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Encoding\Encoding;
 use Endroid\QrCode\ErrorCorrectionLevel;
-use Endroid\QrCode\QrCode;
-
-use Endroid\QrCode\Builder\Builder;
-
-use Endroid\QrCode\Label\LabelAlignment;
 use Endroid\QrCode\Label\Font\OpenSans;
+use Endroid\QrCode\Label\LabelAlignment;
 use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Writer\PngWriter;
 
@@ -26,6 +22,7 @@ if (!$tracking_number) {
 try {
     $order = $orderProductModel->printAWB($tracking_number);
 
+    // Generate QR Code
     $builder = new Builder(
         writer: new PngWriter(),
         writerOptions: [],
@@ -33,24 +30,22 @@ try {
         data: $tracking_number,
         encoding: new Encoding('UTF-8'),
         errorCorrectionLevel: ErrorCorrectionLevel::High,
-        size: 250,
-        margin: 10,
+        size: 200,
+        margin: 5,
         roundBlockSizeMode: RoundBlockSizeMode::Margin,
-
-        logoResizeToWidth: 50,
+        logoResizeToWidth: 40,
         logoPunchoutBackground: true,
         labelText: $tracking_number,
-        labelFont: new OpenSans(10),
+        labelFont: new OpenSans(8),
         labelAlignment: LabelAlignment::Center
     );
 
-
     $qrCode = $builder->build();
     $qrBase64 = $qrCode->getDataUri();
-    
 
-} catch (PDOException $e) {
-    die("Database error: " . $e->getMessage());
+    // Format dates
+    $orderDate = date('M j, Y', strtotime($order['order_date']));
+    $currentDate = date('M j, Y H:i');
 } catch (Exception $e) {
     die("Error: " . $e->getMessage());
 }
@@ -68,19 +63,20 @@ ob_start();
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-size: 9pt;
+            font-size: 8pt;
             line-height: 1.2;
+            font-family: 'Helvetica', Arial, sans-serif;
         }
 
         body {
-            font-family: Arial, sans-serif;
             color: #333;
+            background: #fff;
         }
 
         .awb-container {
             width: 150mm;
             min-height: 100mm;
-            padding: 5mm;
+            padding: 4mm;
             border: 1px solid #000;
             position: relative;
         }
@@ -88,108 +84,142 @@ ob_start();
         .header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 3mm;
-            padding-bottom: 2mm;
+            align-items: flex-start;
+            margin-bottom: 2mm;
+            padding-bottom: 1mm;
             border-bottom: 1px solid #000;
         }
 
         .header h1 {
-            font-size: 12pt;
+            font-size: 10pt;
             color: #d40000;
+            font-weight: bold;
+        }
+
+        .header-info {
+            text-align: right;
         }
 
         .info-section {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 3mm;
-            margin-bottom: 3mm;
+            gap: 2mm;
+            margin-bottom: 2mm;
         }
 
         .address-box {
             border: 1px solid #000;
-            padding: 2mm;
-            min-height: 20mm;
+            padding: 1mm;
+            min-height: 18mm;
+            font-size: 7pt;
         }
 
         .section-title {
             font-weight: bold;
-            font-size: 8pt;
-            margin-bottom: 1mm;
+            font-size: 7pt;
+            margin-bottom: 0.5mm;
             background: #f0f0f0;
+            padding: 0.5mm 1mm;
+            border: 1px solid #000;
+            border-bottom: none;
+        }
+
+        .qr-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin: 2mm 0;
             padding: 1mm;
+            border: 1px solid #000;
+        }
+
+        .tracking-info {
+            flex: 1;
+        }
+
+        .tracking-info p {
+            margin: 0.5mm 0;
+            font-size: 7pt;
         }
 
         .qrcode-container {
             text-align: center;
-            margin: 2mm 0;
         }
 
         .qrcode-number {
-            font-size: 10pt;
-            letter-spacing: 1px;
-            margin-top: 1mm;
+            font-size: 7pt;
+            margin-top: 0.5mm;
             font-weight: bold;
         }
 
         .details-grid {
             display: grid;
             grid-template-columns: 2fr 1fr 1fr;
-            gap: 2mm;
-            margin-top: 2mm;
+            gap: 1mm;
+            margin-top: 1mm;
         }
 
         .detail-box {
             border: 1px solid #000;
-            padding: 2mm;
+            padding: 1mm;
+            font-size: 7pt;
         }
 
         .items-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 2mm;
-            font-size: 8pt;
+            margin-top: 1mm;
+            font-size: 6pt;
         }
 
         .items-table th,
         .items-table td {
             border: 1px solid #000;
-            padding: 1mm;
+            padding: 0.5mm;
+            text-align: left;
         }
 
         .items-table th {
             background-color: #f0f0f0;
+            font-weight: bold;
+        }
+
+        .package-info {
+            margin-top: 1mm;
+        }
+
+        .package-info p {
+            margin: 0.3mm 0;
         }
 
         .special-handling {
             margin-top: 2mm;
-            padding-top: 2mm;
+            padding-top: 1mm;
             border-top: 1px dashed #000;
-            font-size: 8pt;
+            font-size: 7pt;
         }
 
         .footer {
-            margin-top: 3mm;
+            margin-top: 2mm;
             text-align: center;
-            font-size: 7pt;
-            padding-top: 2mm;
+            font-size: 6pt;
+            padding-top: 1mm;
             border-top: 1px dashed #000;
         }
 
-        /* New styles for QR code */
-        .qr-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        .status-badge {
+            display: inline-block;
+            padding: 0.5mm 1mm;
+            background: #333;
+            color: white;
+            border-radius: 2px;
+            font-size: 6pt;
+            font-weight: bold;
+            text-transform: uppercase;
         }
 
-        .qr-info {
-            flex: 1;
-            padding-right: 5mm;
-        }
-
-        .qr-image {
-            flex-shrink: 0;
+        .dimensions {
+            font-family: 'Courier New', monospace;
         }
     </style>
 </head>
@@ -198,9 +228,10 @@ ob_start();
     <div class="awb-container">
         <div class="header">
             <h1>SHIPPING LABEL</h1>
-            <div>
+            <div class="header-info">
                 <strong>Service:</strong> <?= htmlspecialchars($order['service_type']) ?><br>
-                <strong>Ref:</strong> <?= htmlspecialchars($order['order_number']) ?>
+                <strong>Ref No:</strong> <?= htmlspecialchars($order['order_number']) ?><br>
+                <strong>Order Date:</strong> <?= $orderDate ?><br>
             </div>
         </div>
 
@@ -210,7 +241,8 @@ ob_start();
                 <div class="address-box">
                     <strong><?= htmlspecialchars($order['store_profile']['store_name']) ?></strong><br>
                     <?= htmlspecialchars($order['store_profile']['store_address']) ?><br>
-                    <?= htmlspecialchars($order['store_profile']['store_phone']) ?>
+                    Tel: <?= htmlspecialchars($order['store_profile']['store_phone']) ?><br>
+                    Email: <?= htmlspecialchars($order['store_profile']['store_email']) ?>
                 </div>
             </div>
 
@@ -218,43 +250,60 @@ ob_start();
                 <div class="section-title">CONSIGNEE</div>
                 <div class="address-box">
                     <strong><?= htmlspecialchars($order['shipping_address']['first_name']) ?> <?= htmlspecialchars($order['shipping_address']['last_name']) ?></strong><br>
-                    <?= htmlspecialchars($order['shipping_address']['address_line']) ?><br>
-                    <?= htmlspecialchars($order['shipping_address']['brgy']) ?>, <?= htmlspecialchars($order['shipping_address']['city']) ?><br>
-                    <?= htmlspecialchars($order['shipping_address']['region']) ?> <?= htmlspecialchars($order['shipping_address']['postal_code']) ?>
+                    Tel: <?= htmlspecialchars($order['shipping_address']['phone_number']) ?><br>
+                    <?= htmlspecialchars($order['shipping_address']['full_address']) ?>
                 </div>
             </div>
         </div>
 
         <!-- QR Code Section -->
-        <div class="qr-wrapper">
-            <div class="qr-info">
-                <div class="section-title">TRACKING INFO</div>
-                <p><strong>Tracking Number:</strong> <?= htmlspecialchars($order['tracking_number']) ?></p>
-                <p><strong>Date:</strong> <?= date('m/d/Y') ?></p>
-                <p><strong>Pieces:</strong> <?= count($order['items']) ?></p>
+        <div class="qr-section">
+            <div class="tracking-info">
+                <div class="section-title">SHIPPING DETAILS</div>
+                <p><strong>Tracking No:</strong> <?= htmlspecialchars($order['tracking_number']) ?></p>
+                <p><strong>Package:</strong> <?= $order['package_info']['package_count'] ?> of <?= $order['package_info']['package_count'] ?></p>
+                <p><strong>Items:</strong> <?= $order['package_info']['total_items'] ?> pcs</p>
+                <?php if ($order['package_info']['total_weight']): ?>
+                    <p><strong>Weight:</strong> <?= $order['package_info']['total_weight'] ?> kg</p>
+                <?php endif; ?>
+                <?php if ($order['package_info']['dimensions']): ?>
+                    <p><strong>Dimensions:</strong>
+                        <span class="dimensions">
+                            <?= $order['package_info']['dimensions']['length'] ?>x<?= $order['package_info']['dimensions']['width'] ?>x<?= $order['package_info']['dimensions']['height'] ?> <?= $order['package_info']['dimensions']['unit'] ?>
+                        </span>
+                    </p>
+                <?php endif; ?>
             </div>
-
-            <div class="qrcode-container qr-image">
-                <img src="<?= $qrBase64 ?>" alt="Bar Code">
+            <div class="qrcode-container">
+                <img src="<?= $qrBase64 ?>" alt="QR Code" style="width: 45mm; height: 45mm;">
                 <div class="qrcode-number">SCAN TO TRACK</div>
             </div>
         </div>
 
         <div class="details-grid">
             <div class="detail-box">
-                <div class="section-title">CONTENTS</div>
+                <div class="section-title">ORDER CONTENTS</div>
                 <table class="items-table">
                     <thead>
                         <tr>
-                            <th>Description</th>
+                            <th>Product</th>
                             <th>Qty</th>
+                            <th>Variation</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($order['items'] as $item): ?>
                             <tr>
-                                <td><?= htmlspecialchars($item['product_name']) ?></td>
+                                <td><?= htmlspecialchars($item['product_name'] ) ?></td>
                                 <td><?= htmlspecialchars($item['quantity']) ?></td>
+                                <td>
+                                    <?php
+                                    $variation = [];
+                                    if (!empty($item['size'])) $variation[] = $item['size'];
+                                    if (!empty($item['color'])) $variation[] = $item['color'];
+                                    echo htmlspecialchars(implode('/', $variation) ?: 'Standard');
+                                    ?>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -263,25 +312,30 @@ ob_start();
 
             <div class="detail-box">
                 <div class="section-title">SHIPPING INFO</div>
-                <p><strong>Service:</strong> <?= htmlspecialchars($order['service_type']) ?></p>
-                <p><strong>Weight:</strong> <?= htmlspecialchars($order['package_weight'] ?? 'N/A') ?> kg</p>
+                <div class="package-info">
+                    <p><strong>Service:</strong> <?= htmlspecialchars($order['service_type']) ?></p>
+                    <p><strong>Payment:</strong> <?= htmlspecialchars($order['payment_info']['method'] ?? 'N/A') ?></p>
+                    <p><strong>Amount:</strong> PHP<?= number_format($order['financial_info']['total_amount'], 2) ?></p>
+                </div>
             </div>
 
             <div class="detail-box">
                 <div class="section-title">HANDLING</div>
-                <p>□ Fragile</p>
-                <p>□ Keep Dry</p>
-                <p>□ This End Up</p>
+                <p>• Fragile</p>
+                <p>• Keep Dry</p>
+                <p>• This End Up</p>
+                <p>• Do Not Stack</p>
             </div>
         </div>
 
         <div class="special-handling">
             <strong>CARRIER USE ONLY</strong>
             <p>Date: ________ Time: ________ Signed: ________________</p>
+            <p>Remarks: _________________________________________</p>
         </div>
 
         <div class="footer">
-            Generated on <?= date('m/d/Y H:i') ?>
+            Generated on <?= $currentDate ?> | <?= htmlspecialchars($order['store_profile']['store_name']) ?> | Page 1 of 1
         </div>
     </div>
 </body>
@@ -294,10 +348,10 @@ $options = new Options();
 $options->set('isRemoteEnabled', true);
 $options->set('defaultFont', 'Helvetica');
 $options->set('isHtml5ParserEnabled', true);
+$options->set('isPhpEnabled', true);
 
 $dompdf = new Dompdf($options);
 $dompdf->loadHtml($html);
-$dompdf->setPaper('A4', 'portrait');
 $dompdf->render();
 
 $dompdf->stream("awb_" . $order['tracking_number'] . ".pdf", [

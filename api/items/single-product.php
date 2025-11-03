@@ -153,6 +153,25 @@ foreach ($responseData['variations'] as $variation) {
     }
 }
 
+// store details 
+
+$store = $storeProfileModel->get_store_by_id($store_id);
+
+$responseData['store'] = $store;
+
+// get review of the product 
+
+$sql = "SELECT users.first_name, users.last_name, user_feedback.rating, user_feedback.review, user_feedback.created_at FROM user_feedback
+JOIN users ON user_feedback.user_id = users.user_id
+WHERE user_feedback.product_id = ? and user_feedback.store_id = ?";
+$smtp = $conn->prepare($sql);
+$smtp->bind_param("ss", $pid, $store_id);
+$smtp->execute();
+$result = $smtp->get_result();
+$data = $result->fetch_all(MYSQLI_ASSOC);
+
+$responseData['reviews'] = $data;
+
 if (!$hasStock) {
     http_response_code(404);
     echo json_encode([

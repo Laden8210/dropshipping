@@ -359,7 +359,7 @@ function generateReportHTML($title, $storeInfo, $reportData, $startDate, $endDat
             <div class="summary-grid">
                 <div class="summary-card">
                     <h4>Total Revenue</h4>
-                    <div class="value">₱' . number_format($summary['total_revenue'], 2) . '</div>
+                    <div class="value">PHP' . number_format($summary['total_revenue'], 2) . '</div>
                 </div>
                 <div class="summary-card">
                     <h4>Total Orders</h4>
@@ -434,7 +434,7 @@ function generateRevenueReport($data) {
         <div class="summary-grid">
             <div class="summary-card">
                 <h4>Total Revenue</h4>
-                <div class="value">₱' . number_format($summary['total_revenue'], 2) . '</div>
+                <div class="value">PHP' . number_format($summary['total_revenue'], 2) . '</div>
             </div>
             <div class="summary-card">
                 <h4>Total Orders</h4>
@@ -442,11 +442,11 @@ function generateRevenueReport($data) {
             </div>
             <div class="summary-card">
                 <h4>Average Order Value</h4>
-                <div class="value">₱' . number_format($summary['avg_order_value'], 2) . '</div>
+                <div class="value">PHP' . number_format($summary['avg_order_value'], 2) . '</div>
             </div>
             <div class="summary-card">
                 <h4>Highest Order</h4>
-                <div class="value">₱' . number_format($summary['max_order'], 2) . '</div>
+                <div class="value">PHP' . number_format($summary['max_order'], 2) . '</div>
             </div>
         </div>';
     }
@@ -471,10 +471,10 @@ function generateRevenueReport($data) {
             $html .= '<tr>
                 <td>' . date('M j, Y', strtotime($row['date'])) . '</td>
                 <td>' . $row['orders'] . '</td>
-                <td>₱' . number_format($row['subtotal'], 2) . '</td>
-                <td>₱' . number_format($row['shipping_fee'], 2) . '</td>
-                <td>₱' . number_format($row['tax'], 2) . '</td>
-                <td>₱' . number_format($row['revenue'], 2) . '</td>
+                <td>PHP' . number_format($row['subtotal'], 2) . '</td>
+                <td>PHP' . number_format($row['shipping_fee'], 2) . '</td>
+                <td>PHP' . number_format($row['tax'], 2) . '</td>
+                <td>PHP' . number_format($row['revenue'], 2) . '</td>
             </tr>';
         }
         
@@ -502,11 +502,11 @@ function generateRevenueReport($data) {
             $html .= '<tr>
                 <td>' . date('F Y', strtotime($row['month'] . '-01')) . '</td>
                 <td>' . $row['orders'] . '</td>
-                <td>₱' . number_format($row['subtotal'], 2) . '</td>
-                <td>₱' . number_format($row['shipping_fee'], 2) . '</td>
-                <td>₱' . number_format($row['tax'], 2) . '</td>
-                <td>₱' . number_format($row['revenue'], 2) . '</td>
-                <td>₱' . number_format($row['avg_order_value'], 2) . '</td>
+                <td>PHP' . number_format($row['subtotal'], 2) . '</td>
+                <td>PHP' . number_format($row['shipping_fee'], 2) . '</td>
+                <td>PHP' . number_format($row['tax'], 2) . '</td>
+                <td>PHP' . number_format($row['revenue'], 2) . '</td>
+                <td>PHP' . number_format($row['avg_order_value'], 2) . '</td>
             </tr>';
         }
         
@@ -537,7 +537,7 @@ function generateRevenueReport($data) {
             $html .= '<tr>
                 <td>' . ucfirst($row['payment_method']) . '</td>
                 <td>' . $row['orders'] . '</td>
-                <td>₱' . number_format($row['revenue'], 2) . '</td>
+                <td>PHP' . number_format($row['revenue'], 2) . '</td>
                 <td>' . $percentage . '%</td>
             </tr>';
         }
@@ -558,7 +558,7 @@ function generateProductsTable($data) {
             <td>' . $row['product_name'] . '</td>
             <td>' . $row['category_name'] . '</td>
             <td>' . $row['total_sales'] . '</td>
-            <td>₱' . number_format($row['total_revenue'], 2) . '</td>
+            <td>PHP' . number_format($row['total_revenue'], 2) . '</td>
             <td>' . $row['order_count'] . '</td>
         </tr>';
     }
@@ -577,7 +577,7 @@ function generateOrdersTable($data) {
             <td>' . $row['order_number'] . '</td>
             <td>' . $row['customer_name'] . '</td>
             <td>' . date('M j, Y', strtotime($row['created_at'])) . '</td>
-            <td>₱' . number_format($row['total_amount'], 2) . '</td>
+            <td>PHP' . number_format($row['total_amount'], 2) . '</td>
             <td>' . $row['item_count'] . '</td>
         </tr>';
     }
@@ -598,7 +598,7 @@ function generateCompleteReport($data) {
             $html .= '<tr>
                 <td>' . $row['month'] . '</td>
                 <td>' . $row['orders'] . '</td>
-                <td>₱' . number_format($row['revenue'], 2) . '</td>
+                <td>PHP' . number_format($row['revenue'], 2) . '</td>
             </tr>';
         }
         
@@ -615,7 +615,7 @@ function generateCompleteReport($data) {
                 <td>' . $row['product_name'] . '</td>
                 <td>' . $row['category_name'] . '</td>
                 <td>' . $row['total_sales'] . '</td>
-                <td>₱' . number_format($row['total_revenue'], 2) . '</td>
+                <td>PHP' . number_format($row['total_revenue'], 2) . '</td>
                 <td>' . $row['stock'] . '</td>
             </tr>';
         }
