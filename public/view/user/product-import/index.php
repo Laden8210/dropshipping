@@ -459,7 +459,7 @@
                 console.log(data);
                 // Update the counter badge
                 const counter = document.getElementById('counter');
-                // counter.textContent = `${data.length} products found`;
+                 counter.textContent = `${data.length} products found`;
 
                 
 
