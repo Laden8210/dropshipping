@@ -1,5 +1,7 @@
 -- Create admin user for testing
--- Password: admin123 (hashed with password_hash)
+-- Password: Pa$$w0rd! (hashed with password_hash)
+
+
 
 INSERT INTO users (
     user_id, 
@@ -9,6 +11,7 @@ INSERT INTO users (
     email, 
     password, 
     is_active, 
+    is_email_verified,
     created_at, 
     updated_at
 ) VALUES (
@@ -17,8 +20,9 @@ INSERT INTO users (
     'System', 
     'Administrator', 
     'admin@dropshipping.com', 
-    'admin123', 
+    '$2y$10$5IgNU0JtW9STNWcZMVpWG.O3OuuVQB9s5.5gqdBE.MKjk7tQfzwTi', 
     1, 
+    1,
     NOW(), 
     NOW()
 ) ON DUPLICATE KEY UPDATE 
