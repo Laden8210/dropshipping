@@ -74,8 +74,7 @@ if (!$user) {
 
 
 
-// Verify password (assuming passwords are stored hashed)
-if ($password !== $user['password']) {
+if(!password_verify($password, $user['password'])) {
 
     echo json_encode(['status' => 'error', 'message' => 'Invalid credentials', 'http_code' => 401]);
     exit;

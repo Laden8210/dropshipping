@@ -4,6 +4,7 @@ require_once '../../core/config.php';
 require_once '../../models/index.php';
 require_once '../../function/UIDGenerator.php';
 require_once '../../vendor/autoload.php';
+require_once '../../services/NotificationService.php';
 
 session_start();
 header('Content-Type: application/json; charset=utf-8');
