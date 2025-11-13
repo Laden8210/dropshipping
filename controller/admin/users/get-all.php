@@ -41,11 +41,9 @@ try {
                         is_google_auth, google_id, is_email_verified, avatar_url
                     FROM users 
                     WHERE deleted_at IS NULL 
-                    ORDER BY created_at DESC 
-                    LIMIT ? OFFSET ?";
+                    ORDER BY created_at DESC";
     
     $stmt = $conn->prepare($usersQuery);
-    $stmt->bind_param("ii", $limit, $offset);
     $stmt->execute();
     $result = $stmt->get_result();
     

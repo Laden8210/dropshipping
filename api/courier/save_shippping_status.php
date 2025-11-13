@@ -96,11 +96,43 @@ try {
 
         // Notify user about status update
         $order = $orderModel->getByTrackingNumber($trackingNumber);
+
+
         if ($order) {
+
+            $newOrderStatus = '';
+            switch ($status) {
+                case "Received":
+                case "In Transit":
+                    $newOrderStatus = 'processing';
+                    break;
+                case "Out for Delivery":
+                    $newOrderStatus = 'shipped';
+                    break;
+                case "Delivered":
+                    $newOrderStatus = 'delivered';
+                    break;
+                case "Returned":
+                    $newOrderStatus = 'return';
+                    break;
+                default:
+                    $newOrderStatus = 'pending';
+                    break;
+            }
+
+            $createOrderStatusSql = "INSERT INTO order_status_history (order_id, status) VALUES (?, ?)";
+            $stmt = $conn->prepare($createOrderStatusSql);
+            $stmt->bind_param("is", $order['order_id'], $newOrderStatus);
+            $stmt->execute();
+            $stmt->close();
+
+
+
             $userId = $order['user_id'];
             $notificationMessage = "Your order with tracking number {$trackingNumber} status updated to '{$status}'.";
             $notificationModel->create($userId, $notificationMessage);
         }
+
 
 
         $sql = "SELECT * FROM orders WHERE tracking_number = ?";
