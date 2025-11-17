@@ -19,6 +19,7 @@ class AddressModel {
         }
     }
 
+    
     public function getAddress($user_id) {
         $stmt = $this->db->prepare("SELECT * FROM user_shipping_address WHERE user_id = ?");
         $stmt->bind_param("s", $user_id);

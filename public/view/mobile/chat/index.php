@@ -29,6 +29,7 @@
         </div>
     </div>
 
+    
     <!-- Chat Input -->
     <div class="chat-input">
         <div class="input-group">
