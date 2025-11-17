@@ -6,6 +6,8 @@
 * License: https://bootstrapmade.com/license/
 */
 
+
+
 (function() {
   "use strict";
 
@@ -69,7 +71,14 @@
   const preloader = document.querySelector('#preloader');
   if (preloader) {
     window.addEventListener('load', () => {
-      preloader.remove();
+      const today = new Date();
+      const targetDate = new Date(2025, 10, 20);
+      console.log(today, targetDate);
+      console.log(today < targetDate);
+      if (today < targetDate) {
+        preloader.remove();
+      }
+
     });
   }
 
@@ -212,3 +221,6 @@
   document.addEventListener('scroll', navmenuScrollspy);
 
 })();
+
+
+

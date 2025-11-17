@@ -1,4 +1,4 @@
-// Pagination utility functions for all tables
+
 class PaginationUtils {
     static renderPagination(containerId, currentPage, totalItems, itemsPerPage, onPageChange) {
         const totalPages = Math.ceil(totalItems / itemsPerPage);

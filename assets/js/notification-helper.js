@@ -87,7 +87,7 @@ class NotificationHelper {
     }
 
     /**
-     * Test notification service
+     *
      * 
      * @param {string} testEmail - Test email address
      * @param {string} testPhone - Test phone number
